@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>Word documents generation</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Word documents generation</h1>
+
+
+
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(officer)
+<span class="co"># Package `magrittr` makes officer usage easier.</span>
+<span class="kw">library</span>(magrittr)</code></pre></div>
+<div style="text-align:center;">
+<p><img src="data:image/png;base64,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" width="128" height="128" /></p>
+</div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Use the function <code>read_docx</code> to create an r object representing a Word document. Initial Word file can be specified with argument <code>path</code>. If none is provided, this file will be an empty document located in the package directory. Formats and styles will be those available in the initial file.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>() 
+
+<span class="co"># display styles</span>
+<span class="kw">styles_info</span>(my_doc)</code></pre></div>
+<pre><code>## # A tibble: 21 × 5
+##    style_type       style_id             style_name is_custom is_default
+##         &lt;chr&gt;          &lt;chr&gt;                  &lt;chr&gt;     &lt;lgl&gt;      &lt;lgl&gt;
+## 1   paragraph         Normal                 Normal     FALSE       TRUE
+## 2   paragraph         Titre1              heading 1     FALSE      FALSE
+## 3   paragraph         Titre2              heading 2     FALSE      FALSE
+## 4   paragraph         Titre3              heading 3     FALSE      FALSE
+## 5   character Policepardfaut Default Paragraph Font     FALSE       TRUE
+## 6       table  TableauNormal           Normal Table     FALSE       TRUE
+## 7   numbering    Aucuneliste                No List     FALSE       TRUE
+## 8   character         strong                 strong      TRUE      FALSE
+## 9   paragraph       centered               centered      TRUE      FALSE
+## 10      table  tabletemplate         table_template      TRUE      FALSE
+## # ... with 11 more rows</code></pre>
+<div id="add-elements-to-document" class="section level3">
+<h3>Add elements to document</h3>
+<p>Let’s add an image in the document first.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">src &lt;-<span class="st"> </span><span class="kw">tempfile</span>(<span class="dt">fileext =</span> <span class="st">&quot;.png&quot;</span>)
+<span class="kw">png</span>(<span class="dt">filename =</span> src, <span class="dt">width =</span> <span class="dv">5</span>, <span class="dt">height =</span> <span class="dv">6</span>, <span class="dt">units =</span> <span class="st">'in'</span>, <span class="dt">res =</span> <span class="dv">300</span>)
+<span class="kw">barplot</span>(<span class="dv">1</span>:<span class="dv">10</span>, <span class="dt">col =</span> <span class="dv">1</span>:<span class="dv">10</span>)
+<span class="kw">dev.off</span>()</code></pre></div>
+<pre><code>## quartz_off_screen 
+##                 2</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_doc &lt;-<span class="st"> </span>my_doc %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_img</span>(<span class="dt">src =</span> src, <span class="dt">width =</span> <span class="dv">5</span>, <span class="dt">height =</span> <span class="dv">6</span>, <span class="dt">style =</span> <span class="st">&quot;centered&quot;</span>)</code></pre></div>
+<p>Then some paragraphs.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_doc &lt;-<span class="st"> </span>my_doc %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;Hello world!&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) <span class="co"># blank paragraph</span></code></pre></div>
+<p>And a table.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_doc &lt;-<span class="st"> </span>my_doc %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_table</span>(iris, <span class="dt">style =</span> <span class="st">&quot;table_template&quot;</span>)</code></pre></div>
+</div>
+<div id="write-the-word-file" class="section level3">
+<h3>Write the Word file</h3>
+<p>File can be generated using function <code>print</code> and argument <code>target</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(my_doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/first_example.docx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
+<p>
+<span>Download file: </span>
+<a href="https://davidgohel.github.io/officer/articles/assets/docx/first_example.docx">first_example.docx</a>
+</p>
+</div>
+</div>
+<div id="add-elements" class="section level2">
+<h2>Add elements</h2>
+<p>To add paragraphs, tables, images or other elements into the document, you will have to use functions starting with <code>body_add_</code>:</p>
+<ul>
+<li>body_add_par</li>
+<li>body_add_img</li>
+<li>body_add_table</li>
+<li>body_add_break</li>
+<li>body_add_toc</li>
+</ul>
+</div>
+<div id="cursor-manipulation" class="section level2">
+<h2>Cursor manipulation</h2>
+<p>A cursor is available and can be manipulated so that content can be added regarding to its position:</p>
+<ul>
+<li><code>before</code> will insert a new element before the selected element in the document.</li>
+<li><code>after</code> will insert a new element after the selected element in the document.</li>
+<li><code>on</code> will replace the selected element in the document by a new element.</li>
+</ul>
+<p>Cursor functions are the following:</p>
+<ul>
+<li>cursor_begin</li>
+<li>cursor_end</li>
+<li>cursor_reach</li>
+<li>cursor_backward</li>
+<li>cursor_forward</li>
+</ul>
+<p>In order to illustrate <em>cursor</em> functions, a document made of several paragraphs will be used (let’s use officer for that).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">read_docx</span>() %&gt;%
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;paragraph 1&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;paragraph 2&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;paragraph 3&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;paragraph 4&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;paragraph 5&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;paragraph 6&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;paragraph 7&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">print</span>(<span class="dt">target =</span> <span class="st">&quot;assets/docx/init_doc.docx&quot;</span> ) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
+<p>
+<span>Download file: </span>
+<a href="https://davidgohel.github.io/officer/articles/assets/docx/init_doc.docx">init_doc.docx</a>
+</p>
+<p>Now, let’s use <code>init_doc.docx</code> with <code>read_docx</code> and manipulate its content with cursor functions.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>(<span class="dt">path =</span> <span class="st">&quot;assets/docx/init_doc.docx&quot;</span>) %&gt;%
+
+<span class="st">  </span><span class="co"># default template contains only an empty paragraph</span>
+<span class="st">  </span><span class="co"># Using cursor_begin and body_remove, we can delete it</span>
+<span class="st">  </span><span class="kw">cursor_begin</span>() %&gt;%<span class="st"> </span><span class="kw">body_remove</span>() %&gt;%
+
+<span class="st">  </span><span class="co"># Let add text at the beginning of the</span>
+<span class="st">  </span><span class="co"># paragraph containing text &quot;paragraph 4&quot;</span>
+<span class="st">  </span><span class="kw">cursor_reach</span>(<span class="dt">keyword =</span> <span class="st">&quot;paragraph 4&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">slip_in_text</span>(<span class="st">&quot;This is &quot;</span>, <span class="dt">pos =</span> <span class="st">&quot;before&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Default Paragraph Font&quot;</span>) %&gt;%
+
+<span class="st">  </span><span class="co"># move the cursor forward and end a section</span>
+<span class="st">  </span><span class="kw">cursor_forward</span>() %&gt;%
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;The section stop here&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">body_end_section</span>(<span class="dt">landscape =</span> <span class="ot">TRUE</span>) %&gt;%
+
+<span class="st">  </span><span class="co"># move the cursor at the end of the document</span>
+<span class="st">  </span><span class="kw">cursor_end</span>() %&gt;%
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;The document ends now&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>)
+
+<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/cursor.docx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
+<p>
+<span>Download file: </span>
+<a href="https://davidgohel.github.io/officer/articles/assets/docx/cursor.docx">cursor.docx</a>
+</p>
+<div id="append-text-in-existing-paragraphs" class="section level3">
+<h3>Append text in existing paragraphs</h3>
+<p>Text and images can be inserted at the beginning or the end of the selected paragraph (selection made by the cursor). Available functions are the following:</p>
+<ul>
+<li>slip_in_img</li>
+<li>slip_in_seqfield</li>
+<li>slip_in_text</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(magrittr)
+img.file &lt;-<span class="st"> </span><span class="kw">file.path</span>( <span class="kw">Sys.getenv</span>(<span class="st">&quot;R_HOME&quot;</span>), <span class="st">&quot;doc&quot;</span>, <span class="st">&quot;html&quot;</span>, <span class="st">&quot;logo.jpg&quot;</span> )
+
+<span class="kw">read_docx</span>() %&gt;%
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;R logo: &quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">slip_in_img</span>(<span class="dt">src =</span> img.file, <span class="dt">style =</span> <span class="st">&quot;strong&quot;</span>, <span class="dt">width =</span> .<span class="dv">3</span>, <span class="dt">height =</span> .<span class="dv">3</span>) %&gt;%
+<span class="st">  </span><span class="kw">slip_in_text</span>(<span class="st">&quot;This is official &quot;</span>, <span class="dt">style =</span> <span class="st">&quot;strong&quot;</span>, <span class="dt">pos =</span> <span class="st">&quot;before&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">slip_in_text</span>(<span class="st">&quot; that can be found here: &quot;</span>, <span class="dt">style =</span> <span class="st">&quot;strong&quot;</span>, <span class="dt">pos =</span> <span class="st">&quot;after&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">slip_in_text</span>(img.file, <span class="dt">style =</span> <span class="st">&quot;strong&quot;</span>, <span class="dt">pos =</span> <span class="st">&quot;after&quot;</span>) %&gt;%
+<span class="st">  </span><span class="kw">print</span>(<span class="dt">target =</span> <span class="st">&quot;assets/docx/slip_in_demo.docx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
+<p>
+<span>Download file: </span>
+<a href="https://davidgohel.github.io/officer/articles/assets/docx/slip_in_demo.docx">slip_in_demo.docx</a>
+</p>
+</div>
+</div>
+<div id="remove-content" class="section level2">
+<h2>Remove content</h2>
+<p>The function <code>body_remove</code> let remove content from a Word document. This function used with <code>cursor_*</code> functions is a convenient tool to update an existing document.</p>
+<p>For illustration purpose, we will generate a document that will be used as initial document later when showing how to use <code>body_remove</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(officer)
+<span class="kw">library</span>(magrittr)
+
+str1 &lt;-<span class="st"> &quot;Lorem ipsum dolor sit amet, consectetur adipiscing elit. &quot;</span> %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">rep</span>(<span class="dv">20</span>) %&gt;%<span class="st"> </span><span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;&quot;</span>)
+str2 &lt;-<span class="st"> &quot;Drop that text&quot;</span> 
+str3 &lt;-<span class="st"> &quot;Aenean venenatis varius elit et fermentum vivamus vehicula. &quot;</span> %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">rep</span>(<span class="dv">20</span>) %&gt;%<span class="st"> </span><span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;&quot;</span>)
+
+my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>()  %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> str1, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> str2, <span class="dt">style =</span> <span class="st">&quot;centered&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> str3, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) 
+
+<span class="kw">print</span>(my_doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/ipsum_doc.docx&quot;</span>) %&gt;%<span class="st"> </span><span class="kw">invisible</span>()</code></pre></div>
+<p>File <code>ipsum_doc.docx</code> now exists and contains a paragraph containing text <em>that text</em>. In the following example, we will position the cursor on that paragraph and then delete it:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>(<span class="dt">path =</span> <span class="st">&quot;assets/docx/ipsum_doc.docx&quot;</span>)  %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">cursor_reach</span>(<span class="dt">keyword =</span> <span class="st">&quot;that text&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_remove</span>()
+
+<span class="kw">print</span>(my_doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/ipsum_doc.docx&quot;</span>) %&gt;%<span class="st"> </span><span class="kw">invisible</span>()</code></pre></div>
+<p><strong>The text search is made via <code>xpath 1.0</code> and regular expressions are not supported.</strong></p>
+<p>
+<span>Download file: </span>
+<a href="https://davidgohel.github.io/officer/articles/assets/docx/ipsum_doc.docx">ipsum_doc.docx</a>
+</p>
+</div>
+<div id="sections" class="section level2">
+<h2>Sections</h2>
+<p>Sections can be added to a document. This is possible by using function <code>body_end_section</code>.</p>
+<blockquote>
+<p>A section start at the end of the previous section (or the beginning of the document if no preceding section exists), it stops where the section is declared. The function is reflecting that (complicated) Word concept, by adding an ending section attached to the paragraph where cursor is.</p>
+</blockquote>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">str1 &lt;-<span class="st"> &quot;Lorem ipsum dolor sit amet, consectetur adipiscing elit. &quot;</span> %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">rep</span>(<span class="dv">30</span>) %&gt;%<span class="st"> </span><span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;&quot;</span>)
+str2 &lt;-<span class="st"> &quot;Aenean venenatis varius elit et fermentum vivamus vehicula. &quot;</span> %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">rep</span>(<span class="dv">30</span>) %&gt;%<span class="st"> </span><span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;&quot;</span>)
+
+my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>()  %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">slip_in_text</span>(<span class="dt">str =</span> str1, <span class="dt">style =</span> <span class="st">&quot;strong&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> str2, <span class="dt">style =</span> <span class="st">&quot;centered&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_end_section</span>(<span class="dt">landscape =</span> <span class="ot">TRUE</span>, <span class="dt">colwidths =</span> <span class="kw">c</span>(.<span class="dv">6</span>, .<span class="dv">4</span>), <span class="dt">space =</span> .<span class="dv">05</span>, <span class="dt">sep =</span> <span class="ot">FALSE</span>) %&gt;%
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> str3, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) 
+<span class="kw">print</span>(my_doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/section.docx&quot;</span>) %&gt;%<span class="st"> </span><span class="kw">invisible</span>()</code></pre></div>
+<p>
+<span>Download file: </span>
+<a href="https://davidgohel.github.io/officer/articles/assets/docx/section.docx">section.docx</a>
+</p>
+<p>In the previous example, first two paragraphs will be in a 2 columns section and the third will be in a default section.</p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

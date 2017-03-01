@@ -1,0 +1,184 @@
+## ---- echo = FALSE, message=FALSE, warning=FALSE-------------------------
+dir.create("assets/pptx", recursive = TRUE, showWarnings = FALSE)
+office_doc_link <- function(url){
+  stopifnot(requireNamespace("htmltools", quietly = TRUE))
+  htmltools::tags$p(  htmltools::tags$span("Download file: "),
+    htmltools::tags$a(basename(url), href = url))
+}
+
+## ------------------------------------------------------------------------
+library(officer)
+# Package `magrittr` makes officer usage easier.
+library(magrittr)
+
+## ------------------------------------------------------------------------
+my_pres <- read_pptx() 
+
+## ------------------------------------------------------------------------
+my_pres <- my_pres %>% 
+  add_slide(layout = "Title and Content", master = "Office Theme")
+
+## ------------------------------------------------------------------------
+layout_summary(my_pres)
+
+## ------------------------------------------------------------------------
+my_pres <- my_pres %>% 
+  ph_with_text(type = "title", str = "A title") %>%
+  ph_with_text(type = "ftr", str = "A footer") %>%
+  ph_with_text(type = "dt", str = format(Sys.Date())) %>%
+  ph_with_text(type = "sldNum", str = "slide 1") %>%
+  ph_with_text(str = "Hello world", type = "body")
+
+## ------------------------------------------------------------------------
+layout_properties ( x = my_pres, layout = "Two Content", master = "Office Theme" ) %>% head()
+
+## ------------------------------------------------------------------------
+print(my_pres, target = "assets/pptx/first_example.pptx") %>% 
+  invisible()
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/first_example.pptx" ) )
+
+## ------------------------------------------------------------------------
+my_pres <- read_pptx() %>% 
+  add_slide(layout = "Two Content", master = "Office Theme") %>% 
+  add_slide(layout = "Title and Content", master = "Office Theme") %>% 
+  add_slide(layout = "Title Only", master = "Office Theme")
+length(my_pres)
+
+## ------------------------------------------------------------------------
+my_pres <- my_pres %>% remove_slide(index = 1)
+length(my_pres)
+
+## ------------------------------------------------------------------------
+my_pres <- my_pres %>% on_slide(index = 1)
+
+## ------------------------------------------------------------------------
+doc <- read_pptx() %>%
+  add_slide(layout = "Two Content", master = "Office Theme") %>%
+  ph_with_text(type = "body", str = "A first text", index = 1) %>%
+  ph_with_text(type = "body", str = "A second text", index = 2) %>%
+  ph_with_text(type = "title", str = "A title") %>%
+  ph_with_text(type = "ftr", str = "Slide footer") %>%
+  ph_with_text(type = "dt", str = format(Sys.Date()))
+
+print(doc, target = "assets/pptx/ph_with_text.pptx") %>% 
+  invisible()
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_text.pptx" ) )
+
+## ------------------------------------------------------------------------
+img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
+
+doc <- read_pptx() 
+doc <- doc %>%
+  add_slide(layout = "Two Content", master = "Office Theme") %>%
+  ph_with_text(type = "body", str = "body (index 1) is text", index = 1) %>% 
+  ph_with_img(type = "body", index = 2, src = img.file, height = 1.06, width = 1.39 )
+
+print(doc, target = "assets/pptx/ph_with_img.pptx") %>% 
+  invisible()
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_img.pptx" ) )
+
+## ------------------------------------------------------------------------
+doc <- read_pptx() 
+doc <- doc %>%
+  add_slide(layout = "Title and Content", master = "Office Theme") %>%
+  ph_with_table(type = "body", value = head(mtcars) )
+
+print(doc, target = "assets/pptx/ph_with_table.pptx") %>% 
+  invisible()
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_table.pptx" ) )
+
+## ------------------------------------------------------------------------
+slide_summary(doc)
+
+## ------------------------------------------------------------------------
+doc <- ph_remove(x = doc, type = "body")
+
+## ------------------------------------------------------------------------
+my_pres <- read_pptx() %>% 
+  add_slide(layout = "Title and Content", master = "Office Theme") %>% 
+  ph_empty(type = "body")
+
+## ------------------------------------------------------------------------
+text_prop <- fp_text(color = "red", font.size = 20)
+my_pres <- my_pres %>% 
+  ph_add_par() %>%
+  ph_add_text(str = "This is a red text!", style = text_prop ) %>% 
+  ph_add_par(level = 2) %>%
+  ph_add_text(str = "Level 2") %>% 
+  ph_add_par(level = 3) %>%
+  ph_add_text(str = "Level 3")
+
+print(my_pres, target = "assets/pptx/ph_add_text_1.pptx") %>% 
+  invisible()
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_add_text_1.pptx" ) )
+
+## ------------------------------------------------------------------------
+my_pres <- read_pptx() %>% 
+  add_slide(layout = "Title and Content", master = "Office Theme") %>% 
+  ph_with_text(type = "body", str = "A first text")
+
+## ------------------------------------------------------------------------
+text_blue_prop <- update(text_prop, color = "blue" )
+my_pres <- my_pres %>% 
+  ph_add_text(str = "A small red text!", style = text_prop ) %>% 
+  ph_add_text(str = "Blue text first... ", pos = "before", style = text_blue_prop ) %>% 
+  ph_add_par(level = 2) %>%
+  ph_add_text(str = "additionnal paragraph")
+
+print(my_pres, target = "assets/pptx/ph_add_text_2.pptx") %>% 
+  invisible()
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_add_text_2.pptx" ) )
+
+## ------------------------------------------------------------------------
+doc <- read_pptx() %>% 
+  add_slide(layout = "Title and Content", master = "Office Theme") %>% 
+  ph_with_text(type = "body", str = "Blah blah blah") %>% 
+  ph_hyperlink(type = "body", href = "https://cran.r-project.org") %>% 
+  add_slide(layout = "Title and Content", master = "Office Theme") %>% 
+  ph_with_text(type = "body", str = "placeholder target")
+
+print(doc, target = "assets/pptx/ph_hyperlink.pptx") %>% 
+  invisible()
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_hyperlink.pptx" ) )
+
+## ------------------------------------------------------------------------
+doc <- read_pptx() %>% 
+  add_slide(layout = "Title and Content", master = "Office Theme") %>% 
+  ph_with_text(type = "body", str = "Blah blah blah") %>% 
+  add_slide(layout = "Title and Content", master = "Office Theme") %>% 
+  ph_with_text(type = "body", str = "placeholder target") %>% 
+  on_slide(index = 1 ) %>% 
+  ph_slidelink(type = "body", slide_index = 2)
+
+print(doc, target = "assets/pptx/ph_slidelink.pptx") %>% 
+  invisible()
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_slidelink.pptx" ) )
+
+## ------------------------------------------------------------------------
+my_pres <- read_pptx() %>% 
+  add_slide(layout = "Title and Content", master = "Office Theme") %>% 
+  ph_with_text(type = "body", str = "An ") %>% 
+  ph_add_text(str = "hyperlink", href = "https://cran.r-project.org" )
+
+print(my_pres, target = "assets/pptx/ph_add_text_3.pptx") %>% 
+  invisible()
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_add_text_3.pptx" ) )
+
