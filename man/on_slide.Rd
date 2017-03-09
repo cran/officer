@@ -7,12 +7,12 @@
 on_slide(x, index)
 }
 \arguments{
-\item{x}{pptx object}
+\item{x}{rpptx object}
 
 \item{index}{slide index}
 }
 \description{
-change current slide index of a pptx object.
+change current slide index of an rpptx object.
 }
 \examples{
 doc <- read_pptx()
@@ -24,5 +24,6 @@ doc <- ph_with_text(x = doc, type = "title", str = "First title")
 doc <- on_slide( doc, index = 3)
 doc <- ph_with_text(x = doc, type = "title", str = "Third title")
 
-print(doc, target = "on_slide.pptx" )
+if( has_zip() )
+  print(doc, target = "on_slide.pptx" )
 }

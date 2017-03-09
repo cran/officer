@@ -26,3 +26,5 @@ has_css_attr <- function(x, atname, value){
   grepl(reg, css)
 }
 
+
+

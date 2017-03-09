@@ -8,7 +8,7 @@
 #' "after" or "before".
 #' @examples
 #' library(magrittr)
-#' read_docx() %>%
+#' x <- read_docx() %>%
 #'   body_add_par("Time is: ", style = "Normal") %>%
 #'   slip_in_seqfield(
 #'     str = "TIME \u005C@ \"HH:mm:ss\" \u005C* MERGEFORMAT",
@@ -25,9 +25,14 @@
 #'   slip_in_text("Figure: ", style = "strong", pos = "before") %>%
 #'   body_add_par("This is a symbol: ", style = "Normal") %>%
 #'   slip_in_seqfield(str = "SYMBOL 100 \u005Cf Wingdings",
-#'     style = 'strong') %>%
-#'   print(target = "seqfield.docx")
-slip_in_seqfield <- function( x, str, style = "Normal", pos = "after" ){
+#'     style = 'strong')
+#'
+#' if( has_zip() )
+#'   print(x, target = "seqfield.docx")
+slip_in_seqfield <- function( x, str, style = NULL, pos = "after" ){
+
+  if( is.null(style) )
+    style <- x$default_styles$character
 
   style_id <- x$doc_obj$get_style_id(style=style, type = "character")
 
@@ -66,12 +71,17 @@ slip_in_seqfield <- function( x, str, style = "Normal", pos = "after" ){
 #' "after" or "before".
 #' @examples
 #' library(magrittr)
-#' read_docx() %>%
+#' x <- read_docx() %>%
 #'   body_add_par("Hello ", style = "Normal") %>%
 #'   slip_in_text("world", style = "strong") %>%
-#'   slip_in_text("Message is", style = "strong", pos = "before") %>%
-#'   print(target = "append_run.docx")
-slip_in_text <- function( x, str, style = "Normal", pos = "after" ){
+#'   slip_in_text("Message is", style = "strong", pos = "before")
+#'
+#' if( has_zip() )
+#'   print(x, target = "append_run.docx")
+slip_in_text <- function( x, str, style = NULL, pos = "after" ){
+
+  if( is.null(style) )
+    style <- x$default_styles$character
 
   style_id <- x$doc_obj$get_style_id(style=style, type = "character")
   xml_elt <- paste0( wml_with_ns("w:r"),
@@ -95,11 +105,16 @@ slip_in_text <- function( x, str, style = "Normal", pos = "after" ){
 #' @examples
 #' library(magrittr)
 #' img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
-#' read_docx() %>%
+#' x <- read_docx() %>%
 #'   body_add_par("R logo: ", style = "Normal") %>%
-#'   slip_in_img(src = img.file, style = "strong", width = .3, height = .3) %>%
-#'   print(target = "append_img.docx")
-slip_in_img <- function( x, src, style = "Normal", width, height, pos = "after" ){
+#'   slip_in_img(src = img.file, style = "strong", width = .3, height = .3)
+#'
+#' if( has_zip() )
+#'   print(x, target = "append_img.docx")
+slip_in_img <- function( x, src, style = NULL, width, height, pos = "after" ){
+
+  if( is.null(style) )
+    style <- x$default_styles$character
 
   style_id <- x$doc_obj$get_style_id(style=style, type = "character")
 

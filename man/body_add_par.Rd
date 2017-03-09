@@ -4,7 +4,7 @@
 \alias{body_add_par}
 \title{add paragraph of text}
 \usage{
-body_add_par(x, value, style, pos = "after")
+body_add_par(x, value, style = NULL, pos = "after")
 }
 \arguments{
 \item{x}{a docx device}
@@ -26,5 +26,7 @@ doc <- read_docx() \%>\%
   body_add_par("A title", style = "heading 1") \%>\%
   body_add_par("Hello world!", style = "Normal") \%>\%
   body_add_par("centered text", style = "centered")
-print(doc, target = "body_add_par.docx" )
+
+if( has_zip() )
+  print(doc, target = "body_add_par.docx" )
 }

@@ -121,9 +121,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>File can be generated using function <code>print</code> and argument <code>target</code>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(my_doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/first_example.docx&quot;</span>) %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
-<p>
-<span>Download file: </span>
+<p style="text-align:center;font-style:italic;color:gray;">
+<span>Download file </span>
 <a href="https://davidgohel.github.io/officer/articles/assets/docx/first_example.docx">first_example.docx</a>
+<span> - view with</span>
+<a target="_blank" href="https://view.officeapps.live.com/op/view.aspx?src=https://davidgohel.github.io/officer/articles/assets/docx/first_example.docx">office web viewer</a>
 </p>
 </div>
 </div>
@@ -165,9 +167,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;paragraph 7&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) %&gt;%
 <span class="st">  </span><span class="kw">print</span>(<span class="dt">target =</span> <span class="st">&quot;assets/docx/init_doc.docx&quot;</span> ) %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
-<p>
-<span>Download file: </span>
+<p style="text-align:center;font-style:italic;color:gray;">
+<span>Download file </span>
 <a href="https://davidgohel.github.io/officer/articles/assets/docx/init_doc.docx">init_doc.docx</a>
+<span> - view with</span>
+<a target="_blank" href="https://view.officeapps.live.com/op/view.aspx?src=https://davidgohel.github.io/officer/articles/assets/docx/init_doc.docx">office web viewer</a>
 </p>
 <p>Now, let’s use <code>init_doc.docx</code> with <code>read_docx</code> and manipulate its content with cursor functions.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>(<span class="dt">path =</span> <span class="st">&quot;assets/docx/init_doc.docx&quot;</span>) %&gt;%
@@ -192,9 +196,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/cursor.docx&quot;</span>) %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
-<p>
-<span>Download file: </span>
+<p style="text-align:center;font-style:italic;color:gray;">
+<span>Download file </span>
 <a href="https://davidgohel.github.io/officer/articles/assets/docx/cursor.docx">cursor.docx</a>
+<span> - view with</span>
+<a target="_blank" href="https://view.officeapps.live.com/op/view.aspx?src=https://davidgohel.github.io/officer/articles/assets/docx/cursor.docx">office web viewer</a>
 </p>
 <div id="append-text-in-existing-paragraphs" class="section level3">
 <h3>Append text in existing paragraphs</h3>
@@ -215,9 +221,11 @@ img.file &lt;-<span class="st"> </span><span class="kw">file.path</span>( <span 
 <span class="st">  </span><span class="kw">slip_in_text</span>(img.file, <span class="dt">style =</span> <span class="st">&quot;strong&quot;</span>, <span class="dt">pos =</span> <span class="st">&quot;after&quot;</span>) %&gt;%
 <span class="st">  </span><span class="kw">print</span>(<span class="dt">target =</span> <span class="st">&quot;assets/docx/slip_in_demo.docx&quot;</span>) %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
-<p>
-<span>Download file: </span>
+<p style="text-align:center;font-style:italic;color:gray;">
+<span>Download file </span>
 <a href="https://davidgohel.github.io/officer/articles/assets/docx/slip_in_demo.docx">slip_in_demo.docx</a>
+<span> - view with</span>
+<a target="_blank" href="https://view.officeapps.live.com/op/view.aspx?src=https://davidgohel.github.io/officer/articles/assets/docx/slip_in_demo.docx">office web viewer</a>
 </p>
 </div>
 </div>
@@ -247,9 +255,11 @@ my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>()  %&gt;%
 
 <span class="kw">print</span>(my_doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/ipsum_doc.docx&quot;</span>) %&gt;%<span class="st"> </span><span class="kw">invisible</span>()</code></pre></div>
 <p><strong>The text search is made via <code>xpath 1.0</code> and regular expressions are not supported.</strong></p>
-<p>
-<span>Download file: </span>
+<p style="text-align:center;font-style:italic;color:gray;">
+<span>Download file </span>
 <a href="https://davidgohel.github.io/officer/articles/assets/docx/ipsum_doc.docx">ipsum_doc.docx</a>
+<span> - view with</span>
+<a target="_blank" href="https://view.officeapps.live.com/op/view.aspx?src=https://davidgohel.github.io/officer/articles/assets/docx/ipsum_doc.docx">office web viewer</a>
 </p>
 </div>
 <div id="sections" class="section level2">
@@ -269,11 +279,68 @@ my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>()  %&gt;%
 <span class="st">  </span><span class="kw">body_end_section</span>(<span class="dt">landscape =</span> <span class="ot">TRUE</span>, <span class="dt">colwidths =</span> <span class="kw">c</span>(.<span class="dv">6</span>, .<span class="dv">4</span>), <span class="dt">space =</span> .<span class="dv">05</span>, <span class="dt">sep =</span> <span class="ot">FALSE</span>) %&gt;%
 <span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> str3, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) 
 <span class="kw">print</span>(my_doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/section.docx&quot;</span>) %&gt;%<span class="st"> </span><span class="kw">invisible</span>()</code></pre></div>
-<p>
-<span>Download file: </span>
+<p style="text-align:center;font-style:italic;color:gray;">
+<span>Download file </span>
 <a href="https://davidgohel.github.io/officer/articles/assets/docx/section.docx">section.docx</a>
+<span> - view with</span>
+<a target="_blank" href="https://view.officeapps.live.com/op/view.aspx?src=https://davidgohel.github.io/officer/articles/assets/docx/section.docx">office web viewer</a>
 </p>
 <p>In the previous example, first two paragraphs will be in a 2 columns section and the third will be in a default section.</p>
+</div>
+<div id="table-and-image-captions" class="section level2">
+<h2>Table and image captions</h2>
+<p>Man can combine <code>slip_in_seqfield</code> and <code>slip_in_text</code> to prefix a paragraph with references (i.e. chapter number and graphic index in the document). However, producing a plot or a table and its caption can be verbose.</p>
+<p>Shortcuts functions are implemented in the object <code>shortcuts</code> (it will at least give you a template of code to modify if it does not fit exactly your need). <code>slip_in_tableref</code>, <code>slip_in_plotref</code> and <code>body_add_gg</code> can make life easier.</p>
+<p>Below an illustration, the code is linear and easy to read:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(magrittr)
+<span class="kw">library</span>(officer)
+<span class="kw">library</span>(ggplot2)
+
+gg1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data =</span> iris, <span class="kw">aes</span>(Sepal.Length, Petal.Length)) +<span class="st"> </span><span class="kw">geom_point</span>()
+gg2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data =</span> iris, <span class="kw">aes</span>(Sepal.Length, Petal.Length, <span class="dt">color =</span> Species)) +<span class="st"> </span><span class="kw">geom_point</span>()
+
+
+doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>() %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;Table of content&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 1&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_toc</span>(<span class="dt">level =</span> <span class="dv">2</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;Tables&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 1&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;dataset mtcars&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 2&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_table</span>(<span class="dt">value =</span> <span class="kw">head</span>(mtcars)[, <span class="dv">1</span>:<span class="dv">4</span>], <span class="dt">style =</span> <span class="st">&quot;table_template&quot;</span> ) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;data mtcars&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;table title&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span>shortcuts$<span class="kw">slip_in_tableref</span>(<span class="dt">depth =</span> <span class="dv">2</span>) %&gt;%
+<span class="st">  </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;dataset iris&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 2&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_table</span>(<span class="dt">value =</span> <span class="kw">head</span>(iris), <span class="dt">style =</span> <span class="st">&quot;table_template&quot;</span> ) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;data iris&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;table title&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span>shortcuts$<span class="kw">slip_in_tableref</span>(<span class="dt">depth =</span> <span class="dv">2</span>) %&gt;%
+<span class="st">  </span>
+<span class="st">  </span><span class="kw">body_end_section</span>(<span class="dt">landscape =</span> <span class="ot">FALSE</span> ) %&gt;%<span class="st"> </span>
+<span class="st">  </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;plot examples&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 1&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_gg</span>(<span class="dt">value =</span> gg1, <span class="dt">style =</span> <span class="st">&quot;centered&quot;</span> ) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;graph example 1&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;graphic title&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span>shortcuts$<span class="kw">slip_in_plotref</span>(<span class="dt">depth =</span> <span class="dv">1</span>) %&gt;%
+<span class="st">  </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;plot 2&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 2&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_gg</span>(<span class="dt">value =</span> gg2, <span class="dt">style =</span> <span class="st">&quot;centered&quot;</span> ) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;graph example 2&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;graphic title&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span>shortcuts$<span class="kw">slip_in_plotref</span>(<span class="dt">depth =</span> <span class="dv">2</span>) %&gt;%
+<span class="st">  </span>
+<span class="st">  </span><span class="kw">body_end_section</span>(<span class="dt">landscape =</span> <span class="ot">TRUE</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;Table of tables&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 2&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_toc</span>(<span class="dt">style =</span> <span class="st">&quot;table title&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;Table of graphics&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 2&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">body_add_toc</span>(<span class="dt">style =</span> <span class="st">&quot;graphic title&quot;</span>)
+
+<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/toc_and_captions.docx&quot;</span>) %&gt;%<span class="st"> </span><span class="kw">invisible</span>()</code></pre></div>
+<p style="text-align:center;font-style:italic;color:gray;">
+<span>Download file </span>
+<a href="https://davidgohel.github.io/officer/articles/assets/docx/toc_and_captions.docx">toc_and_captions.docx</a>
+<span> - view with</span>
+<a target="_blank" href="https://view.officeapps.live.com/op/view.aspx?src=https://davidgohel.github.io/officer/articles/assets/docx/toc_and_captions.docx">office web viewer</a>
+</p>
 </div>
 
 

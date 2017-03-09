@@ -4,7 +4,7 @@
 \alias{slip_in_img}
 \title{append an image}
 \usage{
-slip_in_img(x, src, style = "Normal", width, height, pos = "after")
+slip_in_img(x, src, style = NULL, width, height, pos = "after")
 }
 \arguments{
 \item{x}{a docx device}
@@ -26,8 +26,10 @@ append an image into a paragraph of a docx object
 \examples{
 library(magrittr)
 img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
-read_docx() \%>\%
+x <- read_docx() \%>\%
   body_add_par("R logo: ", style = "Normal") \%>\%
-  slip_in_img(src = img.file, style = "strong", width = .3, height = .3) \%>\%
-  print(target = "append_img.docx")
+  slip_in_img(src = img.file, style = "strong", width = .3, height = .3)
+
+if( has_zip() )
+  print(x, target = "append_img.docx")
 }

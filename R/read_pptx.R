@@ -3,7 +3,7 @@
 #' @description read and import a pptx file as an R object
 #' representing the document.
 #' @param path path to the pptx file to use a base document.
-#' @param x a pptx object
+#' @param x an rpptx object
 #' @examples
 #' read_pptx()
 #' @importFrom xml2 read_xml xml_length xml_find_first xml_attr xml_ns
@@ -20,7 +20,7 @@ read_pptx <- function( path = NULL ){
 
   obj <- structure(list(package_dir = package_dir),
                    .Names = c("package_dir"),
-                   class = "pptx")
+                   class = "rpptx")
 
   obj$table_styles <- read_table_style(package_dir)
 
@@ -49,7 +49,14 @@ read_table_style <- function(path){
 #' @param target path to the pptx file to write
 #' @param ... unused
 #' @rdname read_pptx
-print.pptx <- function(x, target = NULL, ...){
+#' @examples
+#' # write a rdocx object in a docx file ----
+#' if( require(magrittr) && has_zip() ){
+#'   read_pptx() %>% print(target = "out.pptx")
+#'   # full path of produced file is returned
+#'   print(.Last.value)
+#' }
+print.rpptx <- function(x, target = NULL, ...){
 
   if( is.null( target) ){
     cat("pptx document with", length(x), "slide(s)\n")
@@ -75,7 +82,7 @@ print.pptx <- function(x, target = NULL, ...){
 #' @importFrom xml2 xml_name<- xml_set_attrs xml_ns xml_remove
 #' @title add a slide
 #' @description add a slide into a pptx presentation
-#' @param x pptx object
+#' @param x rpptx object
 #' @param layout slide layout name to use
 #' @param master master layout name where \code{layout} is located
 #' @examples
@@ -123,14 +130,14 @@ add_slide <- function( x, layout, master ){
 #' @rdname read_pptx
 #' @section number of slides:
 #' Function \code{length} will return the number of slides.
-length.pptx <- function( x ){
+length.rpptx <- function( x ){
   x$slide$length()
 }
 
 #' @export
 #' @title change current slide
-#' @description change current slide index of a pptx object.
-#' @param x pptx object
+#' @description change current slide index of an rpptx object.
+#' @param x rpptx object
 #' @param index slide index
 #' @examples
 #' doc <- read_pptx()
@@ -142,7 +149,8 @@ length.pptx <- function( x ){
 #' doc <- on_slide( doc, index = 3)
 #' doc <- ph_with_text(x = doc, type = "title", str = "Third title")
 #'
-#' print(doc, target = "on_slide.pptx" )
+#' if( has_zip() )
+#'   print(doc, target = "on_slide.pptx" )
 on_slide <- function( x, index ){
 
   l_ <- length(x)
@@ -162,7 +170,7 @@ on_slide <- function( x, index ){
 #' @export
 #' @title remove a slide
 #' @description remove a slide from a pptx presentation
-#' @param x pptx object
+#' @param x rpptx object
 #' @param index slide index, default to current slide position.
 #' @note cursor is set on the last slide.
 #' @examples
@@ -213,7 +221,7 @@ layout_summary <- function( x ){
 #' @title slide layout properties
 #' @description get informations about a particular slide layout
 #' into a data.frame.
-#' @param x pptx object
+#' @param x rpptx object
 #' @param layout slide layout name to use
 #' @param master master layout name where \code{layout} is located
 #' @examples
@@ -247,7 +255,7 @@ layout_properties <- function( x, layout = NULL, master = NULL ){
 #' @title slide summary
 #' @description get informations about current slide
 #' into a data.frame.
-#' @param x pptx object
+#' @param x rpptx object
 #' @param index slide index
 #' @examples
 #' library(magrittr)
@@ -290,7 +298,7 @@ slide_summary <- function( x, index = NULL ){
 #' @export
 #' @title color scheme
 #' @description get master layout color scheme into a data.frame.
-#' @param x pptx object
+#' @param x rpptx object
 #' @examples
 #' x <- read_pptx()
 #' color_scheme ( x = x )

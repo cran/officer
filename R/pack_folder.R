@@ -9,17 +9,21 @@
 #' @param folder folder to compress
 #' @param target path of the archive to create
 pack_folder <- function( folder, target ){
+
   target <- getAbsolutePath(target)
   folder <- getAbsolutePath(folder)
   curr_wd <- getwd()
   zip_dir <- folder
   setwd(zip_dir)
-  zz <- zip(zipfile = target, flags = "-qr9X",
+  zip(zipfile = target, flags = "-qr9X",
       files = list.files(all.files = TRUE, recursive = TRUE))
   setwd(curr_wd)
-  if(zz != 0){
-    stop('could not zip document package. A zip application must be available to R.
-         Set its path with Sys.setenv("R_ZIPCMD" = "path/to/zip")', call. = FALSE)
+
+  if( !file.exists(target) ){
+    if( Sys.getenv("R_ZIPCMD") == "")
+      stop('A zip application must be available to R. You can set its path with Sys.setenv("R_ZIPCMD" = "path/to/zip")', call. = FALSE)
+    msg <- sprintf("could not zip package %s in file %s", shQuote(zip_dir), shQuote(target))
+    stop(msg, call. = FALSE)
   }
 
   target
@@ -46,4 +50,17 @@ unpack_folder <- function( file, folder ){
   unzip( zipfile = file, exdir = folder )
 
   folder
+}
+
+#' @export
+#' @title test zip function
+#' @description test wether zip can produce a zip file.
+#' @examples
+#' has_zip()
+has_zip <- function(){
+  ifile <- tempfile(fileext = ".txt")
+  cat("hi", file = ifile)
+  ofile <- tempfile(fileext = ".zip")
+  try(zip(zipfile = ofile, flags = "-qr9X", files = ifile ), silent = TRUE)
+  file.exists(ofile)
 }

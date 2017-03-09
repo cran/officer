@@ -1,13 +1,32 @@
 #' @export
+#' @title add page break
+#' @description add a page break into a docx object
+#' @param x a docx object
+#' @param pos where to add the new element relative to the cursor,
+#' one of "after", "before", "on".
+#' @examples
+#' library(magrittr)
+#' doc <- read_docx() %>% body_add_break()
+#'
+#' if( has_zip() )
+#'   print(doc, target = "body_add_break.docx" )
+body_add_break <- function( x, pos = "after"){
+
+  str <- paste0(wml_with_ns("w:p"), "<w:pPr/>",
+                "<w:r><w:br w:type=\"page\"/></w:r>",
+                "</w:p>")
+  body_add_xml(x = x, str = str, pos = pos)
+
+}
+
+#' @export
 #' @title add image
 #' @description add an image into a docx object
-#' @param x a docx device
+#' @inheritParams body_add_break
 #' @param src image filename
 #' @param style paragraph style
 #' @param width height in inches
 #' @param height height in inches
-#' @param pos where to add the new element relative to the cursor,
-#' one of "after", "before", "on".
 #' @examples
 #' doc <- read_docx()
 #'
@@ -20,9 +39,13 @@
 #'   doc <- body_add_img(x = doc, src = calendar_src, height = 2, width = 2 )
 #' }
 #'
-#' print(doc, target = "body_add_img.docx" )
+#' if( has_zip() )
+#'   print(doc, target = "body_add_img.docx" )
 #' @importFrom xml2 read_xml xml_find_first write_xml xml_add_sibling as_xml_document
-body_add_img <- function( x, src, style = "Normal", width, height, pos = "after" ){
+body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
+
+  if( is.null(style) )
+    style <- x$default_styles$paragraph
 
   style_id <- x$doc_obj$get_style_id(style=style, type = "paragraph")
 
@@ -41,6 +64,38 @@ body_add_img <- function( x, src, style = "Normal", width, height, pos = "after"
 }
 
 #' @export
+#' @title add ggplot
+#' @description add a ggplot as a png image into a docx object
+#' @inheritParams body_add_break
+#' @param value ggplot object
+#' @param style paragraph style
+#' @param width height in inches
+#' @param height height in inches
+#' @importFrom grDevices png dev.off
+#' @import ggplot2
+#' @examples
+#' library(ggplot2)
+#'
+#' doc <- read_docx()
+#'
+#' gg_plot <- ggplot(data = iris ) +
+#'   geom_point(mapping = aes(Sepal.Length, Petal.Length))
+#'
+#' doc <- body_add_gg(doc, value = gg_plot, style = "centered" )
+#'
+#' if( has_zip() )
+#'   print(doc, target = "body_add_gg.docx" )
+body_add_gg <- function( x, value, width = 6, height = 5, style = NULL ){
+  stopifnot(inherits(value, "gg") )
+  file <- tempfile(fileext = ".png")
+  png(filename = file, width = width, height = height, units = "in", res = 300)
+  print(value)
+  dev.off()
+  on.exit(unlink(file))
+  body_add_img(x, src = file, style = style, width = 6, height = 5)
+}
+
+#' @export
 #' @title add paragraph of text
 #' @description add a paragraph of text into a docx object
 #' @param x a docx device
@@ -55,9 +110,14 @@ body_add_img <- function( x, src, style = "Normal", width, height, pos = "after"
 #'   body_add_par("A title", style = "heading 1") %>%
 #'   body_add_par("Hello world!", style = "Normal") %>%
 #'   body_add_par("centered text", style = "centered")
-#' print(doc, target = "body_add_par.docx" )
+#'
+#' if( has_zip() )
+#'   print(doc, target = "body_add_par.docx" )
 #' @importFrom xml2 read_xml xml_find_first write_xml xml_add_sibling as_xml_document
-body_add_par <- function( x, value, style, pos = "after" ){
+body_add_par <- function( x, value, style = NULL, pos = "after" ){
+
+  if( is.null(style) )
+    style <- x$default_styles$paragraph
 
   style_id <- x$doc_obj$get_style_id(style=style, type = "paragraph")
 
@@ -82,7 +142,9 @@ body_add_par <- function( x, value, style, pos = "after" ){
 #'               ftext("World", prop = bold_redface ),
 #'               ftext(", how are you?", prop = bold_face ) )
 #' doc <- read_docx() %>% body_add_fpar(fpar_)
-#' print(doc, target = "body_add_fpar.docx" )
+#'
+#' if( has_zip() )
+#'   print(doc, target = "body_add_fpar.docx" )
 #' @importFrom xml2 read_xml xml_find_first write_xml xml_add_sibling as_xml_document
 #' @seealso \code{\link{fpar}}
 body_add_fpar <- function( x, value, pos = "after" ){
@@ -107,12 +169,17 @@ body_add_fpar <- function( x, value, pos = "after" ){
 #'
 #' doc <- read_docx() %>%
 #'   body_add_table(iris, style = "table_template")
-#' print(doc, target = "body_add_table.docx" )
+#'
+#' if( has_zip() )
+#'   print(doc, target = "body_add_table.docx" )
 #' @importFrom xml2 read_xml xml_find_first write_xml xml_add_sibling as_xml_document
-body_add_table <- function( x, value, style, pos = "after",
+body_add_table <- function( x, value, style = NULL, pos = "after",
                             first_row = TRUE, first_column = FALSE,
                             last_row = FALSE, last_column = FALSE,
                             no_hband = FALSE, no_vband = TRUE ){
+
+  if( is.null(style) )
+    style <- x$default_styles$table
 
   style_id <- x$doc_obj$get_style_id(style=style, type = "table")
 
@@ -138,7 +205,9 @@ body_add_table <- function( x, value, style, pos = "after",
 #' @examples
 #' library(magrittr)
 #' doc <- read_docx() %>% body_add_toc()
-#' print(doc, target = "body_add_toc.docx" )
+#'
+#' if( has_zip() )
+#'   print(doc, target = "body_add_toc.docx" )
 body_add_toc <- function( x, level = 3, pos = "after", style = NULL, separator = ";"){
 
   if( is.null( style )){
@@ -162,25 +231,6 @@ body_add_toc <- function( x, level = 3, pos = "after", style = NULL, separator =
 }
 
 
-
-#' @export
-#' @title add page break
-#' @description add a page break into a docx object
-#' @param x a docx object
-#' @param pos where to add the new element relative to the cursor,
-#' one of "after", "before", "on".
-#' @examples
-#' library(magrittr)
-#' doc <- read_docx() %>% body_add_break()
-#' print(doc, target = "body_add_break.docx" )
-body_add_break <- function( x, pos = "after"){
-
-  str <- paste0(wml_with_ns("w:p"), "<w:pPr/>",
-                "<w:r><w:br w:type=\"page\"/></w:r>",
-                "</w:p>")
-  body_add_xml(x = x, str = str, pos = pos)
-
-}
 
 #' @export
 #' @title add an xml string as document element
@@ -238,12 +288,16 @@ body_add_xml <- function(x, str, pos){
 #'   body_add_par(value = str1, style = "Normal") %>%
 #'   body_add_par(value = str2, style = "centered") %>%
 #'   body_add_par(value = str3, style = "Normal")
-#' print(my_doc, target = "init_doc.docx")
 #'
-#' my_doc <- read_docx(path = "init_doc.docx")  %>%
-#'   cursor_reach(keyword = "that text") %>%
-#'   body_remove()
-#' print(my_doc, target = "result_doc.docx")
+#' if( has_zip() ){
+#'   print(my_doc, target = "init_doc.docx")
+#'
+#'   my_doc <- read_docx(path = "init_doc.docx")  %>%
+#'     cursor_reach(keyword = "that text") %>%
+#'     body_remove()
+#'
+#'   print(my_doc, target = "result_doc.docx")
+#' }
 body_remove <- function(x){
   cursor_elt <- x$doc_obj$get_at_cursor()
   xml_remove(cursor_elt)
@@ -288,7 +342,9 @@ body_remove <- function(x){
 #'   body_end_section(landscape = TRUE, colwidths = c(.6, .4), space = .05, sep = FALSE) %>%
 #'   body_add_par("String 3", style = "heading 1") %>%
 #'   body_add_par(value = str3, style = "Normal")
-#' print(my_doc, target = "body_end_section.docx")
+#'
+#' if( has_zip() )
+#'   print(my_doc, target = "body_end_section.docx")
 #' @importFrom xml2 as_list
 body_end_section <- function(x, landscape = FALSE, colwidths = c(1), space = .05, sep = FALSE){
 
