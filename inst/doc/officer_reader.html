@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>Extract content from Word and PowerPoint</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Extract content from Word and PowerPoint</h1>
+
+
+
+<div id="import-word-document" class="section level2">
+<h2>Import Word document</h2>
+<p>Function <code>docx_summary</code> is returning content of a Word document.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(officer)
+example_docx &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="dt">package =</span> <span class="st">&quot;officer&quot;</span>, <span class="st">&quot;doc_examples/example.docx&quot;</span>)
+doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>(example_docx)
+content &lt;-<span class="st"> </span><span class="kw">docx_summary</span>(doc)
+content</code></pre></div>
+<pre><code>## # A tibble: 69 × 11
+##    doc_index content_type     style_name
+##        &lt;int&gt;        &lt;chr&gt;          &lt;chr&gt;
+## 1          1    paragraph      heading 1
+## 2          2    paragraph           &lt;NA&gt;
+## 3          3    paragraph      heading 1
+## 4          4    paragraph List Paragraph
+## 5          5    paragraph List Paragraph
+## 6          6    paragraph List Paragraph
+## 7          7    paragraph      heading 2
+## 8          8    paragraph List Paragraph
+## 9          9    paragraph List Paragraph
+## 10        10    paragraph List Paragraph
+## # ... with 59 more rows, and 8 more variables: text &lt;chr&gt;, level &lt;dbl&gt;,
+## #   num_id &lt;int&gt;, row_id &lt;int&gt;, is_header &lt;lgl&gt;, cell_id &lt;dbl&gt;,
+## #   col_span &lt;dbl&gt;, row_span &lt;dbl&gt;</code></pre>
+<p>Explore the results:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
+content %&gt;%<span class="st"> </span><span class="kw">group_by</span>(content_type) %&gt;%<span class="st"> </span><span class="kw">summarise</span>(<span class="dt">n =</span> <span class="kw">n_distinct</span>(doc_index))</code></pre></div>
+<pre><code>## # A tibble: 2 × 2
+##   content_type     n
+##          &lt;chr&gt; &lt;int&gt;
+## 1    paragraph    17
+## 2   table cell     1</code></pre>
+<p>To get all paragraphs:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">par_data &lt;-<span class="st"> </span>content %&gt;%<span class="st"> </span><span class="kw">filter</span>(content_type %in%<span class="st"> &quot;paragraph&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">select</span>(doc_index, style_name, text, level, num_id) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="co"># let's make text shorter so it can be display in that vignette</span>
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">text =</span> <span class="kw">substr</span>(text, <span class="dt">start =</span> <span class="dv">1</span>, 
+                       <span class="dt">stop =</span> <span class="kw">ifelse</span>(<span class="kw">nchar</span>(text)&lt;<span class="dv">30</span>, <span class="kw">nchar</span>(text), <span class="dv">30</span>) ))
+
+par_data</code></pre></div>
+<pre><code>## # A tibble: 17 × 5
+##    doc_index     style_name                           text level num_id
+##        &lt;int&gt;          &lt;chr&gt;                          &lt;chr&gt; &lt;dbl&gt;  &lt;int&gt;
+## 1          1      heading 1                        Title 1    NA     NA
+## 2          2           &lt;NA&gt; Lorem ipsum dolor sit amet, co    NA     NA
+## 3          3      heading 1                        Title 2    NA     NA
+## 4          4 List Paragraph             Quisque tristique      1      2
+## 5          5 List Paragraph      Augue nisi, et convallis      1      2
+## 6          6 List Paragraph            Sapien mollis nec.      1      2
+## 7          7      heading 2                    Sub title 1    NA     NA
+## 8          8 List Paragraph             Quisque tristique      1      1
+## 9          9 List Paragraph      Augue nisi, et convallis      1      1
+## 10        10 List Paragraph            Sapien mollis nec.      1      1
+## 11        11           &lt;NA&gt;                                   NA     NA
+## 12        12           &lt;NA&gt; Phasellus nec nunc vitae nulla    NA     NA
+## 13        13      heading 2                    Sub title 2    NA     NA
+## 14        14           &lt;NA&gt; Morbi rhoncus sapien sit amet     NA     NA
+## 15        15           &lt;NA&gt;                                   NA     NA
+## 16        17           &lt;NA&gt;                                   NA     NA
+## 17        18           &lt;NA&gt;                                   NA     NA</code></pre>
+<div id="word-tables" class="section level3">
+<h3>Word tables</h3>
+<p>Tables are unstacked:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">table_cells &lt;-<span class="st"> </span>content %&gt;%<span class="st"> </span><span class="kw">filter</span>(content_type %in%<span class="st"> &quot;table cell&quot;</span>)
+<span class="kw">print</span>(table_cells)</code></pre></div>
+<pre><code>## # A tibble: 52 × 11
+##    doc_index content_type    style_name        text level num_id row_id
+##        &lt;int&gt;        &lt;chr&gt;         &lt;chr&gt;       &lt;chr&gt; &lt;dbl&gt;  &lt;int&gt;  &lt;int&gt;
+## 1         16   table cell Light Shading      Petals    NA     NA      1
+## 2         16   table cell Light Shading 5,621498349    NA     NA      2
+## 3         16   table cell Light Shading 4,994616997    NA     NA      3
+## 4         16   table cell Light Shading 4,767504884    NA     NA      4
+## 5         16   table cell Light Shading 6,299445616    NA     NA      5
+## 6         16   table cell Light Shading 6,489375001    NA     NA      6
+## 7         16   table cell Light Shading   5,7858682    NA     NA      7
+## 8         16   table cell Light Shading 5,645575295    NA     NA      8
+## 9         16   table cell Light Shading 4,828953215    NA     NA      9
+## 10        16   table cell Light Shading 6,783500773    NA     NA     10
+## # ... with 42 more rows, and 4 more variables: is_header &lt;lgl&gt;,
+## #   cell_id &lt;dbl&gt;, col_span &lt;dbl&gt;, row_span &lt;dbl&gt;</code></pre>
+<p>Cells positions and values are dispatched in columns <code>row_id</code>, <code>cell_id</code>, <code>text</code> and <code>is_header</code> (a logical column indicating if the cell is part of header or not). Note that content (column <code>text</code>) is a character vector.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">table_body &lt;-<span class="st"> </span>table_cells %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">filter</span>(!is_header) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">select</span>(row_id, cell_id, text)
+table_body</code></pre></div>
+<pre><code>## # A tibble: 48 × 3
+##    row_id cell_id        text
+##     &lt;int&gt;   &lt;dbl&gt;       &lt;chr&gt;
+## 1       2       1 5,621498349
+## 2       3       1 4,994616997
+## 3       4       1 4,767504884
+## 4       5       1 6,299445616
+## 5       6       1 6,489375001
+## 6       7       1   5,7858682
+## 7       8       1 5,645575295
+## 8       9       1 4,828953215
+## 9      10       1 6,783500773
+## 10     11       1 5,395076839
+## # ... with 38 more rows</code></pre>
+<p>Reshape data with columns <code>row_id</code>, <code>cell_id</code> and <code>text</code>, it’s easy to do with <code>tidyr</code> :</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">if( <span class="kw">require</span>(<span class="st">&quot;tidyr&quot;</span>))
+  table_body %&gt;%<span class="st"> </span><span class="kw">spread</span>(cell_id, text)  </code></pre></div>
+<pre><code>## Loading required package: tidyr</code></pre>
+<pre><code>## # A tibble: 12 × 5
+##    row_id         `1`         `2`         `3`         `4`
+## *   &lt;int&gt;       &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;
+## 1       2 5,621498349 29,48059578 2,462106579  18,2034091
+## 2       3 4,994616997 28,36024706 2,429320759 17,65204912
+## 3       4 4,767504884 27,25431792         AAA        &lt;NA&gt;
+## 4       5 6,299445616  25,9242382 2,066051345 18,37915478
+## 5       6 6,489375001 25,21130805 2,901582763 17,31304737
+## 6       7   5,7858682 25,52433147 2,655642742 17,07215724
+## 7       8 5,645575295 Merged cell 2,278691288  18,2902189
+## 8       9 4,828953215        &lt;NA&gt; 2,238467716 19,87376227
+## 9      10 6,783500773        &lt;NA&gt; 2,202762147 19,85326662
+## 10     11 5,395076839        &lt;NA&gt; 2,538375992 19,56545356
+## 11     12 4,683617783  29,2459239 2,601945544 18,95335451
+## 12     13 4,444226444 25,48653519 2,918513379 19,52866206</code></pre>
+<p>Getting headers requires another operation:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">if( <span class="kw">require</span>(<span class="st">&quot;tidyr&quot;</span>))
+  table_cells %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">filter</span>(is_header) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">select</span>(row_id, cell_id, text) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">spread</span>(cell_id, text)  </code></pre></div>
+<pre><code>## # A tibble: 1 × 5
+##   row_id    `1`       `2`   `3`   `4`
+## *  &lt;int&gt;  &lt;chr&gt;     &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+## 1      1 Petals Internode Sepal Bract</code></pre>
+</div>
+</div>
+<div id="import-powerpoint-document" class="section level2">
+<h2>Import PowerPoint document</h2>
+<p>Function <code>pptx_summary</code> is returning content of a PowerPoint document</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">example_pptx &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="dt">package =</span> <span class="st">&quot;officer&quot;</span>, <span class="st">&quot;doc_examples/example.pptx&quot;</span>)
+doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>(example_pptx)
+content &lt;-<span class="st"> </span><span class="kw">pptx_summary</span>(doc)
+content</code></pre></div>
+<pre><code>## # A tibble: 29 × 9
+##                 text    id content_type slide_id row_id cell_id col_span
+##                &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;   &lt;int&gt;    &lt;dbl&gt;
+## 1              Title    12    paragraph        1     NA      NA       NA
+## 2           A table     13    paragraph        1     NA      NA       NA
+## 3      and some text    13    paragraph        1     NA      NA       NA
+## 4  and some list (1)    13    paragraph        1     NA      NA       NA
+## 5  and some list (2)    13    paragraph        1     NA      NA       NA
+## 6          Header 1     18   table cell        1      1       1        1
+## 7           Header 2    18   table cell        1      1       2        1
+## 8           Header 3    18   table cell        1      1       3        1
+## 9                  A    18   table cell        1      2       1        1
+## 10             12.23    18   table cell        1      2       2        1
+## # ... with 19 more rows, and 2 more variables: row_span &lt;dbl&gt;,
+## #   magick_data &lt;list&gt;</code></pre>
+<p>Explore the results:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">content %&gt;%<span class="st"> </span><span class="kw">group_by</span>(content_type) %&gt;%<span class="st"> </span><span class="kw">summarise</span>(<span class="dt">n =</span> <span class="kw">n_distinct</span>(id))</code></pre></div>
+<pre><code>## # A tibble: 3 × 2
+##   content_type     n
+##          &lt;chr&gt; &lt;int&gt;
+## 1        image     1
+## 2    paragraph     5
+## 3   table cell     1</code></pre>
+<p>To get all paragraphs:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">par_data &lt;-<span class="st"> </span>content %&gt;%<span class="st"> </span><span class="kw">filter</span>(content_type %in%<span class="st"> &quot;paragraph&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="st">  </span><span class="kw">select</span>(id, text)
+
+par_data</code></pre></div>
+<pre><code>## # A tibble: 13 × 2
+##       id               text
+##    &lt;chr&gt;              &lt;chr&gt;
+## 1     12              Title
+## 2     13           A table 
+## 3     13      and some text
+## 4     13  and some list (1)
+## 5     13  and some list (2)
+## 6     15             R logo
+## 7      2                 Hi
+## 8      3           This is 
+## 9      3       an unordered
+## 10     3 list of paragraphs
+## 11     3                   
+## 12     3 This is an ordered
+## 13     3 list of paragraphs</code></pre>
+<p>To get an image:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">image_row &lt;-<span class="st"> </span>content %&gt;%<span class="st"> </span><span class="kw">filter</span>(content_type %in%<span class="st"> &quot;image&quot;</span>)
+<span class="kw">plot</span>(image_row$magick_data[[<span class="dv">1</span>]])</code></pre></div>
+<p><img src="data:image/png;base64,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EBAC5SEgAioPa2kSAkKggIAIqACIgkJACJSHgAioPKylSQgIgQICIqACIAoKASFQHgIioPKwliYhIAQKCIiACoAoKASEQHkIiIDKw1qahIAQKCAgAioAoqAQEALlISACKg9raRICQqCAgAioAIiCQkAIlIeACKg8rKVJCAiBAgIioAIgCgoBIVAeAiKg8rCWJiEgBAoIiIAKgCgoBIRAeQiIgMrDWpqEgBAoICACKgCioBAQAuUhIAIqD2tpEgJCoICACKgAiIJCQAiUh4AIqDyspUkICIECAiKgAiAKCgEhUB4CIqDysJYmISAECgiIgAqAKCgEhEB5CIiAysNamoSAECggIAIqAKKgEBAC5SEgAioPa2kSAkKggIAIqACIgkJACJSHgAioPKylSQgIgQICIqACIAoKASFQHgIioPKwliYhIAQKCIiACoAoKASEQHkIiIDKw1qahIAQKCAgAioAoqAQEALlISACKg9raRICQqCAgAioAIiCQkAIlIeACKg8rKVJCAiBAgIioAIgCgoBIVAeAiKg8rCWJiEgBAoIiIAKgCgoBIRAeQiIgMrDWpqEgBAoICACKgCioBAQAuUhIAIqD2tpEgJCoICACKgAiIJCQAiUh4AIqDyspUkICIECAiKgAiAKCgEhUB4CIqDysJYmISAECgiIgAqAKCgEhEB5CIiAysNamoSAECggIAIqAKKgEBAC5SEgAioPa2kSAkKggIAIqACIgkJACJSHgAioPKylSQgIgQICIqACIAoKASFQHgIioPKwliYhIAQKCIiACoAoKASEQHkIiIDKw1qahIAQKCAgAioAoqAQEALlISACKg9raRICQqCAgAioAIiCQkAIlIeACKg8rKVJCAiBAgIioAIgCgoBIVAeAiKg8rCWJiEgBAoIiIAKgCgoBIRAeQiIgMrDWpqEgBAoICACKgCioBAQAuUhIAIqD2tpEgJCoICACKgAiIJCQAiUh4AIqDyspUkICIECAiKgAiAKCgEhUB4CIqDysJYmISAECgiIgAqAKCgEhEB5CIiAysNamoSAECggIAIqAKKgEBAC5SEgAioPa2kSAkKggIAIqACIgkJACJSHgAioPKylSQgIgQICIqACIAoKASFQHgIioPKwliYhIAQKCIiACoAoKASEQHkIiIDKw1qahIAQKCAgAioAoqAQEALlISACKg9raRICQqCAgAioAIiCQkAIlIeACKg8rKVJCAiBAgIioAIgCgoBIVAeAiKg8rCWJiEgBAoIiIAKgCgoBIRAeQiIgMrDWpqEgBAoICACKgCioBAQAuUhIAIqD2tpEgJCoICACKgAiIJCQAiUh4AIqDyspUkICIECAiKgAiAKCgEhUB4CIqDysJYmISAECgiIgAqAKCgEhEB5CPx/hAqXa8WTaEwAAAAASUVORK5CYII=" /><!-- --></p>
+<div id="powerpoint-tables" class="section level3">
+<h3>PowerPoint tables</h3>
+<p>Tables are unstacked :</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">table_cells &lt;-<span class="st"> </span>content %&gt;%<span class="st"> </span><span class="kw">filter</span>(content_type %in%<span class="st"> &quot;table cell&quot;</span>)
+table_cells</code></pre></div>
+<pre><code>## # A tibble: 15 × 9
+##              text    id content_type slide_id row_id cell_id col_span
+##             &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;   &lt;int&gt;    &lt;dbl&gt;
+## 1       Header 1     18   table cell        1      1       1        1
+## 2        Header 2    18   table cell        1      1       2        1
+## 3        Header 3    18   table cell        1      1       3        1
+## 4               A    18   table cell        1      2       1        1
+## 5           12.23    18   table cell        1      2       2        1
+## 6       blah blah    18   table cell        1      2       3        1
+## 7               B    18   table cell        1      3       1        1
+## 8            1.23    18   table cell        1      3       2        1
+## 9  blah blah blah    18   table cell        1      3       3        1
+## 10              B    18   table cell        1      4       1        1
+## 11            9.0    18   table cell        1      4       2        1
+## 12          Salut    18   table cell        1      4       3        1
+## 13              C    18   table cell        1      5       1        1
+## 14              6    18   table cell        1      5       2        1
+## 15          Hello    18   table cell        1      5       3        1
+## # ... with 2 more variables: row_span &lt;dbl&gt;, magick_data &lt;list&gt;</code></pre>
+<p>Cells positions and values are dispatched in columns <code>row_id</code>, <code>cell_id</code>, <code>text</code>. Note here there is no indicator for table header.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">if( <span class="kw">require</span>(<span class="st">&quot;tidyr&quot;</span>))
+  table_cells %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">select</span>(row_id, cell_id, text) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">spread</span>(cell_id, text)  </code></pre></div>
+<pre><code>## # A tibble: 5 × 4
+##   row_id       `1`      `2`            `3`
+## *  &lt;int&gt;     &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;
+## 1      1 Header 1  Header 2       Header 3
+## 2      2         A    12.23      blah blah
+## 3      3         B     1.23 blah blah blah
+## 4      4         B      9.0          Salut
+## 5      5         C        6          Hello</code></pre>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

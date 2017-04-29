@@ -7,7 +7,7 @@
 slip_in_seqfield(x, str, style = NULL, pos = "after")
 }
 \arguments{
-\item{x}{a docx device}
+\item{x}{an rdocx object}
 
 \item{str}{seq field value}
 
@@ -17,7 +17,7 @@ slip_in_seqfield(x, str, style = NULL, pos = "after")
 "after" or "before".}
 }
 \description{
-append seq field into a paragraph of a docx object
+append seq field into a paragraph of an rdocx object
 }
 \examples{
 library(magrittr)
@@ -40,6 +40,5 @@ x <- read_docx() \%>\%
   slip_in_seqfield(str = "SYMBOL 100 \\u005Cf Wingdings",
     style = 'strong')
 
-if( has_zip() )
-  print(x, target = "seqfield.docx")
+print(x, target = "seqfield.docx")
 }

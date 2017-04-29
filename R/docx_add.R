@@ -1,15 +1,13 @@
 #' @export
 #' @title add page break
-#' @description add a page break into a docx object
-#' @param x a docx object
+#' @description add a page break into an rdocx object
+#' @param x an rdocx object
 #' @param pos where to add the new element relative to the cursor,
 #' one of "after", "before", "on".
 #' @examples
 #' library(magrittr)
 #' doc <- read_docx() %>% body_add_break()
-#'
-#' if( has_zip() )
-#'   print(doc, target = "body_add_break.docx" )
+#' print(doc, target = "body_add_break.docx" )
 body_add_break <- function( x, pos = "after"){
 
   str <- paste0(wml_with_ns("w:p"), "<w:pPr/>",
@@ -21,7 +19,7 @@ body_add_break <- function( x, pos = "after"){
 
 #' @export
 #' @title add image
-#' @description add an image into a docx object
+#' @description add an image into an rdocx object
 #' @inheritParams body_add_break
 #' @param src image filename
 #' @param style paragraph style
@@ -39,8 +37,7 @@ body_add_break <- function( x, pos = "after"){
 #'   doc <- body_add_img(x = doc, src = calendar_src, height = 2, width = 2 )
 #' }
 #'
-#' if( has_zip() )
-#'   print(doc, target = "body_add_img.docx" )
+#' print(doc, target = "body_add_img.docx" )
 #' @importFrom xml2 read_xml xml_find_first write_xml xml_add_sibling as_xml_document
 body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 
@@ -65,7 +62,7 @@ body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 
 #' @export
 #' @title add ggplot
-#' @description add a ggplot as a png image into a docx object
+#' @description add a ggplot as a png image into an rdocx object
 #' @inheritParams body_add_break
 #' @param value ggplot object
 #' @param style paragraph style
@@ -83,8 +80,7 @@ body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 #'
 #' doc <- body_add_gg(doc, value = gg_plot, style = "centered" )
 #'
-#' if( has_zip() )
-#'   print(doc, target = "body_add_gg.docx" )
+#' print(doc, target = "body_add_gg.docx" )
 body_add_gg <- function( x, value, width = 6, height = 5, style = NULL ){
   stopifnot(inherits(value, "gg") )
   file <- tempfile(fileext = ".png")
@@ -97,7 +93,7 @@ body_add_gg <- function( x, value, width = 6, height = 5, style = NULL ){
 
 #' @export
 #' @title add paragraph of text
-#' @description add a paragraph of text into a docx object
+#' @description add a paragraph of text into an rdocx object
 #' @param x a docx device
 #' @param value a character
 #' @param style paragraph style
@@ -111,8 +107,7 @@ body_add_gg <- function( x, value, width = 6, height = 5, style = NULL ){
 #'   body_add_par("Hello world!", style = "Normal") %>%
 #'   body_add_par("centered text", style = "centered")
 #'
-#' if( has_zip() )
-#'   print(doc, target = "body_add_par.docx" )
+#' print(doc, target = "body_add_par.docx" )
 #' @importFrom xml2 read_xml xml_find_first write_xml xml_add_sibling as_xml_document
 body_add_par <- function( x, value, style = NULL, pos = "after" ){
 
@@ -129,7 +124,7 @@ body_add_par <- function( x, value, style = NULL, pos = "after" ){
 
 #' @export
 #' @title add fpar
-#' @description add an \code{fpar} (a formatted paragraph) into a docx object
+#' @description add an \code{fpar} (a formatted paragraph) into an rdocx object
 #' @param x a docx device
 #' @param value a character
 #' @param pos where to add the new element relative to the cursor,
@@ -143,8 +138,7 @@ body_add_par <- function( x, value, style = NULL, pos = "after" ){
 #'               ftext(", how are you?", prop = bold_face ) )
 #' doc <- read_docx() %>% body_add_fpar(fpar_)
 #'
-#' if( has_zip() )
-#'   print(doc, target = "body_add_fpar.docx" )
+#' print(doc, target = "body_add_fpar.docx" )
 #' @importFrom xml2 read_xml xml_find_first write_xml xml_add_sibling as_xml_document
 #' @seealso \code{\link{fpar}}
 body_add_fpar <- function( x, value, pos = "after" ){
@@ -157,7 +151,7 @@ body_add_fpar <- function( x, value, pos = "after" ){
 
 #' @export
 #' @title add table
-#' @description add a table into a docx object
+#' @description add a table into an rdocx object
 #' @param x a docx device
 #' @param value a data.frame
 #' @param style table style
@@ -170,18 +164,21 @@ body_add_fpar <- function( x, value, pos = "after" ){
 #' doc <- read_docx() %>%
 #'   body_add_table(iris, style = "table_template")
 #'
-#' if( has_zip() )
-#'   print(doc, target = "body_add_table.docx" )
+#' print(doc, target = "body_add_table.docx" )
 #' @importFrom xml2 read_xml xml_find_first write_xml xml_add_sibling as_xml_document
 body_add_table <- function( x, value, style = NULL, pos = "after",
                             first_row = TRUE, first_column = FALSE,
                             last_row = FALSE, last_column = FALSE,
                             no_hband = FALSE, no_vband = TRUE ){
 
+  stopifnot(is.data.frame(value))
+
   if( is.null(style) )
     style <- x$default_styles$table
 
   style_id <- x$doc_obj$get_style_id(style=style, type = "table")
+
+  value <- characterise_df(value)
 
   xml_elt <- wml_table(value, style_id,
             first_row, last_row,
@@ -195,8 +192,8 @@ body_add_table <- function( x, value, style = NULL, pos = "after",
 
 #' @export
 #' @title add table of content
-#' @description add a table of content into a docx object
-#' @param x a docx object
+#' @description add a table of content into an rdocx object
+#' @param x an rdocx object
 #' @param level max title level of the table
 #' @param pos where to add the new element relative to the cursor,
 #' one of "after", "before", "on".
@@ -206,8 +203,7 @@ body_add_table <- function( x, value, style = NULL, pos = "after",
 #' library(magrittr)
 #' doc <- read_docx() %>% body_add_toc()
 #'
-#' if( has_zip() )
-#'   print(doc, target = "body_add_toc.docx" )
+#' print(doc, target = "body_add_toc.docx" )
 body_add_toc <- function( x, level = 3, pos = "after", style = NULL, separator = ";"){
 
   if( is.null( style )){
@@ -236,7 +232,7 @@ body_add_toc <- function( x, level = 3, pos = "after", style = NULL, separator =
 #' @title add an xml string as document element
 #' @description Add an xml string as document element in the document. This function
 #' is to be used to add custom openxml code.
-#' @param x a docx object
+#' @param x an rdocx object
 #' @param str a wml string
 #' @param pos where to add the new element relative to the cursor,
 #' one of "after", "before", "on".
@@ -269,11 +265,45 @@ body_add_xml <- function(x, str, pos){
 
 
 
+
+#' @export
+#' @importFrom uuid UUIDgenerate
+#' @title add bookmark
+#' @description Add a bookmark at the cursor location.
+#' @param x an rdocx object
+#' @param id bookmark name
+#' @examples
+#'
+#' # cursor_bookmark ----
+#' library(magrittr)
+#'
+#' doc <- read_docx() %>%
+#'   body_add_par("centered text", style = "centered") %>%
+#'   body_bookmark("text_to_replace")
+body_bookmark <- function(x, id){
+  cursor_elt <- x$doc_obj$get_at_cursor()
+  ns_ <- "xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\""
+  new_id <- UUIDgenerate()
+
+  bm_start_str <- sprintf("<w:bookmarkStart w:id=\"%s\" w:name=\"%s\" %s/>", new_id, id, ns_ )
+  bm_start_end <- sprintf("<w:bookmarkEnd %s w:id=\"%s\"/>", ns_, new_id )
+
+  path_ <- paste0( xml_path(cursor_elt), "//w:r")
+
+  node <- xml_find_first(x$doc_obj$get(), path_ )
+  xml_add_sibling(node, as_xml_document( bm_start_str ) , .where = "before")
+  xml_add_sibling(node, as_xml_document( bm_start_end ) , .where = "after")
+
+  x
+}
+
+
+
 #' @export
 #' @title remove an element
 #' @description remove element pointed by cursor from a Word document
 #' @importFrom xml2 xml_remove
-#' @param x a docx object
+#' @param x an rdocx object
 #' @examples
 #' library(officer)
 #' library(magrittr)
@@ -289,15 +319,13 @@ body_add_xml <- function(x, str, pos){
 #'   body_add_par(value = str2, style = "centered") %>%
 #'   body_add_par(value = str3, style = "Normal")
 #'
-#' if( has_zip() ){
-#'   print(my_doc, target = "init_doc.docx")
+#' print(my_doc, target = "init_doc.docx")
 #'
-#'   my_doc <- read_docx(path = "init_doc.docx")  %>%
-#'     cursor_reach(keyword = "that text") %>%
-#'     body_remove()
+#' my_doc <- read_docx(path = "init_doc.docx")  %>%
+#'   cursor_reach(keyword = "that text") %>%
+#'   body_remove()
 #'
-#'   print(my_doc, target = "result_doc.docx")
-#' }
+#' print(my_doc, target = "result_doc.docx")
 body_remove <- function(x){
   cursor_elt <- x$doc_obj$get_at_cursor()
   xml_remove(cursor_elt)
@@ -317,7 +345,7 @@ body_remove <- function(x){
 #' The function is reflecting that (complicated) Word concept, by adding an ending section
 #' attached to the paragraph where cursor is.
 #' @importFrom xml2 xml_remove
-#' @param x a docx object
+#' @param x an rdocx object
 #' @param landscape landscape orientation
 #' @param colwidths columns widths in percent, if 3 values, 3 columns will be produced.
 #' Sum of this argument should be 1.
@@ -343,8 +371,7 @@ body_remove <- function(x){
 #'   body_add_par("String 3", style = "heading 1") %>%
 #'   body_add_par(value = str3, style = "Normal")
 #'
-#' if( has_zip() )
-#'   print(my_doc, target = "body_end_section.docx")
+#' print(my_doc, target = "body_end_section.docx")
 #' @importFrom xml2 as_list
 body_end_section <- function(x, landscape = FALSE, colwidths = c(1), space = .05, sep = FALSE){
 
@@ -353,16 +380,12 @@ body_end_section <- function(x, landscape = FALSE, colwidths = c(1), space = .05
 
   last_sect <- x$doc_obj$get() %>% xml_find_first("/w:document/w:body/w:sectPr[last()]")
   section_obj <- as_list(last_sect)
+  sdim <- section_dimensions(last_sect)
 
-  h_ref <- as.integer(attr(section_obj$pgSz, "h"))
-  w_ref <- as.integer(attr(section_obj$pgSz, "w"))
-
-  mar_t <- as.integer(attr(section_obj$pgMar, "top"))
-  mar_b <- as.integer(attr(section_obj$pgMar, "bottom"))
-  mar_r <- as.integer(attr(section_obj$pgMar, "right"))
-  mar_l <- as.integer(attr(section_obj$pgMar, "left"))
-  mar_h <- as.integer(attr(section_obj$pgMar, "header"))
-  mar_f <- as.integer(attr(section_obj$pgMar, "footer"))
+  h_ref <- sdim$page["height"];w_ref <- sdim$page["width"]
+  mar_t <- sdim$margins["top"];mar_b <- sdim$margins["bottom"]
+  mar_r <- sdim$margins["right"];mar_l <- sdim$margins["left"]
+  mar_h <- sdim$margins["header"];mar_f <- sdim$margins["footer"]
 
   if( !landscape ){
     h <- h_ref
@@ -405,3 +428,4 @@ body_end_section <- function(x, landscape = FALSE, colwidths = c(1), space = .05
   xml_add_child(.x = xml_child(cursor_elt, "w:pPr"), .value = xml_elt )
   x
 }
+

@@ -1,3 +1,18 @@
+# officer 0.1.2
+
+## new features
+
+* new functions `docx_summary` and `pptx_summary` to import content of an Office document into a tidy data.frame.
+* new function `docx_dim()` is returning current page dimensions.
+* new functions `set_doc_properties` and `doc_properties` to let you modify/access metadata of Word and PowerPoint documents.
+* cursor can now reach paragraphs with a bookmark (functions `body_bookmark` and `cursor_bookmark`).
+* Content can be inserted at any arbitrary location in PowerPoint (functions `ph_empty_at`, `ph_with_img_at` and `ph_with_table_at`).
+
+## Issues
+
+* cast all columns of data.frame as character when using ph_with_table and body_add_table
+* fix pptx when more than 9 slides
+
 # officer 0.1.1
 
 ## Enhancement

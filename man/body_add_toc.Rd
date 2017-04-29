@@ -7,7 +7,7 @@
 body_add_toc(x, level = 3, pos = "after", style = NULL, separator = ";")
 }
 \arguments{
-\item{x}{a docx object}
+\item{x}{an rdocx object}
 
 \item{level}{max title level of the table}
 
@@ -19,12 +19,11 @@ one of "after", "before", "on".}
 \item{separator}{optional. Some configurations need "," (i.e. from Canada) separator instead of ";"}
 }
 \description{
-add a table of content into a docx object
+add a table of content into an rdocx object
 }
 \examples{
 library(magrittr)
 doc <- read_docx() \%>\% body_add_toc()
 
-if( has_zip() )
-  print(doc, target = "body_add_toc.docx" )
+print(doc, target = "body_add_toc.docx" )
 }

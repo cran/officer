@@ -15,7 +15,7 @@ body_add_fpar(x, value, pos = "after")
 one of "after", "before", "on".}
 }
 \description{
-add an \code{fpar} (a formatted paragraph) into a docx object
+add an \code{fpar} (a formatted paragraph) into an rdocx object
 }
 \examples{
 library(magrittr)
@@ -26,8 +26,7 @@ fpar_ <- fpar(ftext("Hello ", prop = bold_face),
               ftext(", how are you?", prop = bold_face ) )
 doc <- read_docx() \%>\% body_add_fpar(fpar_)
 
-if( has_zip() )
-  print(doc, target = "body_add_fpar.docx" )
+print(doc, target = "body_add_fpar.docx" )
 }
 \seealso{
 \code{\link{fpar}}

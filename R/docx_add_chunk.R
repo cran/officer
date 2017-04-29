@@ -1,7 +1,7 @@
 #' @export
 #' @title append seq field
-#' @description append seq field into a paragraph of a docx object
-#' @param x a docx device
+#' @description append seq field into a paragraph of an rdocx object
+#' @param x an rdocx object
 #' @param str seq field value
 #' @param style text style
 #' @param pos where to add the new element relative to the cursor,
@@ -27,8 +27,7 @@
 #'   slip_in_seqfield(str = "SYMBOL 100 \u005Cf Wingdings",
 #'     style = 'strong')
 #'
-#' if( has_zip() )
-#'   print(x, target = "seqfield.docx")
+#' print(x, target = "seqfield.docx")
 slip_in_seqfield <- function( x, str, style = NULL, pos = "after" ){
 
   if( is.null(style) )
@@ -63,8 +62,8 @@ slip_in_seqfield <- function( x, str, style = NULL, pos = "after" ){
 
 #' @export
 #' @title append text
-#' @description append text into a paragraph of a docx object
-#' @param x a docx device
+#' @description append text into a paragraph of an rdocx object
+#' @param x an rdocx object
 #' @param str text
 #' @param style text style
 #' @param pos where to add the new element relative to the cursor,
@@ -76,8 +75,7 @@ slip_in_seqfield <- function( x, str, style = NULL, pos = "after" ){
 #'   slip_in_text("world", style = "strong") %>%
 #'   slip_in_text("Message is", style = "strong", pos = "before")
 #'
-#' if( has_zip() )
-#'   print(x, target = "append_run.docx")
+#' print(x, target = "append_run.docx")
 slip_in_text <- function( x, str, style = NULL, pos = "after" ){
 
   if( is.null(style) )
@@ -93,8 +91,8 @@ slip_in_text <- function( x, str, style = NULL, pos = "after" ){
 
 #' @export
 #' @title append an image
-#' @description append an image into a paragraph of a docx object
-#' @param x a docx device
+#' @description append an image into a paragraph of an rdocx object
+#' @param x an rdocx object
 #' @param src image filename
 #' @param style text style
 #' @param width height in inches
@@ -109,8 +107,7 @@ slip_in_text <- function( x, str, style = NULL, pos = "after" ){
 #'   body_add_par("R logo: ", style = "Normal") %>%
 #'   slip_in_img(src = img.file, style = "strong", width = .3, height = .3)
 #'
-#' if( has_zip() )
-#'   print(x, target = "append_img.docx")
+#' print(x, target = "append_img.docx")
 slip_in_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 
   if( is.null(style) )
@@ -139,7 +136,7 @@ slip_in_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 #' @importFrom xml2 as_xml_document xml_find_first xml_add_child
 #' @description The function add a wml string into
 #' the document after, before or on a cursor location.
-#' @param x a docx object
+#' @param x an rdocx object
 #' @param str a wml string
 #' @param pos where to add the new element relative to the cursor,
 #' "after" or "before".

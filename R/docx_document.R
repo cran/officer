@@ -13,6 +13,7 @@ docx_document <- R6Class(
       super$feed(file.path(private$package_dir, "word/document.xml"))
       private$cursor <- "/w:document/w:body/*[1]"
       private$styles_df <- private$read_styles()
+      private$doc_properties <- core_properties$new(private$package_dir)
     },
 
     package_dirname = function(){
@@ -45,7 +46,9 @@ docx_document <- R6Class(
       node
     },
 
-
+    get_doc_properties = function(){
+      private$doc_properties
+    },
     cursor_begin = function( ){
       private$cursor <- "/w:document/w:body/*[1]"
       self
@@ -58,12 +61,43 @@ docx_document <- R6Class(
       self
     },
 
-    cursor_reach = function( keyword ){
-      xpath_ <- sprintf("/w:document/w:body/*[contains(.//*/w:t/text(),'%s')]", keyword)
-      cursor <- xml_find_first(self$get(), xpath_) %>% xml_path()
-      if( inherits(cursor, "xml_missing") )
-        stop(keyword, " has not been found in the document", call. = FALSE)
+    cursor_bookmark = function( id ){
+      xpath_ <- sprintf("//w:bookmarkStart[@w:name='%s']", id)
+      bm_start <- xml_find_first(self$get(), xpath_)
+
+      if( inherits(bm_start, "xml_missing") )
+        stop("cannot find bookmark ", shQuote(id), call. = FALSE)
+
+      bm_id <- xml_attr(bm_start, "id")
+
+      xpath_ <- sprintf("/w:document/w:body/*[w:bookmarkStart[@w:id='%s']]", bm_id)
+      par_with_bm <- xml_find_first(self$get(), xpath_)
+
+      cursor <- xml_path(par_with_bm)
+
+      xpath_ <- paste0( cursor, sprintf("/w:bookmarkEnd[@w:id='%s']", bm_id) )
+      nodes_with_bm_end <- xml_find_first(self$get(), xpath_)
+      if( inherits(nodes_with_bm_end, "xml_missing") )
+        stop("bookmark ", shQuote(id), " does not end in the same paragraph (or is on the whole paragraph)", call. = FALSE)
+
+      cursor <- cursor
       private$cursor <- cursor
+      self
+    },
+
+    cursor_reach = function( keyword ){
+      nodes_with_text <- xml_find_all(self$get(),"/w:document/w:body/*[.//*/text()]")
+
+      if( length(nodes_with_text) < 1 )
+        stop("no text found in the document", call. = FALSE)
+
+      text_ <- xml_text(nodes_with_text)
+      test_ <- grepl(pattern = keyword, x = text_)
+      if( !any(test_) )
+        stop(keyword, " has not been found in the document", call. = FALSE)
+
+      node <- nodes_with_text[[ which(test_)[1] ]]
+      private$cursor <- xml_path(node)
       self
     },
 
@@ -72,7 +106,6 @@ docx_document <- R6Class(
       private$cursor <- xml_find_first(self$get(), xpath_ ) %>% xml_path()
       self
     },
-
 
     cursor_backward = function( ){
       xpath_ <- paste0(private$cursor, "/preceding-sibling::*[1]" )
@@ -85,6 +118,7 @@ docx_document <- R6Class(
     package_dir = NULL,
     cursor = NULL,
     styles_df = NULL,
+    doc_properties = NULL,
 
 
     read_styles = function(  ){
@@ -102,20 +136,6 @@ docx_document <- R6Class(
 
       all_desc
     }
-    # , read_core = function(  ){
-    #   core_file <- file.path(private$package_dir, "docProps/core.xml")
-    #   doc <- read_xml(core_file)
-    #
-    #   all_ <- xml_find_all(doc, "/cp:coreProperties/*")
-    #   ns_ <- xml_ns(doc)
-    #   all_desc <- tibble(
-    #     tag_ns = all_ %>% xml_name(ns = ns_),
-    #     tag = all_ %>% xml_name(),
-    #     value = all_ %>% xml_text()
-    #   )
-    #
-    #   all_desc
-    # }
 
   )
 

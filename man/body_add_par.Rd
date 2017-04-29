@@ -17,7 +17,7 @@ body_add_par(x, value, style = NULL, pos = "after")
 one of "after", "before", "on".}
 }
 \description{
-add a paragraph of text into a docx object
+add a paragraph of text into an rdocx object
 }
 \examples{
 library(magrittr)
@@ -27,6 +27,5 @@ doc <- read_docx() \%>\%
   body_add_par("Hello world!", style = "Normal") \%>\%
   body_add_par("centered text", style = "centered")
 
-if( has_zip() )
-  print(doc, target = "body_add_par.docx" )
+print(doc, target = "body_add_par.docx" )
 }

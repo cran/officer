@@ -8,7 +8,7 @@ body_end_section(x, landscape = FALSE, colwidths = c(1), space = 0.05,
   sep = FALSE)
 }
 \arguments{
-\item{x}{a docx object}
+\item{x}{an rdocx object}
 
 \item{landscape}{landscape orientation}
 
@@ -49,6 +49,5 @@ my_doc <- read_docx()  \%>\%
   body_add_par("String 3", style = "heading 1") \%>\%
   body_add_par(value = str3, style = "Normal")
 
-if( has_zip() )
-  print(my_doc, target = "body_end_section.docx")
+print(my_doc, target = "body_end_section.docx")
 }

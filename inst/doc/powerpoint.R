@@ -90,6 +90,21 @@ print(doc, target = "assets/pptx/ph_with_img.pptx") %>%
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_img.pptx" ) )
 
 ## ------------------------------------------------------------------------
+img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
+
+doc <- read_pptx() %>%
+  add_slide(layout = "Title and Content", master = "Office Theme") %>%
+  ph_with_text(type = "title", str = "A image") %>%
+  ph_with_img_at(src = img.file, left = 3, top = 4, 
+                 height = 1.06, width = 1.39, rot = 45 )
+
+print(doc, target = "assets/pptx/ph_with_img_at.pptx") %>% 
+  invisible()
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_img_at.pptx" ) )
+
+## ------------------------------------------------------------------------
 doc <- read_pptx() 
 doc <- doc %>%
   add_slide(layout = "Title and Content", master = "Office Theme") %>%
@@ -100,6 +115,19 @@ print(doc, target = "assets/pptx/ph_with_table.pptx") %>%
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_table.pptx" ) )
+
+## ------------------------------------------------------------------------
+doc <- read_pptx() 
+doc <- doc %>%
+  add_slide(layout = "Title and Content", master = "Office Theme") %>%
+  ph_with_table_at(value = head(mtcars), left = 1, top = 3, 
+                 height = 7, width = 7 )
+
+print(doc, target = "assets/pptx/ph_with_table_at.pptx") %>% 
+  invisible()
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_table_at.pptx" ) )
 
 ## ------------------------------------------------------------------------
 slide_summary(doc)

@@ -7,7 +7,7 @@
 slip_in_text(x, str, style = NULL, pos = "after")
 }
 \arguments{
-\item{x}{a docx device}
+\item{x}{an rdocx object}
 
 \item{str}{text}
 
@@ -17,7 +17,7 @@ slip_in_text(x, str, style = NULL, pos = "after")
 "after" or "before".}
 }
 \description{
-append text into a paragraph of a docx object
+append text into a paragraph of an rdocx object
 }
 \examples{
 library(magrittr)
@@ -26,6 +26,5 @@ x <- read_docx() \%>\%
   slip_in_text("world", style = "strong") \%>\%
   slip_in_text("Message is", style = "strong", pos = "before")
 
-if( has_zip() )
-  print(x, target = "append_run.docx")
+print(x, target = "append_run.docx")
 }

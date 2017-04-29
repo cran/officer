@@ -32,6 +32,9 @@ read_pptx <- function( path = NULL ){
 
   obj$slide <- dir_slide$new(obj )
   obj$content_type <- content_type$new(obj )
+
+  obj$core_properties <- core_properties$new(obj$package_dir)
+
   obj$cursor = obj$slide$length()
   obj
 }
@@ -51,7 +54,7 @@ read_table_style <- function(path){
 #' @rdname read_pptx
 #' @examples
 #' # write a rdocx object in a docx file ----
-#' if( require(magrittr) && has_zip() ){
+#' if( require(magrittr) ){
 #'   read_pptx() %>% print(target = "out.pptx")
 #'   # full path of produced file is returned
 #'   print(.Last.value)
@@ -70,6 +73,11 @@ print.rpptx <- function(x, target = NULL, ...){
 
   x$presentation$save()
   x$content_type$save()
+
+  x$core_properties$set_last_modified(format( Sys.time(), "%Y-%m-%dT%H:%M:%SZ"))
+  x$core_properties$set_modified_by(Sys.getenv("USER"))
+  x$core_properties$save()
+
   pack_folder(folder = x$package_dir, target = target )
 }
 
@@ -93,6 +101,8 @@ add_slide <- function( x, layout, master ){
 
   filter_criteria <- interp(~ name == layout & master_name == master, layout = layout, master = master)
   slide_info <- filter_(x$slideLayouts$get_metadata(), filter_criteria)
+  if( nrow( slide_info ) < 1 )
+    stop("could not find layout named ", shQuote(layout), " in master named ", shQuote(master))
   new_slidename <- x$slide$get_new_slidename()
 
   xml_file <- file.path(x$package_dir, "ppt/slides", new_slidename)
@@ -149,8 +159,7 @@ length.rpptx <- function( x ){
 #' doc <- on_slide( doc, index = 3)
 #' doc <- ph_with_text(x = doc, type = "title", str = "Third title")
 #'
-#' if( has_zip() )
-#'   print(doc, target = "on_slide.pptx" )
+#' print(doc, target = "on_slide.pptx" )
 on_slide <- function( x, index ){
 
   l_ <- length(x)
@@ -206,7 +215,7 @@ remove_slide <- function( x, index = NULL ){
 #' @title presentation layouts summary
 #' @description get informations about slide layouts and
 #' master layouts into a data.frame.
-#' @param x a pptx object
+#' @param x rpptx object
 #' @examples
 #' my_pres <- read_pptx()
 #' layout_summary ( x = my_pres )
@@ -252,9 +261,10 @@ layout_properties <- function( x, layout = NULL, master = NULL ){
 
 
 #' @export
-#' @title slide summary
-#' @description get informations about current slide
-#' into a data.frame.
+#' @title get PowerPoint slide content in a tidy format
+#' @description get content and positions of current slide
+#' into a data.frame. If any table, image or paragraph, data is
+#' imported into the resulting data.frame.
 #' @param x rpptx object
 #' @param index slide index
 #' @examples
@@ -267,6 +277,7 @@ layout_properties <- function( x, layout = NULL, master = NULL ){
 #'
 #' slide_summary(my_pres)
 #' slide_summary(my_pres, index = 1)
+#' @importFrom purrr map2_df
 slide_summary <- function( x, index = NULL ){
 
   l_ <- length(x)
@@ -285,8 +296,7 @@ slide_summary <- function( x, index = NULL ){
   str = "p:cSld/p:spTree/*[self::p:sp or self::p:graphicFrame or self::p:grpSp or self::p:pic]"
   nodes <- xml_find_all(slide$get(), str)
   data <- read_xfrm(nodes, file = "slide", name = "" )
-  data$text <- xml_text(nodes)
-
+  data$text <- map_chr(nodes, xml_text )
   select_(data, "-name", "-file", "-ph")
 }
 

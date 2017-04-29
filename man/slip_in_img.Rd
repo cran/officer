@@ -7,7 +7,7 @@
 slip_in_img(x, src, style = NULL, width, height, pos = "after")
 }
 \arguments{
-\item{x}{a docx device}
+\item{x}{an rdocx object}
 
 \item{src}{image filename}
 
@@ -21,7 +21,7 @@ slip_in_img(x, src, style = NULL, width, height, pos = "after")
 "after" or "before".}
 }
 \description{
-append an image into a paragraph of a docx object
+append an image into a paragraph of an rdocx object
 }
 \examples{
 library(magrittr)
@@ -30,6 +30,5 @@ x <- read_docx() \%>\%
   body_add_par("R logo: ", style = "Normal") \%>\%
   slip_in_img(src = img.file, style = "strong", width = .3, height = .3)
 
-if( has_zip() )
-  print(x, target = "append_img.docx")
+print(x, target = "append_img.docx")
 }

@@ -21,7 +21,7 @@ one of "after", "before", "on".}
 \item{first_row, last_row, first_column, last_column, no_hband, no_vband}{logical for Word table options}
 }
 \description{
-add a table into a docx object
+add a table into an rdocx object
 }
 \examples{
 library(magrittr)
@@ -29,6 +29,5 @@ library(magrittr)
 doc <- read_docx() \%>\%
   body_add_table(iris, style = "table_template")
 
-if( has_zip() )
-  print(doc, target = "body_add_table.docx" )
+print(doc, target = "body_add_table.docx" )
 }

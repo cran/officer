@@ -39,8 +39,9 @@ read_docx <- function( path = NULL ){
 #' @param ... unused
 #' @rdname read_docx
 #' @examples
+#' print(read_docx())
 #' # write a rdocx object in a docx file ----
-#' if( require(magrittr) && has_zip() ){
+#' if( require(magrittr) ){
 #'   read_docx() %>% print(target = "out.docx")
 #'   # full path of produced file is returned
 #'   print(.Last.value)
@@ -52,8 +53,17 @@ print.rdocx <- function(x, target = NULL, ...){
 
   if( is.null( target) ){
     cat("rdocx document with", length(x), "element(s)\n")
-    cat("Available styles are:\n")
-    print(as.data.frame(select_( styles_info(x), "style_type", "style_name")))
+    cat("\n* styles:\n")
+
+    style_names <- select_( styles_info(x), "style_type", "style_name")
+    style_sample <- style_names$style_type
+    names(style_sample) <- style_names$style_name
+    print(style_sample)
+
+
+    cursor_elt <- x$doc_obj$get_at_cursor()
+    cat("\n* Content at cursor location:\n")
+    print(node_content(cursor_elt, x))
     return(invisible())
   }
 
@@ -66,8 +76,14 @@ print.rdocx <- function(x, target = NULL, ...){
     xml_attr(x, "id") <- z
     x
   })
+
   x$doc_obj$save()
   x$content_type$save()
+
+  # save doc properties
+  x$doc_obj$get_doc_properties()$set_last_modified(format( Sys.time(), "%Y-%m-%dT%H:%M:%SZ"))
+  x$doc_obj$get_doc_properties()$set_modified_by(Sys.getenv("USER"))
+  x$doc_obj$get_doc_properties()$save()
 
   pack_folder(folder = x$doc_obj$package_dirname(), target = target )
 }
@@ -96,4 +112,67 @@ styles_info <- function( x ){
   x$doc_obj$styles()
 }
 
+#' @export
+#' @title read document properties
+#' @description read Word or PowerPoint document properties
+#' and get results in a tidy data.frame.
+#' @param x an \code{rdocx} or \code{rpptx} object
+#' @examples
+#' library(magrittr)
+#' read_docx() %>% doc_properties()
+doc_properties <- function( x ){
+  if( inherits(x, "rdocx"))
+    cp <- x$doc_obj$get_doc_properties()
+  else if( inherits(x, "rpptx")) cp <- x$core_properties
+  else stop("x should be a rpptx or rdocx object.")
 
+  cp$get_data()
+}
+
+#' @export
+#' @title set document properties
+#' @description set Word or PowerPoint document properties. These are not visible
+#' in the document but are available as metadata of the document.
+#' @note
+#' Fields "last modified" and "last modified by" will be automatically be updated
+#' when file will be written.
+#' @param x a rdocx or rpptx object
+#' @param title,subject,creator,description text fields
+#' @param created a date object
+#' @examples
+#' library(magrittr)
+#' read_docx() %>% set_doc_properties(title = "title",
+#'   subject = "document subject", creator = "Me me me",
+#'   description = "this document is empty",
+#'   created = Sys.time()) %>% doc_properties()
+set_doc_properties <- function( x, title = NULL, subject = NULL,
+                                creator = NULL, description = NULL, created = NULL ){
+
+  if( inherits(x, "rdocx"))
+    cp <- x$doc_obj$get_doc_properties()
+  else if( inherits(x, "rpptx")) cp <- x$core_properties
+  else stop("x should be a rpptx or rdocx object.")
+
+  if( !is.null(title) ) cp$set_title(title)
+  if( !is.null(subject) ) cp$set_subject(subject)
+  if( !is.null(creator) ) cp$set_creator(creator)
+  if( !is.null(description) ) cp$set_description(description)
+  if( !is.null(created) ) cp$set_created(format( created, "%Y-%m-%dT%H:%M:%SZ"))
+
+  x
+}
+
+
+#' @export
+#' @title Word page layout
+#' @description get page width, page height and margins. The return values
+#' are those corresponding to the section where the cursor is.
+#' @param x a \code{rdocx} object
+#' @examples
+#' docx_dim(read_docx())
+docx_dim <- function(x){
+  cursor_elt <- x$doc_obj$get_at_cursor()
+  xpath_ <- file.path( xml_path(cursor_elt), "following-sibling::w:sectPr")
+  next_section <- xml_find_first(x$doc_obj$get(), xpath_)
+  section_dimensions(next_section)
+}
