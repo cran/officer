@@ -1,6 +1,6 @@
-cb3217ba8e435bab7b021371bafebff4 *DESCRIPTION
-e4779b184eadd34a9fa3f7fd9467686c *NAMESPACE
-fc31e741b701fe312b694f8c6ccd8cdc *NEWS
+63cf615721711aeeb9117f3d742aa9df *DESCRIPTION
+0c302661c57119a973087261ad1106c4 *NAMESPACE
+000414ca9fd256114a4e848587d2376a *NEWS
 f514a47710d76e765f78d3bb1cf52ce9 *R/RcppExports.R
 cac27eb376223c432e223c79b3da09c8 *R/core_properties.R
 98a04f87cd2f9671e235209e08e02cd6 *R/cot_objects.R
@@ -10,7 +10,7 @@ cac27eb376223c432e223c79b3da09c8 *R/core_properties.R
 99426f7c3e5b27c6f3ada326e40c1b61 *R/docx_document.R
 5044aafaa9cb1ebc8d544642b047f816 *R/docx_img.R
 4a996815488b8338fd82fc5012cc9750 *R/fortify_docx.R
-92d243c867dd2a693b86f2f5cf25e254 *R/fortify_pptx.R
+00ea646d489d78d9f67e9eda1af31f5f *R/fortify_pptx.R
 cb1cf7fa44b83ea1c7488eb9b9c1938f *R/fp_border.R
 b0d00160fa24ecf38e3d5b205a72ac4c *R/fp_cell.R
 2387a8c700c8afc3240bc081bc238911 *R/fp_checkers.R
@@ -27,16 +27,16 @@ fe38f1028d9196e830d527a5754808f8 *R/ppt_ph_manipulate.R
 760280effcf89792139dbfea4d5e420a *R/ppt_ph_with_at.R
 f5711f99e82ea144bb00b006aaf00d4e *R/ppt_table_shape.R
 20deb399a64868065d0464614a3bfc7f *R/rcpp.R
-05251e0c660c47312d048616768bcee8 *R/read_docx.R
+861a5973c95f287611a21a2cc2f1887f *R/read_docx.R
 e67f10f14b31f98b6fceba873f9639b9 *R/read_pptx.R
 6d38fee8db6b219e762046ce3edb3999 *R/relationship.R
 22a8cc6223aedbe99b2f21c9b16e009e *R/shorcuts.R
 79c9e00d5456b57dc9c918b329a2e65f *R/utils.R
 cea6c16f0b40e96ef099311ce519fa31 *README.md
 83a354eda6b840cb91417188053108dc *build/vignette.rds
-2ad2bfdc60ad74533b335c2ecef389a3 *inst/doc/officer_reader.R
-78ecd549c9ef6e8a7489fe77530938b6 *inst/doc/officer_reader.Rmd
-5b7f8f39d1a4960fe746c8393c255e91 *inst/doc/officer_reader.html
+328ab644227723b923dfbaa8bbdfa25c *inst/doc/officer_reader.R
+8e70f396bf17c475601d4ed3ee89c0a9 *inst/doc/officer_reader.Rmd
+673aa16538ff9821011df1318feb5ddf *inst/doc/officer_reader.html
 aa3bda74f2a7e1f8cdf609408ace54bf *inst/doc/powerpoint.R
 9343dc69ce82013ce03a177761a0906b *inst/doc/powerpoint.Rmd
 68034a88551b7b31e8f53254d8cd5ef6 *inst/doc/powerpoint.html
@@ -62,7 +62,7 @@ d85103dcfe4d4dcb564cd3d606361a4f *man/body_bookmark.Rd
 2863ef6f3f142792f466231f0bcdf06a *man/color_scheme.Rd
 6b188d9f3eb795ef216eaea47d296e4f *man/cursor.Rd
 336ef6b70181d4663c0c6cf074f0989a *man/doc_properties.Rd
-b08f87adb5ff7eda3f4eeb35231f03b9 *man/docx_dim.Rd
+88a79870506d5a7db5894d6adac4f1fe *man/docx_dim.Rd
 5bb71c8a6dc4a1948c4ed22a9a635379 *man/docx_reference_img.Rd
 54450e52956be66be9742e3c0a279051 *man/docx_summary.Rd
 2eca758913a72a0a70820e62bf1bd79f *man/external_img.Rd
@@ -75,6 +75,7 @@ db20e0cb7d8424f18bb5fb4c78cafebe *man/fp_sign.Rd
 2eea3372cc3d8eaf6232a1d36d38ab32 *man/ftext.Rd
 bc05c28e71de4209949a7a7d96346c30 *man/layout_properties.Rd
 e996487d76199bd0981cd14c3712823b *man/layout_summary.Rd
+1d987cc2a31eba993bafcc40f08fd84e *man/media_extract.Rd
 629dbabd53781451f0ba78fc47bd943f *man/on_slide.Rd
 81a65423dd5c8bdc17c3364c3271f90d *man/pack_folder.Rd
 923630233e2712430b373e05ebdf4d2e *man/ph_add_fpar.Rd
@@ -140,6 +141,8 @@ bf7474ef1268bc83653d3ce587d269ca *tests/testthat/test-pptx-selections.R
 2fbd26db4757c7779b0b2f21c1ecf820 *tests/testthat/test-pptx-table.R
 ff7daf51f89d8a3d69e1dfbec57e4346 *tests/testthat/test-properties.R
 b4d5524a826351780e912f3ac3f4a35a *tests/testthat/utils.R
-78ecd549c9ef6e8a7489fe77530938b6 *vignettes/officer_reader.Rmd
+855889e2c3135d4a30978ee1547c4bf4 *vignettes/extract.png
+d41d8cd98f00b204e9800998ecf8427e *vignettes/image1.png
+8e70f396bf17c475601d4ed3ee89c0a9 *vignettes/officer_reader.Rmd
 9343dc69ce82013ce03a177761a0906b *vignettes/powerpoint.Rmd
 ed458e650da1c0be7ca13f8b72942e64 *vignettes/word.Rmd

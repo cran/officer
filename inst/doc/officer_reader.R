@@ -56,7 +56,7 @@ par_data
 
 ## ------------------------------------------------------------------------
 image_row <- content %>% filter(content_type %in% "image")
-plot(image_row$magick_data[[1]])
+media_extract(doc, path = image_row$media_file, target = "extract.png")
 
 ## ---- message=FALSE, warning=FALSE---------------------------------------
 table_cells <- content %>% filter(content_type %in% "table cell")
