@@ -68,6 +68,7 @@ body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 #' @param style paragraph style
 #' @param width height in inches
 #' @param height height in inches
+#' @param ... Arguments to be passed to png function.
 #' @importFrom grDevices png dev.off
 #' @import ggplot2
 #' @examples
@@ -81,14 +82,14 @@ body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 #' doc <- body_add_gg(doc, value = gg_plot, style = "centered" )
 #'
 #' print(doc, target = "body_add_gg.docx" )
-body_add_gg <- function( x, value, width = 6, height = 5, style = NULL ){
+body_add_gg <- function( x, value, width = 6, height = 5, style = NULL, ... ){
   stopifnot(inherits(value, "gg") )
   file <- tempfile(fileext = ".png")
-  png(filename = file, width = width, height = height, units = "in", res = 300)
+  png(filename = file, width = width, height = height, units = "in", res = 300, ...)
   print(value)
   dev.off()
   on.exit(unlink(file))
-  body_add_img(x, src = file, style = style, width = 6, height = 5)
+  body_add_img(x, src = file, style = style, width = width, height = height)
 }
 
 #' @export
@@ -328,8 +329,10 @@ body_bookmark <- function(x, id){
 #' print(my_doc, target = "result_doc.docx")
 body_remove <- function(x){
   cursor_elt <- x$doc_obj$get_at_cursor()
+  x$doc_obj$cursor_forward()
+  new_cursor_elt <- x$doc_obj$get_at_cursor()
   xml_remove(cursor_elt)
-  x <- cursor_forward(x)
+  x$doc_obj$set_cursor(xml_path(new_cursor_elt))
   x
 }
 
@@ -425,7 +428,12 @@ body_end_section <- function(x, landscape = FALSE, colwidths = c(1), space = .05
   xml_elt <- as_xml_document(str)
 
   cursor_elt <- x$doc_obj$get_at_cursor()
-  xml_add_child(.x = xml_child(cursor_elt, "w:pPr"), .value = xml_elt )
+  if( xml_name(cursor_elt) == "p" )
+    last_pPr <- xml_child(cursor_elt, "w:pPr")
+  else {
+    stop("ending a section can only happen on a paragraph, the cursor is located on a ", xml_name(cursor_elt), ", you may have to add an empty paragraph.")
+  }
+  xml_add_child(.x = last_pPr, .value = xml_elt )
   x
 }
 

@@ -93,7 +93,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>Use the function <code>read_pptx</code> to create an r object representing a PowerPoint document. Initial PowerPoint file can be specified with argument <code>path</code>. If none is provided, this file will be an empty document located in the package directory. Formats and available slide layouts will be those available in the template file.</p>
+<p>Use the function <code>read_pptx</code> to create an r object representing a PowerPoint document. Initial PowerPoint file can be specified with argument <code>path</code>. If none is provided, this file will be an empty document located in the package directory. Formats and available slide layouts will be those available in the template file. Content of original document is also preserved (but can be manipulated, i.e. delete a slide).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() </code></pre></div>
 <div id="add-a-slide" class="section level3">
 <h3>Add a slide</h3>
@@ -107,20 +107,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>)</code></pre></div>
 <p><strong><code>layout</code> and <code>master</code> values must match values from the initial document.</strong> Layout names and master layout names are not available in a tidy view within PowerPoint, but theses can be read easily with function <code>layout_summary</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">layout_summary</span>(my_pres)</code></pre></div>
-<pre><code>## # A tibble: 11 × 2
-##                     layout       master
-##                      &lt;chr&gt;        &lt;chr&gt;
-## 1              Title Slide Office Theme
-## 2  Title and Vertical Text Office Theme
-## 3  Vertical Title and Text Office Theme
-## 4        Title and Content Office Theme
-## 5           Section Header Office Theme
-## 6              Two Content Office Theme
-## 7               Comparison Office Theme
-## 8               Title Only Office Theme
-## 9                    Blank Office Theme
-## 10    Content with Caption Office Theme
-## 11    Picture with Caption Office Theme</code></pre>
+<pre><code>## # A tibble: 7 x 2
+##              layout       master
+##               &lt;chr&gt;        &lt;chr&gt;
+## 1       Title Slide Office Theme
+## 2 Title and Content Office Theme
+## 3    Section Header Office Theme
+## 4       Two Content Office Theme
+## 5        Comparison Office Theme
+## 6        Title Only Office Theme
+## 7             Blank Office Theme</code></pre>
 <div id="master-layouts-and-slide-layouts" class="section level4">
 <h4>master layouts and slide layouts</h4>
 <p><code>officer</code> uses a PowerPoint file as initial document. This is the original PowerPoint document where all slides layouts, shapes (placeholders) and styles come from. Major points to be aware of are:</p>
@@ -133,7 +129,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="add-text-content-into-a-placeholder" class="section level3">
 <h3>Add text content into a placeholder</h3>
-<p>Use function <code>ph_with_text</code> to add text into a new shape. The type of the shape is defined in the slide layout associated to the current slide.</p>
+<p>Use function <code>ph_with_text</code> to add text into a new shape. The type of the shape is defined in the slide layout associated to the current slide, for example, using <code>type = &quot;title&quot;</code> will create a title shape in the slide.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span>my_pres %&gt;%<span class="st"> </span>
 <span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;title&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A title&quot;</span>) %&gt;%
 <span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;ftr&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A footer&quot;</span>) %&gt;%
@@ -144,7 +140,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>Function <code>layout_properties</code> provides details about available shapes of a slide layout:</p>
 </blockquote>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">layout_properties</span> ( <span class="dt">x =</span> my_pres, <span class="dt">layout =</span> <span class="st">&quot;Two Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span> ) %&gt;%<span class="st"> </span><span class="kw">head</span>()</code></pre></div>
-<pre><code>## # A tibble: 6 × 7
+<pre><code>## # A tibble: 6 x 7
 ##    master_name        name   type     offx      offy       cx        cy
 ##          &lt;chr&gt;       &lt;chr&gt;  &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
 ## 1 Office Theme Two Content  title 0.500000 0.3003478 9.000000 1.2500000
@@ -281,7 +277,7 @@ doc &lt;-<span class="st"> </span>doc %&gt;%
 <h2>Remove content from a slide</h2>
 <p>Use <code>slide_summary</code> to easily identify shapes in the slide that can be removed.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">slide_summary</span>(doc)</code></pre></div>
-<pre><code>## # A tibble: 1 × 7
+<pre><code>## # A tibble: 1 x 7
 ##    type    id  offx  offy    cx    cy
 ##   &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
 ## 1  body     2    NA    NA    NA    NA

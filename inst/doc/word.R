@@ -19,34 +19,69 @@ library(magrittr)
 
 ## ------------------------------------------------------------------------
 my_doc <- read_docx() 
-
-# display styles
 styles_info(my_doc)
 
-## ------------------------------------------------------------------------
+## ----results='hide'------------------------------------------------------
 src <- tempfile(fileext = ".png")
 png(filename = src, width = 5, height = 6, units = 'in', res = 300)
 barplot(1:10, col = 1:10)
 dev.off()
 
+## ----results='hide'------------------------------------------------------
 my_doc <- my_doc %>% 
-  body_add_img(src = src, width = 5, height = 6, style = "centered")
-
-## ------------------------------------------------------------------------
-my_doc <- my_doc %>% 
+  body_add_img(src = src, width = 5, height = 6, style = "centered") %>% 
   body_add_par("Hello world!", style = "Normal") %>% 
-  body_add_par("", style = "Normal") # blank paragraph
-
-## ------------------------------------------------------------------------
-my_doc <- my_doc %>% 
+  body_add_par("", style = "Normal") %>% # blank paragraph
   body_add_table(iris, style = "table_template")
 
-## ------------------------------------------------------------------------
-print(my_doc, target = "assets/docx/first_example.docx") %>% 
-  invisible()
+## ----results='hide'------------------------------------------------------
+print(my_doc, target = "assets/docx/first_example.docx")
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/first_example.docx" ) )
+
+## ----message=FALSE-------------------------------------------------------
+library(dplyr)
+read_docx() %>% styles_info() %>% 
+  dplyr::filter( style_type %in% "paragraph" )
+
+## ------------------------------------------------------------------------
+library(ggplot2)
+gg <- ggplot(data = iris, aes(Sepal.Length, Petal.Length)) + 
+  geom_point()
+
+read_docx() %>% 
+  body_add_par(value = "Table of content", style = "heading 1") %>% 
+  body_add_toc(level = 2) %>% 
+  body_add_break() %>% 
+
+  body_add_par(value = "dataset iris", style = "heading 2") %>% 
+  body_add_table(value = head(iris), style = "table_template" ) %>% 
+  
+  body_add_par(value = "plot examples", style = "heading 1") %>% 
+  body_add_gg(value = gg, style = "centered" ) %>% 
+
+  print(target = "assets/docx/body_add_demo.docx") %>% 
+  invisible()
+
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/body_add_demo.docx" ) )
+
+## ------------------------------------------------------------------------
+img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
+read_docx() %>%
+  body_add_par("R logo: ", style = "Normal") %>%
+  slip_in_img(src = img.file, style = "strong", 
+              width = .3, height = .3, pos = "after") %>% 
+  slip_in_text(" - This is ", style = "strong", pos = "before") %>% 
+  slip_in_seqfield(str = "SEQ Figure \u005C* ARABIC",
+    style = 'strong', pos = "before") %>% 
+  print(target = "assets/docx/slip_in_demo.docx") %>% 
+  invisible()
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/slip_in_demo.docx" ) )
 
 ## ------------------------------------------------------------------------
 read_docx() %>%
@@ -91,22 +126,6 @@ print(doc, target = "assets/docx/cursor.docx") %>%
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/cursor.docx" ) )
 
 ## ------------------------------------------------------------------------
-library(magrittr)
-img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
-
-read_docx() %>%
-  body_add_par("R logo: ", style = "Normal") %>%
-  slip_in_img(src = img.file, style = "strong", width = .3, height = .3) %>%
-  slip_in_text("This is official ", style = "strong", pos = "before") %>%
-  slip_in_text(" that can be found here: ", style = "strong", pos = "after") %>%
-  slip_in_text(img.file, style = "strong", pos = "after") %>%
-  print(target = "assets/docx/slip_in_demo.docx") %>% 
-  invisible()
-
-## ----echo=FALSE----------------------------------------------------------
-office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/slip_in_demo.docx" ) )
-
-## ------------------------------------------------------------------------
 library(officer)
 library(magrittr)
 
@@ -132,6 +151,24 @@ print(my_doc, target = "assets/docx/ipsum_doc.docx") %>% invisible()
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/ipsum_doc.docx" ) )
+
+## ----results='hide'------------------------------------------------------
+my_doc <- read_docx()  %>% 
+  body_add_par(value = str1, style = "Normal") %>% 
+  body_add_par(value = str2, style = "centered") %>% 
+  body_add_par(value = str3, style = "Normal") 
+
+print(my_doc, target = "assets/docx/replace_template.docx")
+
+## ----results='hide'------------------------------------------------------
+my_doc <- read_docx(path = "assets/docx/replace_template.docx")  %>% 
+  cursor_reach(keyword = "that text") %>% 
+  body_add_par(value = "This is a new paragraph.", style = "centered", pos = "on")
+
+print(my_doc, target = "assets/docx/replace_doc.docx")
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/replace_doc.docx" ) )
 
 ## ------------------------------------------------------------------------
 str1 <- "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " %>% 

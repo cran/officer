@@ -211,7 +211,7 @@ slide_master <- R6Class(
 
     theme_file = function(){
       data <- self$rel_df()
-      theme_file <- data[basename(data$type) == "theme", "target", drop = TRUE]
+      theme_file <- data$target[basename(data$type) == "theme"]
       file.path( "ppt/theme", basename(theme_file) )
     }
 
@@ -243,7 +243,9 @@ slide_layout <- R6Class(
       data <- group_by_(data, .dots = c("id", "type"))
       data <- mutate_(data, num = "row_number()")
       data <- ungroup(data)
-      data$master_file <- basename(rels$target)
+      if( nrow(data))
+        data$master_file <- basename(rels$target)
+      else data$master_file <- character(0)
       data
     },
     name = function(){
