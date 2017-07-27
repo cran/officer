@@ -10,7 +10,7 @@ pml_with_ns <- function(x){
 
 pml_run_str <- function(str, style) {
   str_ <- paste0( pml_with_ns("a:r"), "%s<a:t>%s</a:t></a:r>" )
-  sprintf(str_, format(style, type = "pml"), str)
+  sprintf(str_, format(style, type = "pml"), htmlEscape(str))
 }
 
 pml_shape_str <- function(str, ph) {
@@ -19,7 +19,7 @@ pml_shape_str <- function(str, ph) {
                   "<p:spPr/>",
                   "<p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr/><a:t>%s</a:t></a:r></a:p></p:txBody></p:sp>"
                   )
-  sprintf( str_, ph, str )
+  sprintf( str_, ph, htmlEscape(str) )
 }
 
 
@@ -76,20 +76,20 @@ read_xfrm <- function(nodeset, file, name){
 
 
 #' @importFrom dplyr left_join anti_join bind_rows distinct
-#' @importFrom dplyr rename_ select_ mutate_
 xfrmize <- function( slide_xfrm, master_xfrm ){
-  slide_xfrm<<-slide_xfrm
-  master_xfrm<<-master_xfrm
+  slide_xfrm <- as.data.frame( slide_xfrm )
+  master_xfrm <- as.data.frame(master_xfrm)
 
-  master_ref <- master_xfrm %>%
-    rename_( .dots = setNames( "name", "master_name")) %>%
-    select_("file", "master_name") %>%
-    distinct()
-
-  master_xfrm <- master_xfrm %>%
-    rename_( .dots = setNames( c("offx", "offy", "cx", "cy", "name"),
-                               c("offx_ref", "offy_ref", "cx_ref", "cy_ref", "master_name"))) %>%
-    select_("-id", "-ph")
+  master_ref <- distinct( data.frame(file = master_xfrm$file,
+                                     master_name = master_xfrm$name,
+                                     stringsAsFactors = FALSE ) )
+  tmp_names <- names(master_xfrm)
+  old_ <- c("offx", "offy", "cx", "cy", "name")
+  new_ <- c("offx_ref", "offy_ref", "cx_ref", "cy_ref", "master_name")
+  tmp_names[match(old_, tmp_names)] <- new_
+  names(master_xfrm) <- tmp_names
+  master_xfrm$id <- NULL
+  master_xfrm$ph <- NULL
 
   slide_key_id <- paste0(slide_xfrm$master_file, slide_xfrm$type)
   master_key_id <- paste0(master_xfrm$file, master_xfrm$type)
@@ -149,17 +149,14 @@ get_shape_id <- function(x, type = NULL, id_chr = NULL ){
   shape_index_data$shape_id <- seq_len(nrow(shape_index_data))
 
   if( !is.null(type) && !is.null(id_chr) ){
-    filter_criteria <- interp(~ type == tp & id == index, tp = type, index = id_chr)
-    shape_index_data <- filter_(shape_index_data, filter_criteria)
+    filter_v <- shape_index_data$type == type & shape_index_data$id == id_chr
+    shape_index_data <- shape_index_data[filter_v,]
   } else if( is.null(type) && !is.null(id_chr) ){
-    filter_criteria <- interp(~ id == index, index = id_chr)
-    shape_index_data <- filter_(shape_index_data, filter_criteria)
-  } else if( !is.null(type) && is.null(id_chr) ){
-    filter_criteria <- interp(~ type == tp, tp = type)
-    shape_index_data <- filter_(shape_index_data, filter_criteria)
-  } else {
-    filter_criteria <- interp(~ type == tp, tp = type)
-    shape_index_data <- shape_index_data[nrow(shape_index_data), ]
+    filter_v <- shape_index_data$id == id_chr
+    shape_index_data <- shape_index_data[filter_v,]
+  } else if( !is.null(type) ){
+    filter_v <- shape_index_data$type == type
+    shape_index_data <- shape_index_data[filter_v,]
   }
 
   if( nrow(shape_index_data) < 1 )
@@ -173,9 +170,9 @@ get_shape_id <- function(x, type = NULL, id_chr = NULL ){
 
 characterise_df <- function(x){
   x <- lapply(x, function( x ) {
-    if( is.character(x) ) x
-    else if( is.factor(x) ) as.character(x)
-    else gsub("(^ | $)+", "", format(x))
+    if( is.character(x) ) htmlEscape(x)
+    else if( is.factor(x) ) htmlEscape(as.character(x))
+    else gsub("(^ | $)+", "", htmlEscape(format(x)))
   })
   data.frame(x, stringsAsFactors = FALSE)
 }

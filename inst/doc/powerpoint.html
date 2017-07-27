@@ -103,13 +103,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>a slide layout name</li>
 <li>a master layout name</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span>my_pres %&gt;%<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span>my_pres <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>)</code></pre></div>
 <p><strong><code>layout</code> and <code>master</code> values must match values from the initial document.</strong> Layout names and master layout names are not available in a tidy view within PowerPoint, but theses can be read easily with function <code>layout_summary</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">layout_summary</span>(my_pres)</code></pre></div>
-<pre><code>## # A tibble: 7 x 2
-##              layout       master
-##               &lt;chr&gt;        &lt;chr&gt;
+<pre><code>##              layout       master
 ## 1       Title Slide Office Theme
 ## 2 Title and Content Office Theme
 ## 3    Section Header Office Theme
@@ -130,30 +128,35 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="add-text-content-into-a-placeholder" class="section level3">
 <h3>Add text content into a placeholder</h3>
 <p>Use function <code>ph_with_text</code> to add text into a new shape. The type of the shape is defined in the slide layout associated to the current slide, for example, using <code>type = &quot;title&quot;</code> will create a title shape in the slide.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span>my_pres %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;title&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A title&quot;</span>) %&gt;%
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;ftr&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A footer&quot;</span>) %&gt;%
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;dt&quot;</span>, <span class="dt">str =</span> <span class="kw">format</span>(<span class="kw">Sys.Date</span>())) %&gt;%
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;sldNum&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;slide 1&quot;</span>) %&gt;%
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span>my_pres <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;title&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A title&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;ftr&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A footer&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;dt&quot;</span>, <span class="dt">str =</span> <span class="kw">format</span>(<span class="kw">Sys.Date</span>())) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;sldNum&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;slide 1&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">str =</span> <span class="st">&quot;Hello world&quot;</span>, <span class="dt">type =</span> <span class="st">&quot;body&quot;</span>)</code></pre></div>
 <blockquote>
 <p>Function <code>layout_properties</code> provides details about available shapes of a slide layout:</p>
 </blockquote>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">layout_properties</span> ( <span class="dt">x =</span> my_pres, <span class="dt">layout =</span> <span class="st">&quot;Two Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span> ) %&gt;%<span class="st"> </span><span class="kw">head</span>()</code></pre></div>
-<pre><code>## # A tibble: 6 x 7
-##    master_name        name   type     offx      offy       cx        cy
-##          &lt;chr&gt;       &lt;chr&gt;  &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
-## 1 Office Theme Two Content  title 0.500000 0.3003478 9.000000 1.2500000
-## 2 Office Theme Two Content   body 0.500000 1.7500000 4.416667 4.9496533
-## 3 Office Theme Two Content   body 5.083333 1.7500000 4.416667 4.9496533
-## 4 Office Theme Two Content     dt 0.500000 6.9513889 2.333333 0.3993056
-## 5 Office Theme Two Content    ftr 3.416667 6.9513889 3.166667 0.3993056
-## 6 Office Theme Two Content sldNum 7.166667 6.9513889 2.333333 0.3993056</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">layout_properties</span> ( <span class="dt">x =</span> my_pres, <span class="dt">layout =</span> <span class="st">&quot;Two Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span> ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>()</code></pre></div>
+<pre><code>##     master_name        name   type id     offx      offy       cx
+## 14 Office Theme Two Content  title  2 0.500000 0.3003478 9.000000
+## 15 Office Theme Two Content   body  3 0.500000 1.7500000 4.416667
+## 16 Office Theme Two Content   body  4 5.083333 1.7500000 4.416667
+## 17 Office Theme Two Content     dt  5 0.500000 6.9513889 2.333333
+## 18 Office Theme Two Content    ftr  6 3.416667 6.9513889 3.166667
+## 19 Office Theme Two Content sldNum  7 7.166667 6.9513889 2.333333
+##           cy
+## 14 1.2500000
+## 15 4.9496533
+## 16 4.9496533
+## 17 0.3993056
+## 18 0.3993056
+## 19 0.3993056</code></pre>
 </div>
 <div id="write-the-powerpoint" class="section level3">
 <h3>Write the PowerPoint</h3>
 <p>File can be generated using function <code>print</code> and argument <code>target</code>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(my_pres, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/first_example.pptx&quot;</span>) %&gt;%<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(my_pres, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/first_example.pptx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
@@ -167,33 +170,33 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h2>Slides selection and manipulation</h2>
 <p>There are 3 functions to let you manipulate slides: add_slide, remove_slide and on_slide.</p>
 <p>A slide can be added with function <code>add_slide</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Two Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Two Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title Only&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>)
 <span class="kw">length</span>(my_pres)</code></pre></div>
 <pre><code>## [1] 3</code></pre>
 <p>A Slide can be removed with function <code>remove_slide</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span>my_pres %&gt;%<span class="st"> </span><span class="kw">remove_slide</span>(<span class="dt">index =</span> <span class="dv">1</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span>my_pres <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">remove_slide</span>(<span class="dt">index =</span> <span class="dv">1</span>)
 <span class="kw">length</span>(my_pres)</code></pre></div>
 <pre><code>## [1] 2</code></pre>
 <p>Selected slide can be set with function <code>on_slide</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span>my_pres %&gt;%<span class="st"> </span><span class="kw">on_slide</span>(<span class="dt">index =</span> <span class="dv">1</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span>my_pres <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">on_slide</span>(<span class="dt">index =</span> <span class="dv">1</span>)</code></pre></div>
 </div>
 <div id="add-content-into-a-placeholder" class="section level2">
 <h2>Add content into a placeholder</h2>
 <div id="add-text" class="section level3">
 <h3>Add text</h3>
 <p>Use function <code>ph_with_text</code> to add text into a new shape. Argument <code>type</code> specify which placeholder of the associated layout is to be added (<code>index</code> is to be used when a <code>type</code> is not unique in the slide layout).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() %&gt;%
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Two Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A first text&quot;</span>, <span class="dt">index =</span> <span class="dv">1</span>) %&gt;%
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A second text&quot;</span>, <span class="dt">index =</span> <span class="dv">2</span>) %&gt;%
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;title&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A title&quot;</span>) %&gt;%
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;ftr&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;Slide footer&quot;</span>) %&gt;%
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Two Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A first text&quot;</span>, <span class="dt">index =</span> <span class="dv">1</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A second text&quot;</span>, <span class="dt">index =</span> <span class="dv">2</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;title&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A title&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;ftr&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;Slide footer&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;dt&quot;</span>, <span class="dt">str =</span> <span class="kw">format</span>(<span class="kw">Sys.Date</span>()))
 
-<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_with_text.pptx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_with_text.pptx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
@@ -209,12 +212,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">img.file &lt;-<span class="st"> </span><span class="kw">file.path</span>( <span class="kw">Sys.getenv</span>(<span class="st">&quot;R_HOME&quot;</span>), <span class="st">&quot;doc&quot;</span>, <span class="st">&quot;html&quot;</span>, <span class="st">&quot;logo.jpg&quot;</span> )
 
 doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() 
-doc &lt;-<span class="st"> </span>doc %&gt;%
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Two Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;body (index 1) is text&quot;</span>, <span class="dt">index =</span> <span class="dv">1</span>) %&gt;%<span class="st"> </span>
+doc &lt;-<span class="st"> </span>doc <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Two Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;body (index 1) is text&quot;</span>, <span class="dt">index =</span> <span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">ph_with_img</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">index =</span> <span class="dv">2</span>, <span class="dt">src =</span> img.file, <span class="dt">height =</span> <span class="fl">1.06</span>, <span class="dt">width =</span> <span class="fl">1.39</span> )
 
-<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_with_img.pptx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_with_img.pptx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
@@ -225,13 +228,13 @@ doc &lt;-<span class="st"> </span>doc %&gt;%
 <p>To add an image into a new shape at arbitrary coordinates, use function <code>ph_with_img_at</code>. Arguments <code>left</code> and <code>top</code> are specifying the top left coordinate of the new shape and arguments <code>width</code> and <code>height</code> are specifying the dimensions of the new shape.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">img.file &lt;-<span class="st"> </span><span class="kw">file.path</span>( <span class="kw">Sys.getenv</span>(<span class="st">&quot;R_HOME&quot;</span>), <span class="st">&quot;doc&quot;</span>, <span class="st">&quot;html&quot;</span>, <span class="st">&quot;logo.jpg&quot;</span> )
 
-doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() %&gt;%
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;title&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A image&quot;</span>) %&gt;%
+doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;title&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A image&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">ph_with_img_at</span>(<span class="dt">src =</span> img.file, <span class="dt">left =</span> <span class="dv">3</span>, <span class="dt">top =</span> <span class="dv">4</span>, 
                  <span class="dt">height =</span> <span class="fl">1.06</span>, <span class="dt">width =</span> <span class="fl">1.39</span>, <span class="dt">rot =</span> <span class="dv">45</span> )
 
-<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_with_img_at.pptx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_with_img_at.pptx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
@@ -244,11 +247,11 @@ doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() %&gt;%
 <h3>Add table</h3>
 <p>Use function <code>ph_with_table</code> to add a table into a placeholder.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() 
-doc &lt;-<span class="st"> </span>doc %&gt;%
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%
+doc &lt;-<span class="st"> </span>doc <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">ph_with_table</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">value =</span> <span class="kw">head</span>(mtcars) )
 
-<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_with_table.pptx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_with_table.pptx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
@@ -258,12 +261,12 @@ doc &lt;-<span class="st"> </span>doc %&gt;%
 </p>
 <p>To add a table into a new shape at arbitrary coordinates, use function <code>ph_with_table_at</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() 
-doc &lt;-<span class="st"> </span>doc %&gt;%
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%
+doc &lt;-<span class="st"> </span>doc <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">ph_with_table_at</span>(<span class="dt">value =</span> <span class="kw">head</span>(mtcars), <span class="dt">left =</span> <span class="dv">1</span>, <span class="dt">top =</span> <span class="dv">3</span>, 
                  <span class="dt">height =</span> <span class="dv">7</span>, <span class="dt">width =</span> <span class="dv">7</span> )
 
-<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_with_table_at.pptx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_with_table_at.pptx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
@@ -291,20 +294,20 @@ will be removed from the current slide:</p>
 <div id="add-to-an-empty-new-placeholder" class="section level3">
 <h3>Add to an empty new placeholder</h3>
 <p><code>ph_empty</code> (<code>ph_empty_at</code>) will add a new empty placeholder in the current slide. When using <code>ph_with_text</code>, added text automatically inherits from the layout placeholder, <code>ph_empty</code> gives more control on format of added text and paragraphs.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">ph_empty</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>)</code></pre></div>
 <p>As there is not paragraph yet in the new shape, function <code>ph_add_par</code> will be used to add a new paragraph. Then <code>ph_add_text</code> will be used to add text into that new paragraph.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">text_prop &lt;-<span class="st"> </span><span class="kw">fp_text</span>(<span class="dt">color =</span> <span class="st">&quot;red&quot;</span>, <span class="dt">font.size =</span> <span class="dv">20</span>)
-my_pres &lt;-<span class="st"> </span>my_pres %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">ph_add_par</span>() %&gt;%
-<span class="st">  </span><span class="kw">ph_add_text</span>(<span class="dt">str =</span> <span class="st">&quot;This is a red text!&quot;</span>, <span class="dt">style =</span> text_prop ) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">ph_add_par</span>(<span class="dt">level =</span> <span class="dv">2</span>) %&gt;%
-<span class="st">  </span><span class="kw">ph_add_text</span>(<span class="dt">str =</span> <span class="st">&quot;Level 2&quot;</span>) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">ph_add_par</span>(<span class="dt">level =</span> <span class="dv">3</span>) %&gt;%
+my_pres &lt;-<span class="st"> </span>my_pres <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ph_add_par</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ph_add_text</span>(<span class="dt">str =</span> <span class="st">&quot;This is a red text!&quot;</span>, <span class="dt">style =</span> text_prop ) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ph_add_par</span>(<span class="dt">level =</span> <span class="dv">2</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">ph_add_text</span>(<span class="dt">str =</span> <span class="st">&quot;Level 2&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ph_add_par</span>(<span class="dt">level =</span> <span class="dv">3</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">ph_add_text</span>(<span class="dt">str =</span> <span class="st">&quot;Level 3&quot;</span>)
 
-<span class="kw">print</span>(my_pres, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_add_text_1.pptx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="kw">print</span>(my_pres, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_add_text_1.pptx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
@@ -316,18 +319,18 @@ my_pres &lt;-<span class="st"> </span>my_pres %&gt;%<span class="st"> </span>
 <div id="add-to-an-existing-placeholder-of-text" class="section level3">
 <h3>Add to an existing placeholder of text</h3>
 <p>The following code produce a presentation made of one text shape containing text “A first text”.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;A first text&quot;</span>)</code></pre></div>
 <p>There is a paragraph in the new shape, <code>ph_add_par</code> will be used to add a new paragraph and <code>ph_add_text</code> has to be used to add text into the last paragraph of the shape.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">text_blue_prop &lt;-<span class="st"> </span><span class="kw">update</span>(text_prop, <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span> )
-my_pres &lt;-<span class="st"> </span>my_pres %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">ph_add_text</span>(<span class="dt">str =</span> <span class="st">&quot;A small red text!&quot;</span>, <span class="dt">style =</span> text_prop ) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">ph_add_text</span>(<span class="dt">str =</span> <span class="st">&quot;Blue text first... &quot;</span>, <span class="dt">pos =</span> <span class="st">&quot;before&quot;</span>, <span class="dt">style =</span> text_blue_prop ) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">ph_add_par</span>(<span class="dt">level =</span> <span class="dv">2</span>) %&gt;%
+my_pres &lt;-<span class="st"> </span>my_pres <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ph_add_text</span>(<span class="dt">str =</span> <span class="st">&quot;A small red text!&quot;</span>, <span class="dt">style =</span> text_prop ) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ph_add_text</span>(<span class="dt">str =</span> <span class="st">&quot;Blue text first... &quot;</span>, <span class="dt">pos =</span> <span class="st">&quot;before&quot;</span>, <span class="dt">style =</span> text_blue_prop ) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ph_add_par</span>(<span class="dt">level =</span> <span class="dv">2</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">ph_add_text</span>(<span class="dt">str =</span> <span class="st">&quot;additionnal paragraph&quot;</span>)
 
-<span class="kw">print</span>(my_pres, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_add_text_2.pptx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="kw">print</span>(my_pres, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_add_text_2.pptx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
@@ -342,14 +345,14 @@ my_pres &lt;-<span class="st"> </span>my_pres %&gt;%<span class="st"> </span>
 <div id="external-links" class="section level3">
 <h3>External links</h3>
 <p><code>ph_hyperlink</code> add an hyperlink to an existing placeholder in the current slide. Argument <code>href</code> should contain a valid URL (i.e. starting with <code>http(s)</code>).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;Blah blah blah&quot;</span>) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">ph_hyperlink</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">href =</span> <span class="st">&quot;https://cran.r-project.org&quot;</span>) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;Blah blah blah&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ph_hyperlink</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">href =</span> <span class="st">&quot;https://cran.r-project.org&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;placeholder target&quot;</span>)
 
-<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_hyperlink.pptx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_hyperlink.pptx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
@@ -361,15 +364,15 @@ my_pres &lt;-<span class="st"> </span>my_pres %&gt;%<span class="st"> </span>
 <div id="internal-links" class="section level3">
 <h3>Internal links</h3>
 <p><code>ph_slidelink</code> add an internal link into an existing placeholder. Argument <code>slide_index</code> should contain the index of the target slide.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;Blah blah blah&quot;</span>) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;placeholder target&quot;</span>) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">on_slide</span>(<span class="dt">index =</span> <span class="dv">1</span> ) %&gt;%<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;Blah blah blah&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;placeholder target&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">on_slide</span>(<span class="dt">index =</span> <span class="dv">1</span> ) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">ph_slidelink</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">slide_index =</span> <span class="dv">2</span>)
 
-<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_slidelink.pptx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_slidelink.pptx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
@@ -381,12 +384,12 @@ my_pres &lt;-<span class="st"> </span>my_pres %&gt;%<span class="st"> </span>
 <div id="add-text-with-external-link" class="section level3">
 <h3>Add text with external link</h3>
 <p>Function <code>ph_add_text</code> has an optional argument <code>href</code>, if used, the chunk of text will be an hyperlink.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) %&gt;%<span class="st"> </span>
-<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;An &quot;</span>) %&gt;%<span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_pres &lt;-<span class="st"> </span><span class="kw">read_pptx</span>() <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">add_slide</span>(<span class="dt">layout =</span> <span class="st">&quot;Title and Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">ph_with_text</span>(<span class="dt">type =</span> <span class="st">&quot;body&quot;</span>, <span class="dt">str =</span> <span class="st">&quot;An &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">ph_add_text</span>(<span class="dt">str =</span> <span class="st">&quot;hyperlink&quot;</span>, <span class="dt">href =</span> <span class="st">&quot;https://cran.r-project.org&quot;</span> )
 
-<span class="kw">print</span>(my_pres, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_add_text_3.pptx&quot;</span>) %&gt;%<span class="st"> </span>
+<span class="kw">print</span>(my_pres, <span class="dt">target =</span> <span class="st">&quot;assets/pptx/ph_add_text_3.pptx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>

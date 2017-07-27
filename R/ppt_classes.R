@@ -34,6 +34,11 @@ content_type <- R6Class(
       private$override <- override
       self
     },
+    add_override = function(value){
+      override <- c( private$override, value )
+      private$override <- override
+      self
+    },
     remove_slide = function(partname){
       id <- which( basename(names(private$override)) %in% basename(partname) )
       private$override <- private$override[-id]
@@ -49,6 +54,7 @@ content_type <- R6Class(
     },
 
     save = function() {
+      self$add_ext(extension = "xlsx", type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
       self$add_ext(extension = "jpeg", type = "image/jpeg")
       self$add_ext(extension = "png", type = "image/png")
       self$add_ext(extension = "emf", type = "image/x-emf")
@@ -220,10 +226,6 @@ slide_master <- R6Class(
 )
 
 # slide_layout ------------------------------------------------------------
-
-#' @importFrom dplyr group_by_
-#' @importFrom dplyr mutate_
-#' @importFrom dplyr ungroup
 slide_layout <- R6Class(
   "slide_layout",
   inherit = openxml_document,
@@ -240,9 +242,6 @@ slide_layout <- R6Class(
 
       nodeset <- xml_find_all( self$get(), "p:cSld/p:spTree/*[self::p:sp or self::p:graphicFrame or self::p:grpSp or self::p:pic]")
       data <- read_xfrm(nodeset, self$file_name(), self$name())
-      data <- group_by_(data, .dots = c("id", "type"))
-      data <- mutate_(data, num = "row_number()")
-      data <- ungroup(data)
       if( nrow(data))
         data$master_file <- basename(rels$target)
       else data$master_file <- character(0)
@@ -260,7 +259,6 @@ slide_layout <- R6Class(
 )
 
 # slide ------------------------------------------------------------
-
 slide <- R6Class(
   "slide",
   inherit = openxml_document,
@@ -268,8 +266,8 @@ slide <- R6Class(
 
     feed = function( file ) {
       super$feed(file)
-      filter_criteria <- interp(~ basename(type) == "slideLayout")
-      slide_info <- filter_(private$rels_doc$get_data() , filter_criteria)
+      slide_info <- private$rels_doc$get_data()
+      slide_info <- slide_info[basename(slide_info$type) == "slideLayout",]
       private$layout_file <- basename( slide_info$target )
       self
     },
@@ -500,6 +498,17 @@ dir_slide <- R6Class(
 
     length = function(){
       length(private$collection)
+    },
+
+    get_slide_list = function(){
+      slide_dir <- file.path(private$package_dir, "ppt/slides")
+      slide_files <- list.files(slide_dir, pattern = "\\.xml$")
+      slide_index <- seq_along(slide_files)
+      if( length(slide_files)){
+        slide_files <- basename( slide_files )
+        slide_index <- as.integer(gsub("^(slide)([0-9]+)(\\.xml)$", "\\2", slide_files ))
+      }
+      data.frame( slide_files = slide_files, slide_index = slide_index, stringsAsFactors = FALSE)
     },
 
     get_new_slidename = function(){

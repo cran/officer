@@ -8,7 +8,7 @@
 #' # create a rdocx object with default template ---
 #' read_docx()
 #'
-#' @importFrom xml2 read_xml xml_length xml_find_first
+#' @importFrom xml2 read_xml xml_length xml_find_first as_list
 read_docx <- function( path = NULL ){
 
   if( !is.null(path) && !file.exists(path))
@@ -27,8 +27,13 @@ read_docx <- function( path = NULL ){
   obj$content_type <- content_type$new( obj )
   obj$doc_obj <- docx_document$new(package_dir)
 
-  default_refs <- filter_(styles_info(obj) , interp(~ is_default) )
+  default_refs <- styles_info(obj)
+  default_refs <- default_refs[default_refs$is_default,]
   obj$default_styles <- setNames( as.list(default_refs$style_name), default_refs$style_type )
+
+  last_sect <- xml_find_first(obj$doc_obj$get(), "/w:document/w:body/w:sectPr[last()]")
+  section_obj <- as_list(last_sect)
+  obj$sect_dim <- section_dimensions(last_sect)
 
   obj <- cursor_end(obj)
   obj
@@ -55,7 +60,7 @@ print.rdocx <- function(x, target = NULL, ...){
     cat("rdocx document with", length(x), "element(s)\n")
     cat("\n* styles:\n")
 
-    style_names <- select_( styles_info(x), "style_type", "style_name")
+    style_names <- styles_info(x)
     style_sample <- style_names$style_type
     names(style_sample) <- style_names$style_name
     print(style_sample)
@@ -77,6 +82,13 @@ print.rdocx <- function(x, target = NULL, ...){
     x
   })
 
+  sections_ <- xml_find_all(x$doc_obj$get(), "//w:sectPr")
+  last_sect <- sections_[length(sections_)]
+  if( inherits( xml_find_first(x$doc_obj$get(), file.path( xml_path(last_sect), "w:type")), "xml_missing" ) ){
+    xml_add_child( last_sect,
+      as_xml_document("<w:type xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" w:val=\"continuous\"/>")
+      )
+  }
   x$doc_obj$save()
   x$content_type$save()
 

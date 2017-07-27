@@ -1,3 +1,20 @@
+# officer 0.1.5
+
+## Enhancement
+
+* new function `body_default_section`
+* fp_border supports width in double precision
+
+## Issues
+
+* characters <, > and & are now html encoded
+* on_slide index is now the correct slide number id.
+
+## Changes
+
+* drop dplyr deprecated verbs from code
+* rename `break_column` to `break_column_before`.
+
 # officer 0.1.4
 
 ## Issues
