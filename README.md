@@ -63,3 +63,9 @@ Or the latest version on CRAN:
 ``` r
 install.packages("officer")
 ```
+
+Plan / to do list
+-----------------
+
+-   enable access to headers and footers in Word documents
+-   improve tests and documentation (help is more than welcome)

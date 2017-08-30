@@ -142,7 +142,7 @@ par_data</code></pre></div>
 ##  2        16   table cell Light Shading 5,621498349    NA     NA      2
 ##  3        16   table cell Light Shading 4,994616997    NA     NA      3
 ##  4        16   table cell Light Shading 4,767504884    NA     NA      4
-##  5        16   table cell Light Shading 6,299445616    NA     NA      5
+##  5        16   table cell Light Shading  25,9242382    NA     NA      5
 ##  6        16   table cell Light Shading 6,489375001    NA     NA      6
 ##  7        16   table cell Light Shading   5,7858682    NA     NA      7
 ##  8        16   table cell Light Shading 5,645575295    NA     NA      8
@@ -161,7 +161,7 @@ table_body</code></pre></div>
 ##  1      2       1 5,621498349
 ##  2      3       1 4,994616997
 ##  3      4       1 4,767504884
-##  4      5       1 6,299445616
+##  4      5       1  25,9242382
 ##  5      6       1 6,489375001
 ##  6      7       1   5,7858682
 ##  7      8       1 5,645575295
@@ -174,20 +174,21 @@ table_body</code></pre></div>
   table_body <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spread</span>(cell_id, text)  </code></pre></div>
 <pre><code>## Loading required package: tidyr</code></pre>
 <pre><code>## # A tibble: 12 x 5
-##    row_id         `1`         `2`         `3`         `4`
-##  *  &lt;int&gt;       &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;       &lt;chr&gt;
-##  1      2 5,621498349 29,48059578 2,462106579  18,2034091
-##  2      3 4,994616997 28,36024706 2,429320759 17,65204912
-##  3      4 4,767504884 27,25431792         AAA        &lt;NA&gt;
-##  4      5 6,299445616  25,9242382 2,066051345 18,37915478
-##  5      6 6,489375001 25,21130805 2,901582763 17,31304737
-##  6      7   5,7858682 25,52433147 2,655642742 17,07215724
-##  7      8 5,645575295 Merged cell 2,278691288  18,2902189
-##  8      9 4,828953215        &lt;NA&gt; 2,238467716 19,87376227
-##  9     10 6,783500773        &lt;NA&gt; 2,202762147 19,85326662
-## 10     11 5,395076839        &lt;NA&gt; 2,538375992 19,56545356
-## 11     12 4,683617783  29,2459239 2,601945544 18,95335451
-## 12     13 4,444226444 25,48653519 2,918513379 19,52866206</code></pre>
+##    row_id         `1`         `2`                   `3`
+##  *  &lt;int&gt;       &lt;chr&gt;       &lt;chr&gt;                 &lt;chr&gt;
+##  1      2 5,621498349        &lt;NA&gt; 2,46210657918,2034091
+##  2      3 4,994616997          AA           2,429320759
+##  3      4 4,767504884        &lt;NA&gt;                   AAA
+##  4      5  25,9242382        &lt;NA&gt;           2,066051345
+##  5      6 6,489375001 25,21130805           2,901582763
+##  6      7   5,7858682 25,52433147           2,655642742
+##  7      8 5,645575295 Merged cell           2,278691288
+##  8      9 4,828953215        &lt;NA&gt;           2,238467716
+##  9     10 6,783500773        &lt;NA&gt;           2,202762147
+## 10     11 5,395076839        &lt;NA&gt;           2,538375992
+## 11     12 4,683617783  29,2459239           2,601945544
+## 12     13        Note        &lt;NA&gt;                  &lt;NA&gt;
+## # ... with 1 more variables: `4` &lt;chr&gt;</code></pre>
 <p>Getting headers requires another operation:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">if</span>( <span class="kw">require</span>(<span class="st">&quot;tidyr&quot;</span>))
   table_cells <span class="op">%&gt;%</span><span class="st"> </span>
@@ -207,7 +208,7 @@ table_body</code></pre></div>
 doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>(example_pptx)
 content &lt;-<span class="st"> </span><span class="kw">pptx_summary</span>(doc)
 content</code></pre></div>
-<pre><code>## # A tibble: 29 x 9
+<pre><code>## # A tibble: 55 x 9
 ##                 text    id content_type slide_id row_id cell_id col_span
 ##                &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;   &lt;int&gt;    &lt;dbl&gt;
 ##  1             Title    12    paragraph        1     NA      NA       NA
@@ -220,7 +221,7 @@ content</code></pre></div>
 ##  8          Header 3    18   table cell        1      1       3        1
 ##  9                 A    18   table cell        1      2       1        1
 ## 10             12.23    18   table cell        1      2       2        1
-## # ... with 19 more rows, and 2 more variables: row_span &lt;dbl&gt;,
+## # ... with 45 more rows, and 2 more variables: row_span &lt;dbl&gt;,
 ## #   media_file &lt;chr&gt;</code></pre>
 <p>Explore the results:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">content <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(content_type) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarise</span>(<span class="dt">n =</span> <span class="kw">n_distinct</span>(id))</code></pre></div>
@@ -229,7 +230,7 @@ content</code></pre></div>
 ##          &lt;chr&gt; &lt;int&gt;
 ## 1        image     1
 ## 2    paragraph     5
-## 3   table cell     1</code></pre>
+## 3   table cell     2</code></pre>
 <p>To get all paragraphs:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">par_data &lt;-<span class="st"> </span>content <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(content_type <span class="op">%in%</span><span class="st"> &quot;paragraph&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">select</span>(id, text)
@@ -264,7 +265,7 @@ par_data</code></pre></div>
 <p>Tables are unstacked :</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">table_cells &lt;-<span class="st"> </span>content <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(content_type <span class="op">%in%</span><span class="st"> &quot;table cell&quot;</span>)
 table_cells</code></pre></div>
-<pre><code>## # A tibble: 15 x 9
+<pre><code>## # A tibble: 41 x 9
 ##              text    id content_type slide_id row_id cell_id col_span
 ##             &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;   &lt;int&gt;    &lt;dbl&gt;
 ##  1      Header 1     18   table cell        1      1       1        1
@@ -277,15 +278,11 @@ table_cells</code></pre></div>
 ##  8           1.23    18   table cell        1      3       2        1
 ##  9 blah blah blah    18   table cell        1      3       3        1
 ## 10              B    18   table cell        1      4       1        1
-## 11            9.0    18   table cell        1      4       2        1
-## 12          Salut    18   table cell        1      4       3        1
-## 13              C    18   table cell        1      5       1        1
-## 14              6    18   table cell        1      5       2        1
-## 15          Hello    18   table cell        1      5       3        1
-## # ... with 2 more variables: row_span &lt;dbl&gt;, media_file &lt;chr&gt;</code></pre>
+## # ... with 31 more rows, and 2 more variables: row_span &lt;dbl&gt;,
+## #   media_file &lt;chr&gt;</code></pre>
 <p>Cells positions and values are dispatched in columns <code>row_id</code>, <code>cell_id</code>, <code>text</code>. Note here there is no indicator for table header.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">if</span>( <span class="kw">require</span>(<span class="st">&quot;tidyr&quot;</span>))
-  table_cells <span class="op">%&gt;%</span><span class="st"> </span>
+  table_cells <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>( id <span class="op">==</span><span class="st"> </span><span class="dv">18</span> ) <span class="op">%&gt;%</span><span class="st">  </span>
 <span class="st">    </span><span class="kw">select</span>(row_id, cell_id, text) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">    </span><span class="kw">spread</span>(cell_id, text)  </code></pre></div>
 <pre><code>## # A tibble: 5 x 4

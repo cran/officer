@@ -64,7 +64,7 @@ table_cells
 
 ## ------------------------------------------------------------------------
 if( require("tidyr"))
-  table_cells %>% 
+  table_cells %>% filter( id == 18 ) %>%  
     select(row_id, cell_id, text) %>% 
     spread(cell_id, text)  
 
