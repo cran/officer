@@ -138,13 +138,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>Function <code>layout_properties</code> provides details about available shapes of a slide layout:</p>
 </blockquote>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">layout_properties</span> ( <span class="dt">x =</span> my_pres, <span class="dt">layout =</span> <span class="st">&quot;Two Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span> ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>()</code></pre></div>
-<pre><code>##     master_name        name   type id     offx      offy       cx
-## 14 Office Theme Two Content  title  2 0.500000 0.3003478 9.000000
-## 15 Office Theme Two Content   body  3 0.500000 1.7500000 4.416667
-## 16 Office Theme Two Content   body  4 5.083333 1.7500000 4.416667
-## 17 Office Theme Two Content     dt  5 0.500000 6.9513889 2.333333
-## 18 Office Theme Two Content    ftr  6 3.416667 6.9513889 3.166667
-## 19 Office Theme Two Content sldNum  7 7.166667 6.9513889 2.333333
+<pre><code>##     master_name        name   type id ph_label     offx      offy       cx
+## 14 Office Theme Two Content  title  2     &lt;NA&gt; 0.500000 0.3003478 9.000000
+## 15 Office Theme Two Content   body  3     &lt;NA&gt; 0.500000 1.7500000 4.416667
+## 16 Office Theme Two Content   body  4     &lt;NA&gt; 5.083333 1.7500000 4.416667
+## 17 Office Theme Two Content     dt  5     &lt;NA&gt; 0.500000 6.9513889 2.333333
+## 18 Office Theme Two Content    ftr  6     &lt;NA&gt; 3.416667 6.9513889 3.166667
+## 19 Office Theme Two Content sldNum  7     &lt;NA&gt; 7.166667 6.9513889 2.333333
 ##           cy
 ## 14 1.2500000
 ## 15 4.9496533
@@ -280,10 +280,10 @@ doc &lt;-<span class="st"> </span>doc <span class="op">%&gt;%</span>
 <h2>Remove content from a slide</h2>
 <p>Use <code>slide_summary</code> to easily identify shapes in the slide that can be removed.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">slide_summary</span>(doc)</code></pre></div>
-<pre><code>## # A tibble: 1 x 7
-##    type    id  offx  offy    cx    cy
-##   &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
-## 1  body     2    NA    NA    NA    NA
+<pre><code>## # A tibble: 1 x 8
+##    type    id ph_label  offx  offy    cx    cy
+##   &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+## 1  body     2             NA    NA    NA    NA
 ## # ... with 1 more variables: text &lt;chr&gt;</code></pre>
 <p>In the following example, shape corresponding to <code>type &quot;body&quot;</code><br />
 will be removed from the current slide:</p>
