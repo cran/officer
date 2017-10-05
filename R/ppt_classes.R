@@ -56,6 +56,7 @@ content_type <- R6Class(
     save = function() {
       self$add_ext(extension = "xlsx", type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
       self$add_ext(extension = "jpeg", type = "image/jpeg")
+      self$add_ext(extension = "gif", type = "image/gif")
       self$add_ext(extension = "png", type = "image/png")
       self$add_ext(extension = "emf", type = "image/x-emf")
       self$add_ext(extension = "jpg", type = "application/octet-stream")
@@ -207,7 +208,7 @@ slide_master <- R6Class(
     },
 
     xfrm = function(){
-      nodeset <- xml_find_all( self$get(), "p:cSld/p:spTree/*[self::p:sp or self::p:graphicFrame or self::p:grpSp or self::p:pic]")
+      nodeset <- xml_find_all( self$get(), as_xpath_content_sel("p:cSld/p:spTree/") )
       read_xfrm(nodeset, self$file_name(), self$name())
     }
 
@@ -240,16 +241,31 @@ slide_layout <- R6Class(
       rels <- self$rel_df()
       rels <- rels[basename( rels$type ) == "slideMaster", ]
 
-      nodeset <- xml_find_all( self$get(), "p:cSld/p:spTree/*[self::p:sp or self::p:graphicFrame or self::p:grpSp or self::p:pic]")
+      nodeset <- xml_find_all( self$get(), as_xpath_content_sel("p:cSld/p:spTree/"))
       data <- read_xfrm(nodeset, self$file_name(), self$name())
       if( nrow(data))
         data$master_file <- basename(rels$target)
       else data$master_file <- character(0)
       data
     },
+    write_template = function(new_file){
+
+      path <- system.file(package = "officer", "template/slide.xml")
+
+      rel_filename <- file.path(
+        dirname(new_file), "_rels",
+        paste0(basename(new_file), ".rels") )
+
+      newrel <- relationship$new()$add(
+        id = "rId1", type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout",
+        target = file.path("../slideLayouts", basename(self$file_name())) )
+      newrel$write(path = rel_filename)
+      file.copy(path, to = new_file)
+      self
+    },
+
     name = function(){
-      xmldoc <- read_xml(self$file_name())
-      csld <- xml_find_first(xmldoc, "//p:cSld")
+      csld <- xml_find_first(self$get(), "//p:cSld")
       xml_attr(csld, "name")
     }
 
@@ -366,8 +382,13 @@ dir_collection <- R6Class(
       private$collection <- map( filenames, function(x, container){
         container$clone()$feed(x)
       }, container = container)
-
+      names(private$collection) <- basename(filenames)
     },
+
+    collection_get = function(name){
+      private$collection[[name]]
+    },
+
     get_metadata = function(){
       map_df(private$collection, function(x) x$get_metadata())
     },
@@ -478,6 +499,18 @@ dir_slide <- R6Class(
       private$slides_path <- file.path(private$package_dir, "ppt/slides")
       private$collection <- map(private$collection, function(x, ref) x$set_xfrm(ref), ref = private$slide_layouts$get_xfrm_data() )
       names(private$collection) <- basename(filenames)
+      self
+    },
+    update_slide = function( index ){
+      dir_ <- file.path(private$package_dir, "ppt/slides")
+      filenames <- list.files(path = dir_, pattern = "\\.xml$", full.names = TRUE)
+
+      # order matter here, so lets order file regarding their index
+      sl_id <- as.integer( gsub( "(slide)([0-9]+)(\\.xml)$", "\\2", basename(filenames) ) )
+      filenames <- filenames[order(sl_id)]
+
+      private$collection[[index]] <- slide$new("ppt/slides")$feed(filenames[index])$fortify_id()
+      private$collection[[index]]$set_xfrm(private$slide_layouts$get_xfrm_data())
       self
     },
     remove = function(index ){

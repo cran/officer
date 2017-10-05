@@ -11,6 +11,7 @@ The officer package lets R users manipulate Word (`.docx`) and PowerPoint (`*.pp
 
 > Make corporate reporting with minimum hassle
 
+
 Word documents
 --------------
 

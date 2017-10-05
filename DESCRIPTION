@@ -1,7 +1,7 @@
 Package: officer
 Type: Package
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.1.7
+Version: 0.1.8
 Authors@R: c(
     person("David", "Gohel", role = c("aut", "cre"),
     email = "david.gohel@ardata.fr"))
@@ -25,8 +25,8 @@ RoxygenNote: 6.0.1.9000
 Suggests: testthat, devEMF, knitr, rmarkdown, tidyr
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2017-09-16 10:25:23 UTC; davidgohel
+Packaged: 2017-10-05 17:45:25 UTC; davidgohel
 Author: David Gohel [aut, cre]
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2017-09-16 18:51:38 UTC
+Date/Publication: 2017-10-05 22:23:38 UTC

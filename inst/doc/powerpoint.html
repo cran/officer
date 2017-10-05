@@ -138,20 +138,20 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>Function <code>layout_properties</code> provides details about available shapes of a slide layout:</p>
 </blockquote>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">layout_properties</span> ( <span class="dt">x =</span> my_pres, <span class="dt">layout =</span> <span class="st">&quot;Two Content&quot;</span>, <span class="dt">master =</span> <span class="st">&quot;Office Theme&quot;</span> ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">head</span>()</code></pre></div>
-<pre><code>##     master_name        name   type id ph_label     offx      offy       cx
-## 14 Office Theme Two Content  title  2     &lt;NA&gt; 0.500000 0.3003478 9.000000
-## 15 Office Theme Two Content   body  3     &lt;NA&gt; 0.500000 1.7500000 4.416667
-## 16 Office Theme Two Content   body  4     &lt;NA&gt; 5.083333 1.7500000 4.416667
-## 17 Office Theme Two Content     dt  5     &lt;NA&gt; 0.500000 6.9513889 2.333333
-## 18 Office Theme Two Content    ftr  6     &lt;NA&gt; 3.416667 6.9513889 3.166667
-## 19 Office Theme Two Content sldNum  7     &lt;NA&gt; 7.166667 6.9513889 2.333333
-##           cy
-## 14 1.2500000
-## 15 4.9496533
-## 16 4.9496533
-## 17 0.3993056
-## 18 0.3993056
-## 19 0.3993056</code></pre>
+<pre><code>##     master_name        name   type id                   ph_label     offx
+## 14 Office Theme Two Content  title  2                    Title 1 0.500000
+## 15 Office Theme Two Content   body  3      Content Placeholder 2 0.500000
+## 16 Office Theme Two Content   body  4      Content Placeholder 3 5.083333
+## 17 Office Theme Two Content     dt  5         Date Placeholder 4 0.500000
+## 18 Office Theme Two Content    ftr  6       Footer Placeholder 5 3.416667
+## 19 Office Theme Two Content sldNum  7 Slide Number Placeholder 6 7.166667
+##         offy       cx        cy
+## 14 0.3003478 9.000000 1.2500000
+## 15 1.7500000 4.416667 4.9496533
+## 16 1.7500000 4.416667 4.9496533
+## 17 6.9513889 2.333333 0.3993056
+## 18 6.9513889 3.166667 0.3993056
+## 19 6.9513889 2.333333 0.3993056</code></pre>
 </div>
 <div id="write-the-powerpoint" class="section level3">
 <h3>Write the PowerPoint</h3>
@@ -282,7 +282,7 @@ doc &lt;-<span class="st"> </span>doc <span class="op">%&gt;%</span>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">slide_summary</span>(doc)</code></pre></div>
 <pre><code>## # A tibble: 1 x 8
 ##    type    id ph_label  offx  offy    cx    cy
-##   &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+##   &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1  body     2             NA    NA    NA    NA
 ## # ... with 1 more variables: text &lt;chr&gt;</code></pre>
 <p>In the following example, shape corresponding to <code>type &quot;body&quot;</code><br />
