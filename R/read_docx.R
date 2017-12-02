@@ -1,11 +1,11 @@
 #' @export
-#' @title open a connexion to a 'Word' file
+#' @title open a connection to a 'Word' file
 #' @description read and import a docx file as an R object
 #' representing the document.
-#' @param path path to the docx file to use a base document.
-#' @param x a rdocx object
+#' @param path path to the docx file to use as base document.
+#' @param x an rdocx object
 #' @examples
-#' # create a rdocx object with default template ---
+#' # create an rdocx object with default template ---
 #' read_docx()
 #'
 #' @importFrom xml2 read_xml xml_length xml_find_first as_list
@@ -53,7 +53,6 @@ read_docx <- function( path = NULL ){
 #' }
 #'
 #' @importFrom xml2 xml_attr<- xml_find_all xml_find_all
-#' @importFrom purrr walk2
 print.rdocx <- function(x, target = NULL, ...){
 
   if( is.null( target) ){
@@ -77,10 +76,10 @@ print.rdocx <- function(x, target = NULL, ...){
 
   # make all id unique
   all_uid <- xml_find_all(x$doc_obj$get(), "//*[@id]")
-  walk2(all_uid, seq_along(all_uid), function(x, z) {
-    xml_attr(x, "id") <- z
-    x
-  })
+
+  for(z in seq_along(all_uid) ){
+    xml_attr(all_uid[[z]], "id") <- z
+  }
 
   sections_ <- xml_find_all(x$doc_obj$get(), "//w:sectPr")
   last_sect <- sections_[length(sections_)]
@@ -102,21 +101,20 @@ print.rdocx <- function(x, target = NULL, ...){
 
 #' @export
 #' @examples
-#' # how many element are there in the document ----
+#' # how many elements are there in the document ----
 #' length( read_docx() )
 #'
 #' @importFrom xml2 read_xml xml_length xml_find_first
 #' @rdname read_docx
 length.rdocx <- function( x ){
-  xml_find_first(x$doc_obj$get(), "/w:document/w:body") %>% xml_length()
-
+  xml_length( xml_find_first(x$doc_obj$get(), "/w:document/w:body") )
 }
 
 #' @export
 #' @title read Word styles
 #' @description read Word styles and get results in
 #' a tidy data.frame.
-#' @param x a rdocx object
+#' @param x an rdocx object
 #' @examples
 #' library(magrittr)
 #' read_docx() %>% styles_info()
@@ -146,9 +144,9 @@ doc_properties <- function( x ){
 #' @description set Word or PowerPoint document properties. These are not visible
 #' in the document but are available as metadata of the document.
 #' @note
-#' Fields "last modified" and "last modified by" will be automatically be updated
-#' when file will be written.
-#' @param x a rdocx or rpptx object
+#' The "last modified" and "last modified by" fields will be automatically be updated
+#' when the file is written.
+#' @param x an rdocx or rpptx object
 #' @param title,subject,creator,description text fields
 #' @param created a date object
 #' @examples
@@ -179,7 +177,7 @@ set_doc_properties <- function( x, title = NULL, subject = NULL,
 #' @title Word page layout
 #' @description get page width, page height and margins (in inches). The return values
 #' are those corresponding to the section where the cursor is.
-#' @param x a \code{rdocx} object
+#' @param x an \code{rdocx} object
 #' @examples
 #' docx_dim(read_docx())
 docx_dim <- function(x){
@@ -198,7 +196,7 @@ docx_dim <- function(x){
 #' @title List Word bookmarks
 #' @description List bookmarks id that can be found in an \code{rdocx}
 #' object.
-#' @param x a \code{rdocx} object
+#' @param x an \code{rdocx} object
 #' @examples
 #' library(magrittr)
 #'

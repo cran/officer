@@ -19,16 +19,16 @@ body_add_break <- function( x, pos = "after"){
 
 #' @export
 #' @title add image
-#' @description add an image into an rdocx object
+#' @description add an image into an rdocx object.
 #' @inheritParams body_add_break
-#' @param src image filename
+#' @param src image filename, the basename of the file must not contain any blank.
 #' @param style paragraph style
 #' @param width height in inches
 #' @param height height in inches
 #' @examples
 #' doc <- read_docx()
 #'
-#' img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
+#' img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
 #' if( file.exists(img.file) ){
 #'   doc <- body_add_img(x = doc, src = img.file, height = 1.06, width = 1.39 )
 #' }
@@ -66,20 +66,23 @@ body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 #' @param height height in inches
 #' @param ... Arguments to be passed to png function.
 #' @importFrom grDevices png dev.off
-#' @import ggplot2
 #' @examples
-#' library(ggplot2)
+#' if( require("ggplot2") ){
+#'   doc <- read_docx()
 #'
-#' doc <- read_docx()
+#'   gg_plot <- ggplot(data = iris ) +
+#'     geom_point(mapping = aes(Sepal.Length, Petal.Length))
 #'
-#' gg_plot <- ggplot(data = iris ) +
-#'   geom_point(mapping = aes(Sepal.Length, Petal.Length))
+#'   if( capabilities(what = "png") )
+#'     doc <- body_add_gg(doc, value = gg_plot, style = "centered" )
 #'
-#' if( capabilities(what = "png") )
-#'   doc <- body_add_gg(doc, value = gg_plot, style = "centered" )
-#'
-#' print(doc, target = "body_add_gg.docx" )
+#'   print(doc, target = "body_add_gg.docx" )
+#' }
 body_add_gg <- function( x, value, width = 6, height = 5, style = NULL, ... ){
+
+  if( !requireNamespace("ggplot2") )
+    stop("package ggplot2 is required to use this function")
+
   stopifnot(inherits(value, "gg") )
   file <- tempfile(fileext = ".png")
   options(bitmapType='cairo')
@@ -168,12 +171,21 @@ body_add_fpar <- function( x, value, style = NULL, pos = "after" ){
 #' @title add table
 #' @description add a table into an rdocx object
 #' @param x a docx device
-#' @param value a data.frame
+#' @param value a data.frame to add as a table
 #' @param style table style
 #' @param pos where to add the new element relative to the cursor,
-#' one of "after", "before", "on".
+#' one of after", "before", "on".
 #' @param header display header if TRUE
-#' @param first_row,last_row,first_column,last_column,no_hband,no_vband logical for Word table options
+#' @param first_row Specifies that the first column conditional formatting should be
+#' applied. Details for this and other conditional formatting options can be found
+#' \href{here}{http://officeopenxml.com/WPtblLook.php}.
+#' @param last_row Specifies that the first column conditional formatting should be applied.
+#' @param first_column Specifies that the first column conditional formatting should
+#' be applied.
+#' @param last_column Specifies that the first column conditional formatting should be
+#' applied.
+#' @param no_hband Specifies that the first column conditional formatting should be applied.
+#' @param no_vband Specifies that the first column conditional formatting should be applied.
 #' @examples
 #' library(magrittr)
 #'
@@ -188,6 +200,8 @@ body_add_table <- function( x, value, style = NULL, pos = "after", header = TRUE
                             no_hband = FALSE, no_vband = TRUE ){
 
   stopifnot(is.data.frame(value))
+  if(inherits(value, "tbl_df")) value <-
+      as.data.frame(value, check.names = FALSE, stringsAsFactors = FALSE )
 
   if( is.null(style) )
     style <- x$default_styles$table
@@ -203,8 +217,6 @@ body_add_table <- function( x, value, style = NULL, pos = "after", header = TRUE
 
   body_add_xml(x = x, str = xml_elt, pos = pos)
 }
-
-
 
 #' @export
 #' @title add table of content
@@ -242,8 +254,6 @@ body_add_toc <- function( x, level = 3, pos = "after", style = NULL, separator =
 
 }
 
-
-
 #' @export
 #' @title add an xml string as document element
 #' @description Add an xml string as document element in the document. This function
@@ -280,9 +290,6 @@ body_add_xml <- function(x, str, pos){
   x
 }
 
-
-
-
 #' @export
 #' @importFrom uuid UUIDgenerate
 #' @title add bookmark
@@ -313,8 +320,6 @@ body_bookmark <- function(x, id){
 
   x
 }
-
-
 
 #' @export
 #' @title remove an element
@@ -360,16 +365,15 @@ body_remove <- function(x){
 }
 
 #' @export
-#' @importFrom purrr is_scalar_character
 #' @title replace text at a bookmark location
 #' @description replace text content enclosed in a bookmark
-#' by another text. A bookmark will be considered as valid if enclosing words
-#' within a paragraph, i.e. a bookmark along two or more paragraphs is invalid,
-#' a bookmark set on a whole paragraph is also invalid, bookmarking few words inside a paragraph
-#' is valid.
+#' with different text. A bookmark will be considered as valid if enclosing words
+#' within a paragraph; i.e., a bookmark along two or more paragraphs is invalid,
+#' a bookmark set on a whole paragraph is also invalid, but bookmarking few words
+#' inside a paragraph is valid.
 #' @param x a docx device
 #' @param bookmark bookmark id
-#' @param value a character
+#' @param value the replacement string, of type character
 #' @examples
 #' library(magrittr)
 #' doc <- read_docx() %>%
@@ -383,25 +387,111 @@ body_replace_at <- function( x, bookmark, value ){
   x
 }
 
+#' @export
+#' @title Replace text anywhere in the document, or at a cursor
+#' @description Replace all occurrences of old_value with new_value. This method
+#' uses \code{\link{grepl}}/\code{\link{gsub}} for pattern matching; you may
+#' supply arguments as required (and therefore use \code{\link{regex}} features)
+#' using the optional \code{...} argument.
+#'
+#' Note that by default, grepl/gsub will use \code{fixed=FALSE}, which means
+#' that \code{old_value} and \code{new_value} will be interepreted as regular
+#' expressions.
+#'
+#' \strong{Chunking of text}
+#'
+#' Note that the behind-the-scenes representation of text in a Word document is
+#' frequently not what you might expect! Sometimes a paragraph of text is broken
+#' up (or "chunked") into several "runs," as a result of style changes, pauses
+#' in text entry, later revisions and edits, etc. If you have not styled the
+#' text, and have entered it in an "all-at-once" fashion, e.g. by pasting it or
+#' by outputing it programmatically into your Word document, then this will
+#' likely not be a problem. If you are working with a manually-edited document,
+#' however, this can lead to unexpected failures to find text.
+#'
+#' You can use the officer function \code{\link{docx_show_chunk}} to
+#' show how the paragraph of text at the current cursor has been chunked into
+#' runs, and what text is in each chunk. This can help troubleshoot unexpected
+#' failures to find text.
+#' @seealso \code{\link{grep}}, \code{\link{regex}}, \code{\link{docx_show_chunk}}
+#' @author Frank Hangler, \email{frank@plotandscatter.com}
+#' @param x a docx device
+#' @param old_value the value to replace
+#' @param new_value the value to replace it with
+#' @param only_at_cursor if \code{TRUE}, only search-and-replace at the current
+#' cursor; if \code{FALSE} (default), search-and-replace in the entire document
+#' (this can be slow on large documents!)
+#' @param ... optional arguments to grepl/gsub (e.g. \code{fixed=TRUE})
+#' @examples
+#' library(magrittr)
+#'
+#' doc <- read_docx() %>%
+#'   body_add_par("Placeholder one") %>%
+#'   body_add_par("Placeholder two")
+#'
+#' # Show text chunk at cursor
+#' docx_show_chunk(doc)  # Output is 'Placeholder two'
+#'
+#' # Simple search-and-replace at current cursor, with regex turned off
+#' body_replace_all_text(doc, "Placeholder", "new", only_at_cursor=TRUE, fixed=TRUE)
+#' docx_show_chunk(doc)  # Output is 'new two'
+#'
+#' # Do the same, but in the entire document and ignoring case
+#' body_replace_all_text(doc, "placeholder", "new", only_at_cursor=FALSE, ignore.case=TRUE)
+#' cursor_backward(doc)
+#' docx_show_chunk(doc) # Output is 'new one'
+#'
+#' # Use regex : replace all words starting with "n" with the word "example"
+#' body_replace_all_text(doc, "\\bn.*?\\b", "example")
+#' docx_show_chunk(doc) # Output is 'example one'
+body_replace_all_text <- function( x, old_value, new_value, only_at_cursor = FALSE, ... ){
+  stopifnot(is_scalar_character(old_value),
+            is_scalar_character(new_value),
+            is_scalar_logical(only_at_cursor))
+  x$doc_obj$replace_all_text(old_value, new_value, only_at_cursor, ...)
+  x
+}
+
+#' @export
+#' @title Show underlying text tag structure
+#' @description Show the structure of text tags at the current cursor. This is
+#' most useful when trying to troubleshoot search-and-replace functionality
+#' using \code{\link{body_replace_all_text}}.
+#' @seealso \code{\link{body_replace_all_text}}
+#' @param x a docx device
+#' @examples
+#' library(magrittr)
+#'
+#' doc <- read_docx() %>%
+#'   body_add_par("Placeholder one") %>%
+#'   body_add_par("Placeholder two")
+#'
+#' # Show text chunk at cursor
+#' docx_show_chunk(doc)  # Output is 'Placeholder two'
+docx_show_chunk <- function( x ){
+  x$doc_obj$docx_show_chunk()
+  invisible(x)
+}
+
 
 #' @export
 #' @title add section
-#' @description add a section in a Word document. A section has effect
-#' on preceding paragraphs or tables.
+#' @description add a section in a Word document. A section affects
+#' preceding paragraphs or tables.
 #'
 #' @details
-#' A section start at the end of the previous section (or the beginning of
-#' the document if no preceding section exists), it stops where the section is declared.
+#' A section starts at the end of the previous section (or the beginning of
+#' the document if no preceding section exists), and stops where the section is declared.
 #' The function \code{body_end_section()} is reflecting that Word concept.
 #' The function \code{body_default_section()} is only modifying the default section of
 #' the document.
 #' @importFrom xml2 xml_remove
 #' @param x an rdocx object
 #' @param landscape landscape orientation
-#' @param colwidths columns widths in percent, if 3 values, 3 columns will be produced.
-#' Sum of this argument should be 1.
+#' @param colwidths columns widths as percentages, summing to 1. If 3 values, 3 columns
+#' will be produced.
 #' @param space space in percent between columns.
-#' @param sep if TRUE a line is sperating columns.
+#' @param sep if TRUE a line is separating columns.
 #' @param continuous TRUE for a continuous section break.
 #' @examples
 #' library(magrittr)

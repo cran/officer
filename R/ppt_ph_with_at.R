@@ -68,7 +68,7 @@ ph_empty_at <- function( x, left, top, width, height, bg = "transparent", rot = 
 #' doc <- read_pptx()
 #' doc <- add_slide(doc, layout = "Title and Content", master = "Office Theme")
 #'
-#' img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
+#' img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
 #' if( file.exists(img.file) ){
 #'   doc <- ph_with_img_at(x = doc, src = img.file, height = 1.06, width = 1.39,
 #'     left = 4, top = 4, rot = 45 )
@@ -128,7 +128,7 @@ ph_with_table_at <- function( x, value, left, top, width, height,
 
   slide <- x$slide$get_slide(x$cursor)
 
-  xml_elt <- table_shape(x = x, value = value, left = left, top = top, width = width, height = height,
+  xml_elt <- table_shape(x = x, value = value, left = left*914400, top = top*914400, width = width*914400, height = height*914400,
                          first_row = first_row, first_column = first_column,
                          last_row = last_row, last_column = last_column, header = header )
 
@@ -138,3 +138,21 @@ ph_with_table_at <- function( x, value, left, top, width, height,
   x
 }
 
+#' @export
+#' @param left,top location of the new shape on the slide
+#' @importFrom grDevices png dev.off
+#' @rdname ph_with_gg
+ph_with_gg_at <- function( x, value, width, height, left, top, ... ){
+
+  if( !requireNamespace("ggplot2") )
+    stop("package ggplot2 is required to use this function")
+
+  stopifnot(inherits(value, "gg") )
+  file <- tempfile(fileext = ".png")
+  options(bitmapType='cairo')
+  png(filename = file, width = width, height = height, units = "in", res = 300, ...)
+  print(value)
+  dev.off()
+  on.exit(unlink(file))
+  ph_with_img_at( x, src = file, width = width, height = height, left = left, top = top )
+}

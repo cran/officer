@@ -93,7 +93,7 @@ slip_in_text <- function( x, str, style = NULL, pos = "after" ){
 #' @title append an image
 #' @description append an image into a paragraph of an rdocx object
 #' @param x an rdocx object
-#' @param src image filename
+#' @param src image filename, the basename of the file must not contain any blank.
 #' @param style text style
 #' @param width height in inches
 #' @param height height in inches
@@ -102,7 +102,7 @@ slip_in_text <- function( x, str, style = NULL, pos = "after" ){
 #' @importFrom xml2 as_xml_document xml_find_first
 #' @examples
 #' library(magrittr)
-#' img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
+#' img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
 #' x <- read_docx() %>%
 #'   body_add_par("R logo: ", style = "Normal") %>%
 #'   slip_in_img(src = img.file, style = "strong", width = .3, height = .3)
@@ -122,7 +122,7 @@ slip_in_img <- function( x, src, style = NULL, width, height, pos = "after" ){
   x <- docx_reference_img(x, src)
   xml_elt <- wml_link_images( x, xml_elt )
 
-  drawing_node <- as_xml_document(xml_elt) %>% xml_find_first("//w:r/w:drawing")
+  drawing_node <- xml_find_first(as_xml_document(xml_elt), "//w:r/w:drawing")
 
   wml_ <- paste0(wml_with_ns("w:r"), "<w:rPr><w:rStyle w:val=\"%s\"/></w:rPr>%s</w:r>")
   xml_elt <- sprintf(wml_, style_id, as.character(drawing_node) )

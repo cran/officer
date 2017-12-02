@@ -30,4 +30,11 @@ Useful links:
 \author{
 \strong{Maintainer}: David Gohel \email{david.gohel@ardata.fr}
 
+Other contributors:
+\itemize{
+  \item Frank Hangler \email{frank@plotandscatter.com} (function body_replace_all_text) [contributor]
+  \item Liz Sander \email{lsander@civisanalytics.com} (several documentation fixes) [contributor]
+  \item Jon Calder \email{jonmcalder@gmail.com} (update vignettes) [contributor]
+}
+
 }

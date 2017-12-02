@@ -72,56 +72,59 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <div id="import-word-document" class="section level2">
 <h2>Import Word document</h2>
-<p>Function <code>docx_summary</code> is returning content of a Word document.</p>
+<p>The function <code>docx_summary()</code> returns the content of a Word document.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(officer)
 example_docx &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="dt">package =</span> <span class="st">&quot;officer&quot;</span>, <span class="st">&quot;doc_examples/example.docx&quot;</span>)
 doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>(example_docx)
 content &lt;-<span class="st"> </span><span class="kw">docx_summary</span>(doc)
-content</code></pre></div>
-<pre><code>## # A tibble: 69 x 11
-##    doc_index content_type     style_name
-##        &lt;int&gt;        &lt;chr&gt;          &lt;chr&gt;
-##  1         1    paragraph      heading 1
-##  2         2    paragraph           &lt;NA&gt;
-##  3         3    paragraph      heading 1
-##  4         4    paragraph List Paragraph
-##  5         5    paragraph List Paragraph
-##  6         6    paragraph List Paragraph
-##  7         7    paragraph      heading 2
-##  8         8    paragraph List Paragraph
-##  9         9    paragraph List Paragraph
-## 10        10    paragraph List Paragraph
-## # ... with 59 more rows, and 8 more variables: text &lt;chr&gt;, level &lt;dbl&gt;,
-## #   num_id &lt;int&gt;, row_id &lt;int&gt;, is_header &lt;lgl&gt;, cell_id &lt;dbl&gt;,
-## #   col_span &lt;dbl&gt;, row_span &lt;dbl&gt;</code></pre>
+<span class="kw">head</span>(content)</code></pre></div>
+<pre><code>##   doc_index content_type     style_name
+## 1         1    paragraph      heading 1
+## 2         2    paragraph           &lt;NA&gt;
+## 3         3    paragraph      heading 1
+## 4         4    paragraph List Paragraph
+## 5         5    paragraph List Paragraph
+## 6         6    paragraph List Paragraph
+##                                                        text level num_id
+## 1                                                   Title 1    NA     NA
+## 2 Lorem ipsum dolor sit amet, consectetur adipiscing elit.     NA     NA
+## 3                                                   Title 2    NA     NA
+## 4                                        Quisque tristique      1      2
+## 5                                 Augue nisi, et convallis      1      2
+## 6                                       Sapien mollis nec.      1      2
+##   row_id is_header cell_id col_span row_span
+## 1     NA        NA      NA       NA       NA
+## 2     NA        NA      NA       NA       NA
+## 3     NA        NA      NA       NA       NA
+## 4     NA        NA      NA       NA       NA
+## 5     NA        NA      NA       NA       NA
+## 6     NA        NA      NA       NA       NA</code></pre>
 <p>Explore the results:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
-content <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(content_type) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarise</span>(<span class="dt">n =</span> <span class="kw">n_distinct</span>(doc_index))</code></pre></div>
-<pre><code>## # A tibble: 2 x 2
-##   content_type     n
-##          &lt;chr&gt; &lt;int&gt;
-## 1    paragraph    17
-## 2   table cell     1</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tapply</span>(content<span class="op">$</span>doc_index, 
+       content<span class="op">$</span>content_type, 
+       <span class="cf">function</span>(x) <span class="kw">length</span>(<span class="kw">unique</span>(x)))</code></pre></div>
+<pre><code>##  paragraph table cell 
+##         17          1</code></pre>
 <p>To get all paragraphs:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">par_data &lt;-<span class="st"> </span>content <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(content_type <span class="op">%in%</span><span class="st"> &quot;paragraph&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">select</span>(doc_index, style_name, text, level, num_id) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="co"># let's make text shorter so it can be display in that vignette</span>
-<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">text =</span> <span class="kw">substr</span>(text, <span class="dt">start =</span> <span class="dv">1</span>, 
-                       <span class="dt">stop =</span> <span class="kw">ifelse</span>(<span class="kw">nchar</span>(text)<span class="op">&lt;</span><span class="dv">30</span>, <span class="kw">nchar</span>(text), <span class="dv">30</span>) ))
-
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">par_data &lt;-<span class="st"> </span><span class="kw">subset</span>(content, content_type <span class="op">%in%</span><span class="st"> &quot;paragraph&quot;</span>) 
+par_data &lt;-<span class="st"> </span>par_data[, <span class="kw">c</span>(<span class="st">&quot;doc_index&quot;</span>, <span class="st">&quot;style_name&quot;</span>, 
+                         <span class="st">&quot;text&quot;</span>, <span class="st">&quot;level&quot;</span>, <span class="st">&quot;num_id&quot;</span>) ]
+par_data<span class="op">$</span>text &lt;-<span class="st"> </span><span class="kw">with</span>(par_data, {
+  <span class="kw">substr</span>(
+    text, <span class="dt">start =</span> <span class="dv">1</span>, 
+    <span class="dt">stop =</span> <span class="kw">ifelse</span>(<span class="kw">nchar</span>(text)<span class="op">&lt;</span><span class="dv">30</span>, <span class="kw">nchar</span>(text), <span class="dv">30</span>) )
+})
 par_data</code></pre></div>
-<pre><code>## # A tibble: 17 x 5
-##    doc_index     style_name                           text level num_id
-##        &lt;int&gt;          &lt;chr&gt;                          &lt;chr&gt; &lt;dbl&gt;  &lt;int&gt;
-##  1         1      heading 1                        Title 1    NA     NA
-##  2         2           &lt;NA&gt; Lorem ipsum dolor sit amet, co    NA     NA
-##  3         3      heading 1                        Title 2    NA     NA
-##  4         4 List Paragraph             Quisque tristique      1      2
-##  5         5 List Paragraph      Augue nisi, et convallis      1      2
-##  6         6 List Paragraph            Sapien mollis nec.      1      2
-##  7         7      heading 2                    Sub title 1    NA     NA
-##  8         8 List Paragraph             Quisque tristique      1      1
-##  9         9 List Paragraph      Augue nisi, et convallis      1      1
+<pre><code>##    doc_index     style_name                           text level num_id
+## 1          1      heading 1                        Title 1    NA     NA
+## 2          2           &lt;NA&gt; Lorem ipsum dolor sit amet, co    NA     NA
+## 3          3      heading 1                        Title 2    NA     NA
+## 4          4 List Paragraph             Quisque tristique      1      2
+## 5          5 List Paragraph      Augue nisi, et convallis      1      2
+## 6          6 List Paragraph            Sapien mollis nec.      1      2
+## 7          7      heading 2                    Sub title 1    NA     NA
+## 8          8 List Paragraph             Quisque tristique      1      1
+## 9          9 List Paragraph      Augue nisi, et convallis      1      1
 ## 10        10 List Paragraph            Sapien mollis nec.      1      1
 ## 11        11           &lt;NA&gt;                                   NA     NA
 ## 12        12           &lt;NA&gt; Phasellus nec nunc vitae nulla    NA     NA
@@ -133,127 +136,122 @@ par_data</code></pre></div>
 <div id="word-tables" class="section level3">
 <h3>Word tables</h3>
 <p>Tables are unstacked:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">table_cells &lt;-<span class="st"> </span>content <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(content_type <span class="op">%in%</span><span class="st"> &quot;table cell&quot;</span>)
-<span class="kw">print</span>(table_cells)</code></pre></div>
-<pre><code>## # A tibble: 52 x 11
-##    doc_index content_type    style_name        text level num_id row_id
-##        &lt;int&gt;        &lt;chr&gt;         &lt;chr&gt;       &lt;chr&gt; &lt;dbl&gt;  &lt;int&gt;  &lt;int&gt;
-##  1        16   table cell Light Shading      Petals    NA     NA      1
-##  2        16   table cell Light Shading 5,621498349    NA     NA      2
-##  3        16   table cell Light Shading 4,994616997    NA     NA      3
-##  4        16   table cell Light Shading 4,767504884    NA     NA      4
-##  5        16   table cell Light Shading  25,9242382    NA     NA      5
-##  6        16   table cell Light Shading 6,489375001    NA     NA      6
-##  7        16   table cell Light Shading   5,7858682    NA     NA      7
-##  8        16   table cell Light Shading 5,645575295    NA     NA      8
-##  9        16   table cell Light Shading 4,828953215    NA     NA      9
-## 10        16   table cell Light Shading 6,783500773    NA     NA     10
-## # ... with 42 more rows, and 4 more variables: is_header &lt;lgl&gt;,
-## #   cell_id &lt;dbl&gt;, col_span &lt;dbl&gt;, row_span &lt;dbl&gt;</code></pre>
-<p>Cells positions and values are dispatched in columns <code>row_id</code>, <code>cell_id</code>, <code>text</code> and <code>is_header</code> (a logical column indicating if the cell is part of header or not). Note that content (column <code>text</code>) is a character vector.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">table_body &lt;-<span class="st"> </span>table_cells <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">filter</span>(<span class="op">!</span>is_header) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">select</span>(row_id, cell_id, text)
-table_body</code></pre></div>
-<pre><code>## # A tibble: 48 x 3
-##    row_id cell_id        text
-##     &lt;int&gt;   &lt;dbl&gt;       &lt;chr&gt;
-##  1      2       1 5,621498349
-##  2      3       1 4,994616997
-##  3      4       1 4,767504884
-##  4      5       1  25,9242382
-##  5      6       1 6,489375001
-##  6      7       1   5,7858682
-##  7      8       1 5,645575295
-##  8      9       1 4,828953215
-##  9     10       1 6,783500773
-## 10     11       1 5,395076839
-## # ... with 38 more rows</code></pre>
-<p>Reshape data with columns <code>row_id</code>, <code>cell_id</code> and <code>text</code>, it’s easy to do with <code>tidyr</code> :</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">if</span>( <span class="kw">require</span>(<span class="st">&quot;tidyr&quot;</span>))
-  table_body <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">spread</span>(cell_id, text)  </code></pre></div>
-<pre><code>## Loading required package: tidyr</code></pre>
-<pre><code>## # A tibble: 12 x 5
-##    row_id         `1`         `2`                   `3`
-##  *  &lt;int&gt;       &lt;chr&gt;       &lt;chr&gt;                 &lt;chr&gt;
-##  1      2 5,621498349        &lt;NA&gt; 2,46210657918,2034091
-##  2      3 4,994616997          AA           2,429320759
-##  3      4 4,767504884        &lt;NA&gt;                   AAA
-##  4      5  25,9242382        &lt;NA&gt;           2,066051345
-##  5      6 6,489375001 25,21130805           2,901582763
-##  6      7   5,7858682 25,52433147           2,655642742
-##  7      8 5,645575295 Merged cell           2,278691288
-##  8      9 4,828953215        &lt;NA&gt;           2,238467716
-##  9     10 6,783500773        &lt;NA&gt;           2,202762147
-## 10     11 5,395076839        &lt;NA&gt;           2,538375992
-## 11     12 4,683617783  29,2459239           2,601945544
-## 12     13        Note        &lt;NA&gt;                  &lt;NA&gt;
-## # ... with 1 more variables: `4` &lt;chr&gt;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">table_cells &lt;-<span class="st"> </span><span class="kw">subset</span>(content, content_type <span class="op">%in%</span><span class="st"> &quot;table cell&quot;</span>)
+<span class="kw">print</span>(<span class="kw">head</span>( table_cells) )</code></pre></div>
+<pre><code>##      doc_index content_type    style_name        text level num_id row_id
+## 1.1         16   table cell Light Shading      Petals    NA     NA      1
+## 1.11        16   table cell Light Shading 5,621498349    NA     NA      2
+## 1.12        16   table cell Light Shading 4,994616997    NA     NA      3
+## 1.13        16   table cell Light Shading 4,767504884    NA     NA      4
+## 1.14        16   table cell Light Shading  25,9242382    NA     NA      5
+## 1.15        16   table cell Light Shading 6,489375001    NA     NA      6
+##      is_header cell_id col_span row_span
+## 1.1       TRUE       1        1        1
+## 1.11     FALSE       1        2        1
+## 1.12     FALSE       1        1        1
+## 1.13     FALSE       1        1        1
+## 1.14     FALSE       1        2        1
+## 1.15     FALSE       1        1        1</code></pre>
+<p>Cells positions and values are dispatched in columns <code>row_id</code>, <code>cell_id</code>, <code>text</code> and <code>is_header</code> (a logical column indicating if the cell is part of a header or not). Note that the content itself (column <code>text</code>) is a character vector.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">table_body &lt;-<span class="st"> </span><span class="kw">subset</span>(table_cells, <span class="op">!</span>is_header)
+table_body &lt;-<span class="st"> </span>table_body[,<span class="kw">c</span>(<span class="st">&quot;row_id&quot;</span>, <span class="st">&quot;cell_id&quot;</span>, <span class="st">&quot;text&quot;</span>)]
+<span class="kw">head</span>(table_body)</code></pre></div>
+<pre><code>##      row_id cell_id        text
+## 1.11      2       1 5,621498349
+## 1.12      3       1 4,994616997
+## 1.13      4       1 4,767504884
+## 1.14      5       1  25,9242382
+## 1.15      6       1 6,489375001
+## 1.16      7       1   5,7858682</code></pre>
+<p>Reshaping the data with columns <code>row_id</code>, <code>cell_id</code> and <code>text</code> would display something close to the orginal table:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tapply</span>(table_body<span class="op">$</span>text, 
+       <span class="kw">list</span>(<span class="dt">row_id =</span> table_body<span class="op">$</span>row_id, 
+            <span class="dt">cell_id =</span> table_body<span class="op">$</span>cell_id
+            ), 
+       <span class="dt">FUN =</span> I
+       )</code></pre></div>
+<pre><code>##       cell_id
+## row_id 1             2             3                      
+##     2  &quot;5,621498349&quot; NA            &quot;2,46210657918,2034091&quot;
+##     3  &quot;4,994616997&quot; &quot;AA&quot;          &quot;2,429320759&quot;          
+##     4  &quot;4,767504884&quot; NA            &quot;AAA&quot;                  
+##     5  &quot;25,9242382&quot;  NA            &quot;2,066051345&quot;          
+##     6  &quot;6,489375001&quot; &quot;25,21130805&quot; &quot;2,901582763&quot;          
+##     7  &quot;5,7858682&quot;   &quot;25,52433147&quot; &quot;2,655642742&quot;          
+##     8  &quot;5,645575295&quot; &quot;Merged cell&quot; &quot;2,278691288&quot;          
+##     9  &quot;4,828953215&quot; NA            &quot;2,238467716&quot;          
+##     10 &quot;6,783500773&quot; NA            &quot;2,202762147&quot;          
+##     11 &quot;5,395076839&quot; NA            &quot;2,538375992&quot;          
+##     12 &quot;4,683617783&quot; &quot;29,2459239&quot;  &quot;2,601945544&quot;          
+##     13 &quot;Note&quot;        NA            NA                     
+##       cell_id
+## row_id 4                                 
+##     2  NA                                
+##     3  &quot;17,65204912&quot;                     
+##     4  NA                                
+##     5  &quot;18,37915478&quot;                     
+##     6  &quot;17,3130473717,0721572418,2902189&quot;
+##     7  NA                                
+##     8  NA                                
+##     9  &quot;19,87376227&quot;                     
+##     10 &quot;19,85326662&quot;                     
+##     11 &quot;19,56545356&quot;                     
+##     12 &quot;18,95335451&quot;                     
+##     13 NA</code></pre>
 <p>Getting headers requires another operation:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">if</span>( <span class="kw">require</span>(<span class="st">&quot;tidyr&quot;</span>))
-  table_cells <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">    </span><span class="kw">filter</span>(is_header) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">    </span><span class="kw">select</span>(row_id, cell_id, text) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">    </span><span class="kw">spread</span>(cell_id, text)  </code></pre></div>
-<pre><code>## # A tibble: 1 x 5
-##   row_id    `1`       `2`   `3`   `4`
-## *  &lt;int&gt;  &lt;chr&gt;     &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
-## 1      1 Petals Internode Sepal Bract</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data &lt;-<span class="st"> </span><span class="kw">subset</span>(table_cells, is_header) 
+data &lt;-<span class="st"> </span>data[, <span class="kw">c</span>(<span class="st">&quot;row_id&quot;</span>, <span class="st">&quot;cell_id&quot;</span>, <span class="st">&quot;text&quot;</span>) ] 
+
+<span class="kw">tapply</span>(data<span class="op">$</span>text, 
+   <span class="kw">list</span>(<span class="dt">row_id =</span> data<span class="op">$</span>row_id, 
+        <span class="dt">cell_id =</span> data<span class="op">$</span>cell_id
+        ), <span class="dt">FUN =</span> I )</code></pre></div>
+<pre><code>##       cell_id
+## row_id 1        2           3       4      
+##      1 &quot;Petals&quot; &quot;Internode&quot; &quot;Sepal&quot; &quot;Bract&quot;</code></pre>
 </div>
 </div>
 <div id="import-powerpoint-document" class="section level2">
 <h2>Import PowerPoint document</h2>
-<p>Function <code>pptx_summary</code> is returning content of a PowerPoint document</p>
+<p>The function <code>pptx_summary()</code> returns the content of a PowerPoint document.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">example_pptx &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="dt">package =</span> <span class="st">&quot;officer&quot;</span>, <span class="st">&quot;doc_examples/example.pptx&quot;</span>)
 doc &lt;-<span class="st"> </span><span class="kw">read_pptx</span>(example_pptx)
 content &lt;-<span class="st"> </span><span class="kw">pptx_summary</span>(doc)
-content</code></pre></div>
-<pre><code>## # A tibble: 55 x 9
-##                 text    id content_type slide_id row_id cell_id col_span
-##                &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;   &lt;int&gt;    &lt;dbl&gt;
-##  1             Title    12    paragraph        1     NA      NA       NA
-##  2          A table     13    paragraph        1     NA      NA       NA
-##  3     and some text    13    paragraph        1     NA      NA       NA
-##  4 and some list (1)    13    paragraph        1     NA      NA       NA
-##  5 and some list (2)    13    paragraph        1     NA      NA       NA
-##  6         Header 1     18   table cell        1      1       1        1
-##  7          Header 2    18   table cell        1      1       2        1
-##  8          Header 3    18   table cell        1      1       3        1
-##  9                 A    18   table cell        1      2       1        1
-## 10             12.23    18   table cell        1      2       2        1
-## # ... with 45 more rows, and 2 more variables: row_span &lt;dbl&gt;,
-## #   media_file &lt;chr&gt;</code></pre>
+<span class="kw">head</span>(content)</code></pre></div>
+<pre><code>##                  text id content_type slide_id row_id cell_id col_span
+## 1               Title 12    paragraph        1     NA      NA       NA
+## 2            A table  13    paragraph        1     NA      NA       NA
+## 3       and some text 13    paragraph        1     NA      NA       NA
+## 4   and some list (1) 13    paragraph        1     NA      NA       NA
+## 5   and some list (2) 13    paragraph        1     NA      NA       NA
+## 1.1         Header 1  18   table cell        1      1       1        1
+##     row_span media_file
+## 1         NA       &lt;NA&gt;
+## 2         NA       &lt;NA&gt;
+## 3         NA       &lt;NA&gt;
+## 4         NA       &lt;NA&gt;
+## 5         NA       &lt;NA&gt;
+## 1.1        1       &lt;NA&gt;</code></pre>
 <p>Explore the results:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">content <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(content_type) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarise</span>(<span class="dt">n =</span> <span class="kw">n_distinct</span>(id))</code></pre></div>
-<pre><code>## # A tibble: 3 x 2
-##   content_type     n
-##          &lt;chr&gt; &lt;int&gt;
-## 1        image     1
-## 2    paragraph     5
-## 3   table cell     2</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">tapply</span>(content<span class="op">$</span>id, 
+       content<span class="op">$</span>content_type, 
+       <span class="cf">function</span>(x) <span class="kw">length</span>(<span class="kw">unique</span>(x)))</code></pre></div>
+<pre><code>##      image  paragraph table cell 
+##          1          5          2</code></pre>
 <p>To get all paragraphs:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">par_data &lt;-<span class="st"> </span>content <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(content_type <span class="op">%in%</span><span class="st"> &quot;paragraph&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">select</span>(id, text)
-
-par_data</code></pre></div>
-<pre><code>## # A tibble: 13 x 2
-##       id               text
-##    &lt;chr&gt;              &lt;chr&gt;
-##  1    12              Title
-##  2    13           A table 
-##  3    13      and some text
-##  4    13  and some list (1)
-##  5    13  and some list (2)
-##  6    15             R logo
-##  7     2                 Hi
-##  8     3           This is 
-##  9     3       an unordered
-## 10     3 list of paragraphs
-## 11     3                   
-## 12     3 This is an ordered
-## 13     3 list of paragraphs</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">par_data &lt;-<span class="st"> </span><span class="kw">subset</span>(content, 
+                   content_type <span class="op">%in%</span><span class="st"> &quot;paragraph&quot;</span>, 
+                   <span class="dt">select =</span> <span class="kw">c</span>(id, text) )
+<span class="kw">head</span>(par_data)</code></pre></div>
+<pre><code>##    id              text
+## 1  12             Title
+## 2  13          A table 
+## 3  13     and some text
+## 4  13 and some list (1)
+## 5  13 and some list (2)
+## 11 15            R logo</code></pre>
 <p>To get an image:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">image_row &lt;-<span class="st"> </span>content <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(content_type <span class="op">%in%</span><span class="st"> &quot;image&quot;</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">image_row &lt;-<span class="st"> </span><span class="kw">subset</span>(content, content_type <span class="op">%in%</span><span class="st"> &quot;image&quot;</span>)
 <span class="kw">media_extract</span>(doc, <span class="dt">path =</span> image_row<span class="op">$</span>media_file, <span class="dt">target =</span> <span class="st">&quot;extract.png&quot;</span>)</code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 <div class="figure">
@@ -263,36 +261,35 @@ par_data</code></pre></div>
 <div id="powerpoint-tables" class="section level3">
 <h3>PowerPoint tables</h3>
 <p>Tables are unstacked :</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">table_cells &lt;-<span class="st"> </span>content <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(content_type <span class="op">%in%</span><span class="st"> &quot;table cell&quot;</span>)
-table_cells</code></pre></div>
-<pre><code>## # A tibble: 41 x 9
-##              text    id content_type slide_id row_id cell_id col_span
-##             &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;    &lt;int&gt;  &lt;int&gt;   &lt;int&gt;    &lt;dbl&gt;
-##  1      Header 1     18   table cell        1      1       1        1
-##  2       Header 2    18   table cell        1      1       2        1
-##  3       Header 3    18   table cell        1      1       3        1
-##  4              A    18   table cell        1      2       1        1
-##  5          12.23    18   table cell        1      2       2        1
-##  6      blah blah    18   table cell        1      2       3        1
-##  7              B    18   table cell        1      3       1        1
-##  8           1.23    18   table cell        1      3       2        1
-##  9 blah blah blah    18   table cell        1      3       3        1
-## 10              B    18   table cell        1      4       1        1
-## # ... with 31 more rows, and 2 more variables: row_span &lt;dbl&gt;,
-## #   media_file &lt;chr&gt;</code></pre>
-<p>Cells positions and values are dispatched in columns <code>row_id</code>, <code>cell_id</code>, <code>text</code>. Note here there is no indicator for table header.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">if</span>( <span class="kw">require</span>(<span class="st">&quot;tidyr&quot;</span>))
-  table_cells <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>( id <span class="op">==</span><span class="st"> </span><span class="dv">18</span> ) <span class="op">%&gt;%</span><span class="st">  </span>
-<span class="st">    </span><span class="kw">select</span>(row_id, cell_id, text) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">    </span><span class="kw">spread</span>(cell_id, text)  </code></pre></div>
-<pre><code>## # A tibble: 5 x 4
-##   row_id       `1`      `2`            `3`
-## *  &lt;int&gt;     &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;
-## 1      1 Header 1  Header 2       Header 3
-## 2      2         A    12.23      blah blah
-## 3      3         B     1.23 blah blah blah
-## 4      4         B      9.0          Salut
-## 5      5         C        6          Hello</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">table_cells &lt;-<span class="st"> </span><span class="kw">subset</span>(content, content_type <span class="op">%in%</span><span class="st"> &quot;table cell&quot;</span>)
+<span class="kw">head</span>(table_cells)</code></pre></div>
+<pre><code>##           text id content_type slide_id row_id cell_id col_span row_span
+## 1.1  Header 1  18   table cell        1      1       1        1        1
+## 1.4          A 18   table cell        1      2       1        1        1
+## 1.7          B 18   table cell        1      3       1        1        1
+## 1.10         B 18   table cell        1      4       1        1        1
+## 1.13         C 18   table cell        1      5       1        1        1
+## 2.2   Header 2 18   table cell        1      1       2        1        1
+##      media_file
+## 1.1        &lt;NA&gt;
+## 1.4        &lt;NA&gt;
+## 1.7        &lt;NA&gt;
+## 1.10       &lt;NA&gt;
+## 1.13       &lt;NA&gt;
+## 2.2        &lt;NA&gt;</code></pre>
+<p>Cells positions and values are dispatched in columns <code>row_id</code>, <code>cell_id</code>, <code>text</code>. Note that here there is no indicator for the table header.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data &lt;-<span class="st"> </span><span class="kw">subset</span>(table_cells, id <span class="op">==</span><span class="st"> </span><span class="dv">18</span>, <span class="kw">c</span>(row_id, cell_id, text) )
+<span class="kw">tapply</span>(data<span class="op">$</span>text, 
+   <span class="kw">list</span>(<span class="dt">row_id =</span> data<span class="op">$</span>row_id, 
+        <span class="dt">cell_id =</span> data<span class="op">$</span>cell_id
+        ), <span class="dt">FUN =</span> I )</code></pre></div>
+<pre><code>##       cell_id
+## row_id 1           2          3               
+##      1 &quot;Header 1 &quot; &quot;Header 2&quot; &quot;Header 3&quot;      
+##      2 &quot;A&quot;         &quot;12.23&quot;    &quot;blah blah&quot;     
+##      3 &quot;B&quot;         &quot;1.23&quot;     &quot;blah blah blah&quot;
+##      4 &quot;B&quot;         &quot;9.0&quot;      &quot;Salut&quot;         
+##      5 &quot;C&quot;         &quot;6&quot;        &quot;Hello&quot;</code></pre>
 </div>
 </div>
 

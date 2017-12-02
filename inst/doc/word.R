@@ -38,38 +38,39 @@ my_doc <- my_doc %>%
 print(my_doc, target = "assets/docx/first_example.docx")
 
 ## ----echo=FALSE----------------------------------------------------------
-office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/first_example.docx" ) )
+office_doc_link(url = paste0("https://davidgohel.github.io/officer/articles/", "assets/docx/first_example.docx"))
 
 ## ----message=FALSE-------------------------------------------------------
-library(dplyr)
 read_docx() %>% styles_info() %>% 
-  dplyr::filter( style_type %in% "paragraph" )
+  subset( style_type %in% "paragraph" )
 
 ## ------------------------------------------------------------------------
-library(ggplot2)
-gg <- ggplot(data = iris, aes(Sepal.Length, Petal.Length)) + 
-  geom_point()
-
-read_docx() %>% 
-  body_add_par(value = "Table of content", style = "heading 1") %>% 
-  body_add_toc(level = 2) %>% 
-  body_add_break() %>% 
-
-  body_add_par(value = "dataset iris", style = "heading 2") %>% 
-  body_add_table(value = head(iris), style = "table_template" ) %>% 
+if( require("ggplot2") ){
+  gg <- ggplot(data = iris, aes(Sepal.Length, Petal.Length)) + 
+    geom_point()
   
-  body_add_par(value = "plot examples", style = "heading 1") %>% 
-  body_add_gg(value = gg, style = "centered" ) %>% 
-
-  print(target = "assets/docx/body_add_demo.docx") %>% 
-  invisible()
-
+  read_docx() %>% 
+    body_add_par(value = "Table of content", style = "heading 1") %>% 
+    body_add_toc(level = 2) %>% 
+    body_add_break() %>% 
+  
+    body_add_par(value = "dataset iris", style = "heading 2") %>% 
+    body_add_table(value = head(iris), style = "table_template" ) %>% 
+    
+    body_add_par(value = "plot examples", style = "heading 1") %>% 
+    body_add_gg(value = gg, style = "centered" ) %>% 
+  
+    print(target = "assets/docx/body_add_demo.docx") %>% 
+    invisible()
+}
 
 ## ----echo=FALSE----------------------------------------------------------
-office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/body_add_demo.docx" ) )
+if( require("ggplot2") ){
+  office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/body_add_demo.docx" ) )
+}
 
 ## ------------------------------------------------------------------------
-img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
+img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
 read_docx() %>%
   body_add_par("R logo: ", style = "Normal") %>%
   slip_in_img(src = img.file, style = "strong", 
@@ -167,6 +168,34 @@ my_doc <- read_docx(path = "assets/docx/replace_template.docx")  %>%
 
 print(my_doc, target = "assets/docx/replace_doc.docx")
 
+## ----results='hide'------------------------------------------------------
+doc <- read_docx() %>%
+  body_add_par("centered text", style = "centered") %>%
+  slip_in_text(". How are you", style = "strong") %>%
+  body_bookmark("text_to_replace") %>%
+  body_replace_at("text_to_replace", "not left aligned")
+
+## ----results='hide'------------------------------------------------------
+doc <- read_docx() %>%
+  body_add_par("Placeholder one") %>%
+  body_add_par("Placeholder two")
+
+# Show text chunk at cursor
+docx_show_chunk(doc)  # Output is 'Placeholder two'
+
+# Simple search-and-replace at current cursor, with regex turned off
+body_replace_all_text(doc, "Placeholder", "new", only_at_cursor = TRUE, fixed=TRUE)
+docx_show_chunk(doc)  # Output is 'new two'
+
+# Do the same, but in the entire document and ignoring case
+body_replace_all_text(doc, "placeholder", "new", only_at_cursor = FALSE, ignore.case=TRUE)
+cursor_backward(doc)
+docx_show_chunk(doc) # Output is 'new one'
+
+# Use regex : replace all words starting with "n" with the word "example"
+body_replace_all_text(doc, "\\bn.*?\\b", "example")
+docx_show_chunk(doc) # Output is 'example one'
+
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/replace_doc.docx" ) )
 
@@ -191,10 +220,12 @@ office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/",
 ## ------------------------------------------------------------------------
 library(magrittr)
 library(officer)
-library(ggplot2)
+if( require("ggplot2") ){
 
-gg1 <- ggplot(data = iris, aes(Sepal.Length, Petal.Length)) + geom_point()
-gg2 <- ggplot(data = iris, aes(Sepal.Length, Petal.Length, color = Species)) + geom_point()
+gg1 <- ggplot(data = iris, aes(Sepal.Length, Petal.Length)) + 
+  geom_point()
+gg2 <- ggplot(data = iris, aes(Sepal.Length, Petal.Length, color = Species)) + 
+  geom_point()
 
 
 doc <- read_docx() %>% 
@@ -232,7 +263,10 @@ doc <- read_docx() %>%
   body_add_toc(style = "graphic title")
 
 print(doc, target = "assets/docx/toc_and_captions.docx") %>% invisible()
+}
 
 ## ----echo=FALSE----------------------------------------------------------
-office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/toc_and_captions.docx" ) )
+if( require("ggplot2") ){
+  office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/toc_and_captions.docx" ) )
+}
 

@@ -81,37 +81,67 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <ol style="list-style-type: decimal">
 <li>Start with <code>read_docx</code></li>
 </ol>
-<p>Use the function <code>read_docx</code> to create an r object representing a Word document.</p>
-<p>Initial Word file can be specified with argument <code>path</code>. If none is provided, this file will be an empty document located in the package directory. Formats and styles are defined in the initial file.</p>
+<p>Use the function <code>read_docx()</code> to create an R object representing a Word document.</p>
+<p>The initial Word file can be specified with the <code>path</code> argument. If none is provided, this file will be an empty document located in the package directory. Formats and styles are defined in the initial file.</p>
 <p>From the initial document, we will be able to use an object containing not only paragraph styles, character styles and table styles of the original document but also its content.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>() 
 <span class="kw">styles_info</span>(my_doc)</code></pre></div>
-<pre><code>## # A tibble: 21 x 5
-##    style_type       style_id             style_name is_custom is_default
-##         &lt;chr&gt;          &lt;chr&gt;                  &lt;chr&gt;     &lt;lgl&gt;      &lt;lgl&gt;
-##  1  paragraph         Normal                 Normal     FALSE       TRUE
-##  2  paragraph         Titre1              heading 1     FALSE      FALSE
-##  3  paragraph         Titre2              heading 2     FALSE      FALSE
-##  4  paragraph         Titre3              heading 3     FALSE      FALSE
-##  5  character Policepardfaut Default Paragraph Font     FALSE       TRUE
-##  6      table  TableauNormal           Normal Table     FALSE       TRUE
-##  7  numbering    Aucuneliste                No List     FALSE       TRUE
-##  8  character         strong                 strong      TRUE      FALSE
-##  9  paragraph       centered               centered      TRUE      FALSE
-## 10      table  tabletemplate         table_template      TRUE      FALSE
-## # ... with 11 more rows</code></pre>
+<pre><code>##    style_type            style_id             style_name is_custom
+## 1   paragraph              Normal                 Normal     FALSE
+## 2   paragraph              Titre1              heading 1     FALSE
+## 3   paragraph              Titre2              heading 2     FALSE
+## 4   paragraph              Titre3              heading 3     FALSE
+## 5   character      Policepardfaut Default Paragraph Font     FALSE
+## 6       table       TableauNormal           Normal Table     FALSE
+## 7   numbering         Aucuneliste                No List     FALSE
+## 8   character              strong                 strong      TRUE
+## 9   paragraph            centered               centered      TRUE
+## 10      table       tabletemplate         table_template      TRUE
+## 11      table Listeclaire-Accent2    Light List Accent 2     FALSE
+## 12  character           Titre1Car            Titre 1 Car      TRUE
+## 13  character           Titre2Car            Titre 2 Car      TRUE
+## 14  character           Titre3Car            Titre 3 Car      TRUE
+## 15  paragraph        graphictitle          graphic title      TRUE
+## 16  paragraph          tabletitle            table title      TRUE
+## 17      table       Professionnel     Table Professional     FALSE
+## 18  paragraph                 TM1                  toc 1     FALSE
+## 19  paragraph                 TM2                  toc 2     FALSE
+## 20  paragraph       Textedebulles           Balloon Text     FALSE
+## 21  character    TextedebullesCar    Texte de bulles Car      TRUE
+##    is_default
+## 1        TRUE
+## 2       FALSE
+## 3       FALSE
+## 4       FALSE
+## 5        TRUE
+## 6        TRUE
+## 7        TRUE
+## 8       FALSE
+## 9       FALSE
+## 10      FALSE
+## 11      FALSE
+## 12      FALSE
+## 13      FALSE
+## 14      FALSE
+## 15      FALSE
+## 16      FALSE
+## 17      FALSE
+## 18      FALSE
+## 19      FALSE
+## 20      FALSE
+## 21      FALSE</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Add elements to document</li>
 </ol>
 <blockquote>
-<p>By default new content is added at the end of the document. To understand how to add content at any location in the document, see section about cursor.</p>
+<p>By default new content is added at the end of the document. To understand how to add content at any location in the document, see the later section about cursor manipulation.</p>
 </blockquote>
 <p>Let’s create an image from a plot…</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">src &lt;-<span class="st"> </span><span class="kw">tempfile</span>(<span class="dt">fileext =</span> <span class="st">&quot;.png&quot;</span>)
 <span class="kw">png</span>(<span class="dt">filename =</span> src, <span class="dt">width =</span> <span class="dv">5</span>, <span class="dt">height =</span> <span class="dv">6</span>, <span class="dt">units =</span> <span class="st">'in'</span>, <span class="dt">res =</span> <span class="dv">300</span>)
 <span class="kw">barplot</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="dt">col =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)
 <span class="kw">dev.off</span>()</code></pre></div>
-<p>… and add that image in the document and some new paragraphs of text and a table.</p>
+<p>…and add that image to the document along with some new text paragraphs and a table.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_doc &lt;-<span class="st"> </span>my_doc <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">body_add_img</span>(<span class="dt">src =</span> src, <span class="dt">width =</span> <span class="dv">5</span>, <span class="dt">height =</span> <span class="dv">6</span>, <span class="dt">style =</span> <span class="st">&quot;centered&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;Hello world!&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
@@ -120,7 +150,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <ol start="3" style="list-style-type: decimal">
 <li>Write the Word file</li>
 </ol>
-<p>File can be generated using function <code>print</code> and argument <code>target</code>:</p>
+<p>An (updated) Word file can be generated using the <code>print()</code> function with the <code>target</code> argument:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(my_doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/first_example.docx&quot;</span>)</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
@@ -151,50 +181,48 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul>
 <div id="body_add_-functions" class="section level3">
 <h3><code>body_add_*</code> functions</h3>
-<p>The paragraph is the main top container for content within a Word document. <em>Note that tables are top container, they are at the same level than paragraphs</em>. <code>body_add_*</code> functions are designed to <strong>add content as a top container</strong>: text as an entire paragraph, table, image, page break…</p>
-<p>A title is a paragraph. To add a title, use <code>body_add_par()</code> with <code>style</code> argument pointing to corresponding title style.</p>
-<p>Use function <code>styles_info()</code> to see available styles:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
-<span class="kw">read_docx</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">styles_info</span>() <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span>dplyr<span class="op">::</span><span class="kw">filter</span>( style_type <span class="op">%in%</span><span class="st"> &quot;paragraph&quot;</span> )</code></pre></div>
-<pre><code>## # A tibble: 10 x 5
-##    style_type      style_id    style_name is_custom is_default
-##         &lt;chr&gt;         &lt;chr&gt;         &lt;chr&gt;     &lt;lgl&gt;      &lt;lgl&gt;
-##  1  paragraph        Normal        Normal     FALSE       TRUE
-##  2  paragraph        Titre1     heading 1     FALSE      FALSE
-##  3  paragraph        Titre2     heading 2     FALSE      FALSE
-##  4  paragraph        Titre3     heading 3     FALSE      FALSE
-##  5  paragraph      centered      centered      TRUE      FALSE
-##  6  paragraph  graphictitle graphic title      TRUE      FALSE
-##  7  paragraph    tabletitle   table title      TRUE      FALSE
-##  8  paragraph           TM1         toc 1     FALSE      FALSE
-##  9  paragraph           TM2         toc 2     FALSE      FALSE
-## 10  paragraph Textedebulles  Balloon Text     FALSE      FALSE</code></pre>
+<p>The paragraph is the main top container for content within a Word document. <em>Note that tables are top container, they are at the same level as paragraphs</em>. <code>body_add_*</code> functions are designed to <strong>add content as a top container</strong>: text as an entire paragraph, table, image, page break…</p>
+<p>A title is a paragraph. To add a title, use <code>body_add_par()</code> with the <code>style</code> argument pointing to the corresponding title style.</p>
+<p>Use the function <code>styles_info()</code> to see available styles:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">read_docx</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">styles_info</span>() <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">subset</span>( style_type <span class="op">%in%</span><span class="st"> &quot;paragraph&quot;</span> )</code></pre></div>
+<pre><code>##    style_type      style_id    style_name is_custom is_default
+## 1   paragraph        Normal        Normal     FALSE       TRUE
+## 2   paragraph        Titre1     heading 1     FALSE      FALSE
+## 3   paragraph        Titre2     heading 2     FALSE      FALSE
+## 4   paragraph        Titre3     heading 3     FALSE      FALSE
+## 9   paragraph      centered      centered      TRUE      FALSE
+## 15  paragraph  graphictitle graphic title      TRUE      FALSE
+## 16  paragraph    tabletitle   table title      TRUE      FALSE
+## 18  paragraph           TM1         toc 1     FALSE      FALSE
+## 19  paragraph           TM2         toc 2     FALSE      FALSE
+## 20  paragraph Textedebulles  Balloon Text     FALSE      FALSE</code></pre>
 <blockquote>
-<p>It is important to understand that these style names are read in the initial file provided to <code>read_docx</code>. Few comments</p>
+<p>It is important to understand that these style names are read in the initial file provided to <code>read_docx()</code>. A few comments:</p>
 </blockquote>
 <ul>
-<li>One of the styles is <em>heading 1</em> which correspond to a level 1 title.</li>
-<li>When using <code>body_add_gg</code> in the following code, using <code>style = &quot;centered&quot;</code> will set <em>centered</em> paragraph properties (defined as centered in the initial document) to the new paragraph where the plot will be added.</li>
-<li>Table templates are also defined in the initial document and can be used with <code>body_add_table</code>. For advanced tabular formatting, use package <code>flextable</code> instead (<a href="https://davidgohel.github.io/officer/">flextable website</a>), it has a function <code>body_add_flextable()</code> that can be used with <code>officer</code>.</li>
+<li>One of the styles is <em>heading 1</em> which corresponds to a level 1 title.</li>
+<li>When using <code>body_add_gg()</code> in the following code, using <code>style = &quot;centered&quot;</code> will set <em>centered</em> paragraph properties (defined as centered in the initial document) to the new paragraph where the plot will be added.</li>
+<li>Table templates are also defined in the initial document and can be used with <code>body_add_table()</code>. For advanced tabular formatting, use the <code>flextable</code> package instead (<a href="https://davidgohel.github.io/officer/">flextable website</a>). It has a function <code>body_add_flextable()</code> that can be used with <code>officer</code>.</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(ggplot2)
-gg &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data =</span> iris, <span class="kw">aes</span>(Sepal.Length, Petal.Length)) <span class="op">+</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">geom_point</span>()
-
-<span class="kw">read_docx</span>() <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;Table of content&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 1&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">body_add_toc</span>(<span class="dt">level =</span> <span class="dv">2</span>) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">body_add_break</span>() <span class="op">%&gt;%</span><span class="st"> </span>
-
-<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;dataset iris&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 2&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">body_add_table</span>(<span class="dt">value =</span> <span class="kw">head</span>(iris), <span class="dt">style =</span> <span class="st">&quot;table_template&quot;</span> ) <span class="op">%&gt;%</span><span class="st"> </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="cf">if</span>( <span class="kw">require</span>(<span class="st">&quot;ggplot2&quot;</span>) ){
+  gg &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data =</span> iris, <span class="kw">aes</span>(Sepal.Length, Petal.Length)) <span class="op">+</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">geom_point</span>()
+  
+  <span class="kw">read_docx</span>() <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;Table of content&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 1&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">body_add_toc</span>(<span class="dt">level =</span> <span class="dv">2</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">body_add_break</span>() <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span>
-<span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;plot examples&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 1&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">body_add_gg</span>(<span class="dt">value =</span> gg, <span class="dt">style =</span> <span class="st">&quot;centered&quot;</span> ) <span class="op">%&gt;%</span><span class="st"> </span>
-
-<span class="st">  </span><span class="kw">print</span>(<span class="dt">target =</span> <span class="st">&quot;assets/docx/body_add_demo.docx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">invisible</span>()</code></pre></div>
+<span class="st">    </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;dataset iris&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 2&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">body_add_table</span>(<span class="dt">value =</span> <span class="kw">head</span>(iris), <span class="dt">style =</span> <span class="st">&quot;table_template&quot;</span> ) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span>
+<span class="st">    </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;plot examples&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 1&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">body_add_gg</span>(<span class="dt">value =</span> gg, <span class="dt">style =</span> <span class="st">&quot;centered&quot;</span> ) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span>
+<span class="st">    </span><span class="kw">print</span>(<span class="dt">target =</span> <span class="st">&quot;assets/docx/body_add_demo.docx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">invisible</span>()
+}</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
 <a href="https://davidgohel.github.io/officer/articles/assets/docx/body_add_demo.docx">body_add_demo.docx</a>
@@ -204,13 +232,13 @@ gg &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt"
 </div>
 <div id="slip_in_-functions" class="section level3">
 <h3><code>slip_in_*</code> functions</h3>
-<p><code>slip_in_*</code> functions are designed to add content <strong>inside an existing paragraph</strong>: text, image or seq field. Element is inserted at beginning or end of the paragraph (<code>pos=c('after', 'before')</code>). Available functions are the following:</p>
+<p>The <code>slip_in_*</code> functions are designed to add content <strong>inside an existing paragraph</strong>: text, image or seq field. The element is inserted either at the beginning or end of the paragraph (<code>pos = c('after', 'before')</code>). Available functions are the following:</p>
 <ul>
-<li>slip_in_img</li>
-<li>slip_in_seqfield</li>
-<li>slip_in_text</li>
+<li><code>slip_in_img()</code></li>
+<li><code>slip_in_seqfield()</code></li>
+<li><code>slip_in_text()</code></li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">img.file &lt;-<span class="st"> </span><span class="kw">file.path</span>( <span class="kw">Sys.getenv</span>(<span class="st">&quot;R_HOME&quot;</span>), <span class="st">&quot;doc&quot;</span>, <span class="st">&quot;html&quot;</span>, <span class="st">&quot;logo.jpg&quot;</span> )
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">img.file &lt;-<span class="st"> </span><span class="kw">file.path</span>( <span class="kw">R.home</span>(<span class="st">&quot;doc&quot;</span>), <span class="st">&quot;html&quot;</span>, <span class="st">&quot;logo.jpg&quot;</span> )
 <span class="kw">read_docx</span>() <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;R logo: &quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">slip_in_img</span>(<span class="dt">src =</span> img.file, <span class="dt">style =</span> <span class="st">&quot;strong&quot;</span>, 
@@ -226,12 +254,12 @@ gg &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt"
 <span> - view with</span>
 <a target="_blank" href="https://view.officeapps.live.com/op/view.aspx?src=https://davidgohel.github.io/officer/articles/assets/docx/slip_in_demo.docx">office web viewer</a>
 </p>
-<p>These have been implemented mostly to let add Word numbering seq-fields at beginning of paragraphs used as reference entries (i.e. a table caption, a plot caption). See Section <em>Table and image captions</em>.</p>
+<p>These have been implemented mostly to allow the addition of Word’s special sequence fields (which facilitate numbering) at the beginning of paragraphs used as reference entries (e.g. a table or plot caption). See the section <em>Table and image captions</em>.</p>
 </div>
 </div>
 <div id="cursor-manipulation" class="section level2">
 <h2>Cursor manipulation</h2>
-<p>A cursor is available and can be manipulated so that content can be added regarding to its position with <code>body_add_*</code> functions:</p>
+<p>A cursor is available and can be manipulated so that content can be added relative to its position with the <code>body_add_*</code> functions:</p>
 <ul>
 <li><code>before</code> will insert a new element before the selected element in the document.</li>
 <li><code>after</code> will insert a new element after the selected element in the document.</li>
@@ -239,14 +267,14 @@ gg &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt"
 </ul>
 <p>Cursor functions are the following:</p>
 <ul>
-<li>cursor_begin</li>
-<li>cursor_end</li>
-<li>cursor_reach</li>
-<li>cursor_backward</li>
-<li>cursor_forward</li>
-<li>cursor_bookmark</li>
+<li><code>cursor_begin()</code></li>
+<li><code>cursor_end()</code></li>
+<li><code>cursor_reach()</code></li>
+<li><code>cursor_backward()</code></li>
+<li><code>cursor_forward()</code></li>
+<li><code>cursor_bookmark()</code></li>
 </ul>
-<p>In order to illustrate <em>cursor</em> functions, a document made of several paragraphs will be used (let’s use officer for that).</p>
+<p>In order to illustrate the <em>cursor</em> functions, a document made up of several paragraphs will be used (let’s use officer for that).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">read_docx</span>() <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;paragraph 1&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;paragraph 2&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) <span class="op">%&gt;%</span>
@@ -263,7 +291,7 @@ gg &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt"
 <span> - view with</span>
 <a target="_blank" href="https://view.officeapps.live.com/op/view.aspx?src=https://davidgohel.github.io/officer/articles/assets/docx/init_doc.docx">office web viewer</a>
 </p>
-<p>Now, let’s use <code>init_doc.docx</code> with <code>read_docx</code> and manipulate its content with cursor functions.</p>
+<p>Now, let’s use <code>init_doc.docx</code> with <code>read_docx()</code> and manipulate its content with cursor functions.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>(<span class="dt">path =</span> <span class="st">&quot;assets/docx/init_doc.docx&quot;</span>) <span class="op">%&gt;%</span>
 
 <span class="st">  </span><span class="co"># default template contains only an empty paragraph</span>
@@ -295,8 +323,8 @@ gg &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt"
 </div>
 <div id="remove-content" class="section level2">
 <h2>Remove content</h2>
-<p>The function <code>body_remove</code> let remove content from a Word document. This function used with <code>cursor_*</code> functions is a convenient tool to update an existing document.</p>
-<p>For illustration purpose, we will generate a document that will be used as initial document later when showing how to use <code>body_remove</code>.</p>
+<p>The function <code>body_remove()</code> lets you remove content from a Word document. This function used with <code>cursor_*</code> functions is a convenient tool to update an existing document.</p>
+<p>For illustration purposes, we will generate a document that will be used as an initial document later when showing how to use <code>body_remove()</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(officer)
 <span class="kw">library</span>(magrittr)
 
@@ -312,7 +340,7 @@ my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>()  <span 
 <span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> str3, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) 
 
 <span class="kw">print</span>(my_doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/ipsum_doc.docx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">invisible</span>()</code></pre></div>
-<p>File <code>ipsum_doc.docx</code> now exists and contains a paragraph containing text <em>that text</em>. In the following example, we will position the cursor on that paragraph and then delete it:</p>
+<p>The file <code>ipsum_doc.docx</code> now exists and contains a paragraph containing text <em>that text</em>. In the following example, we will position the cursor on that paragraph and then delete it:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>(<span class="dt">path =</span> <span class="st">&quot;assets/docx/ipsum_doc.docx&quot;</span>)  <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">cursor_reach</span>(<span class="dt">keyword =</span> <span class="st">&quot;that text&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">body_remove</span>()
@@ -328,20 +356,53 @@ my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>()  <span 
 </div>
 <div id="replace-content" class="section level2">
 <h2>Replace content</h2>
-<p>Functions <code>body_add_*</code> let replace content in a Word document.</p>
-<p>For illustration purpose, we will generate a document that will be used as initial document later.</p>
+<p>The <code>body_add_*</code> functions let you replace content in a Word document.</p>
+<p>For illustration purposes, we will generate a document that will be used as an initial document later.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>()  <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> str1, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> str2, <span class="dt">style =</span> <span class="st">&quot;centered&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> str3, <span class="dt">style =</span> <span class="st">&quot;Normal&quot;</span>) 
 
 <span class="kw">print</span>(my_doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/replace_template.docx&quot;</span>)</code></pre></div>
-<p>File <code>replace_template.docx</code> now exists and contains a paragraph containing text <em>that text</em>. In the following example, we will position the cursor on that paragraph and then replace it. Using <code>pos = &quot;on&quot;</code> will replace content where cursor is by new content.</p>
+<p>The file <code>replace_template.docx</code> now exists and contains a paragraph containing text <em>that text</em>. In the following example, we will position the cursor on that paragraph and then replace it. Using <code>pos = &quot;on&quot;</code> will replace content where the cursor is with new content.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>(<span class="dt">path =</span> <span class="st">&quot;assets/docx/replace_template.docx&quot;</span>)  <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">cursor_reach</span>(<span class="dt">keyword =</span> <span class="st">&quot;that text&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;This is a new paragraph.&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;centered&quot;</span>, <span class="dt">pos =</span> <span class="st">&quot;on&quot;</span>)
 
 <span class="kw">print</span>(my_doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/replace_doc.docx&quot;</span>)</code></pre></div>
+<div id="search-and-replace" class="section level3">
+<h3>Search-and-replace</h3>
+<p>You can also use the <code>body_replace_*</code> functions to search-and-replace text. <code>body_replace_at()</code> replaces text at a bookmark:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;centered text&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;centered&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">slip_in_text</span>(<span class="st">&quot;. How are you&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;strong&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">body_bookmark</span>(<span class="st">&quot;text_to_replace&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">body_replace_at</span>(<span class="st">&quot;text_to_replace&quot;</span>, <span class="st">&quot;not left aligned&quot;</span>)</code></pre></div>
+<p><code>body_replace_all_text()</code> will, depending on the options provided, replace text either at the cursor or in the entire document:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>() <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;Placeholder one&quot;</span>) <span class="op">%&gt;%</span>
+<span class="st">  </span><span class="kw">body_add_par</span>(<span class="st">&quot;Placeholder two&quot;</span>)
+
+<span class="co"># Show text chunk at cursor</span>
+<span class="kw">docx_show_chunk</span>(doc)  <span class="co"># Output is 'Placeholder two'</span></code></pre></div>
+<pre><code>## 1 text nodes found at this cursor.</code></pre>
+<pre><code>##   &lt;w:t&gt;: 'Placeholder two'</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Simple search-and-replace at current cursor, with regex turned off</span>
+<span class="kw">body_replace_all_text</span>(doc, <span class="st">&quot;Placeholder&quot;</span>, <span class="st">&quot;new&quot;</span>, <span class="dt">only_at_cursor =</span> <span class="ot">TRUE</span>, <span class="dt">fixed=</span><span class="ot">TRUE</span>)
+<span class="kw">docx_show_chunk</span>(doc)  <span class="co"># Output is 'new two'</span></code></pre></div>
+<pre><code>## 1 text nodes found at this cursor.</code></pre>
+<pre><code>##   &lt;w:t&gt;: 'new two'</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Do the same, but in the entire document and ignoring case</span>
+<span class="kw">body_replace_all_text</span>(doc, <span class="st">&quot;placeholder&quot;</span>, <span class="st">&quot;new&quot;</span>, <span class="dt">only_at_cursor =</span> <span class="ot">FALSE</span>, <span class="dt">ignore.case=</span><span class="ot">TRUE</span>)
+<span class="kw">cursor_backward</span>(doc)
+<span class="kw">docx_show_chunk</span>(doc) <span class="co"># Output is 'new one'</span></code></pre></div>
+<pre><code>## 1 text nodes found at this cursor.</code></pre>
+<pre><code>##   &lt;w:t&gt;: 'new one'</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Use regex : replace all words starting with &quot;n&quot; with the word &quot;example&quot;</span>
+<span class="kw">body_replace_all_text</span>(doc, <span class="st">&quot;</span><span class="ch">\\</span><span class="st">bn.*?</span><span class="ch">\\</span><span class="st">b&quot;</span>, <span class="st">&quot;example&quot;</span>)
+<span class="kw">docx_show_chunk</span>(doc) <span class="co"># Output is 'example one'</span></code></pre></div>
+<pre><code>## 1 text nodes found at this cursor.</code></pre>
+<pre><code>##   &lt;w:t&gt;: 'example one'</code></pre>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
 <a href="https://davidgohel.github.io/officer/articles/assets/docx/replace_doc.docx">replace_doc.docx</a>
@@ -349,11 +410,12 @@ my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>()  <span 
 <a target="_blank" href="https://view.officeapps.live.com/op/view.aspx?src=https://davidgohel.github.io/officer/articles/assets/docx/replace_doc.docx">office web viewer</a>
 </p>
 </div>
+</div>
 <div id="sections" class="section level2">
 <h2>Sections</h2>
-<p>Sections can be added to a document. This is possible by using function <code>body_end_section</code>. The default section can be modified with function <code>body_default_section</code>.</p>
+<p>Sections can be added to a document. This is possible by using the function <code>body_end_section()</code>. The default section can be modified with the function <code>body_default_section()</code>.</p>
 <blockquote>
-<p>A section start at the end of the previous section (or the beginning of the document if no preceding section exists), it stops where the section is declared.</p>
+<p>A section starts at the end of the previous section (or the beginning of the document if no preceding section exists). It stops where the section is declared.</p>
 </blockquote>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">str1 &lt;-<span class="st"> &quot;Lorem ipsum dolor sit amet, consectetur adipiscing elit. &quot;</span> <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">rep</span>(<span class="dv">30</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">paste</span>(<span class="dt">collapse =</span> <span class="st">&quot;&quot;</span>)
@@ -374,19 +436,21 @@ my_doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>()  <span 
 <span> - view with</span>
 <a target="_blank" href="https://view.officeapps.live.com/op/view.aspx?src=https://davidgohel.github.io/officer/articles/assets/docx/section.docx">office web viewer</a>
 </p>
-<p>In the previous example, first two paragraphs will be in a 2 columns section and the third will be in a default section.</p>
+<p>In the previous example, the first two paragraphs will be in a 2 column section and the third will be in a default section.</p>
 </div>
 <div id="table-and-image-captions" class="section level2">
 <h2>Table and image captions</h2>
-<p>Man can combine <code>slip_in_seqfield</code> and <code>slip_in_text</code> to prefix a paragraph with references (i.e. chapter number and graphic index in the document). However, producing a plot or a table and its caption can be verbose.</p>
-<p>Shortcuts functions are implemented in the object <code>shortcuts</code> (it will at least give you a template of code to modify if it does not fit exactly your need). <code>slip_in_tableref</code>, <code>slip_in_plotref</code> and <code>body_add_gg</code> can make life easier.</p>
-<p>Below an illustration:</p>
+<p><code>slip_in_seqfield()</code> and <code>slip_in_text()</code> can be combined to prefix a paragraph with references (i.e. chapter number and graphic index in the document). However, producing a plot or a table and its caption can be verbose.</p>
+<p>Shortcut functions are implemented in the object <code>shortcuts</code> (it will at least give you a template of code to modify if it does not fit your needs exactly). <code>slip_in_tableref()</code>, <code>slip_in_plotref()</code> and <code>body_add_gg()</code> can make life easier.</p>
+<p>Usage of these functions is illustrated below:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(magrittr)
 <span class="kw">library</span>(officer)
-<span class="kw">library</span>(ggplot2)
+<span class="cf">if</span>( <span class="kw">require</span>(<span class="st">&quot;ggplot2&quot;</span>) ){
 
-gg1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data =</span> iris, <span class="kw">aes</span>(Sepal.Length, Petal.Length)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_point</span>()
-gg2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data =</span> iris, <span class="kw">aes</span>(Sepal.Length, Petal.Length, <span class="dt">color =</span> Species)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_point</span>()
+gg1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data =</span> iris, <span class="kw">aes</span>(Sepal.Length, Petal.Length)) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_point</span>()
+gg2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(<span class="dt">data =</span> iris, <span class="kw">aes</span>(Sepal.Length, Petal.Length, <span class="dt">color =</span> Species)) <span class="op">+</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">geom_point</span>()
 
 
 doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>() <span class="op">%&gt;%</span><span class="st"> </span>
@@ -423,7 +487,8 @@ doc &lt;-<span class="st"> </span><span class="kw">read_docx</span>() <span clas
 <span class="st">  </span><span class="kw">body_add_par</span>(<span class="dt">value =</span> <span class="st">&quot;Table of graphics&quot;</span>, <span class="dt">style =</span> <span class="st">&quot;heading 2&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">body_add_toc</span>(<span class="dt">style =</span> <span class="st">&quot;graphic title&quot;</span>)
 
-<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/toc_and_captions.docx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">invisible</span>()</code></pre></div>
+<span class="kw">print</span>(doc, <span class="dt">target =</span> <span class="st">&quot;assets/docx/toc_and_captions.docx&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">invisible</span>()
+}</code></pre></div>
 <p style="text-align:center;font-style:italic;color:gray;">
 <span>Download file </span>
 <a href="https://davidgohel.github.io/officer/articles/assets/docx/toc_and_captions.docx">toc_and_captions.docx</a>

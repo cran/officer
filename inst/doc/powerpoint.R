@@ -75,7 +75,7 @@ print(doc, target = "assets/pptx/ph_with_text.pptx") %>%
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_text.pptx" ) )
 
 ## ------------------------------------------------------------------------
-img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
+img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
 
 doc <- read_pptx() 
 doc <- doc %>%
@@ -90,19 +90,26 @@ print(doc, target = "assets/pptx/ph_with_img.pptx") %>%
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_img.pptx" ) )
 
 ## ------------------------------------------------------------------------
-img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
+if( require("ggplot2") ){
+  doc <- read_pptx()
+  doc <- add_slide(doc, layout = "Title and Content",
+    master = "Office Theme")
 
-doc <- read_pptx() %>%
-  add_slide(layout = "Title and Content", master = "Office Theme") %>%
-  ph_with_text(type = "title", str = "A image") %>%
-  ph_with_img_at(src = img.file, left = 3, top = 4, 
-                 height = 1.06, width = 1.39, rot = 45 )
+  gg_plot <- ggplot(data = iris ) +
+    geom_point(mapping = aes(Sepal.Length, Petal.Length), size = 3) +
+    theme_minimal()
 
-print(doc, target = "assets/pptx/ph_with_img_at.pptx") %>% 
+  if( capabilities(what = "png") )
+    doc <- ph_with_gg(doc, value = gg_plot )
+
+  print(doc, target = "assets/pptx/ph_with_gg.pptx" ) %>% 
   invisible()
+}
 
 ## ----echo=FALSE----------------------------------------------------------
-office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_img_at.pptx" ) )
+if( file.exists("assets/pptx/ph_with_gg.pptx"))
+  office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/",
+                                 "assets/pptx/ph_with_img.pptx" ) )
 
 ## ------------------------------------------------------------------------
 doc <- read_pptx() 
@@ -167,7 +174,7 @@ my_pres <- my_pres %>%
   ph_add_text(str = "A small red text!", style = text_prop ) %>% 
   ph_add_text(str = "Blue text first... ", pos = "before", style = text_blue_prop ) %>% 
   ph_add_par(level = 2) %>%
-  ph_add_text(str = "additionnal paragraph")
+  ph_add_text(str = "additional paragraph")
 
 print(my_pres, target = "assets/pptx/ph_add_text_2.pptx") %>% 
   invisible()

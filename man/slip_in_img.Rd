@@ -9,7 +9,7 @@ slip_in_img(x, src, style = NULL, width, height, pos = "after")
 \arguments{
 \item{x}{an rdocx object}
 
-\item{src}{image filename}
+\item{src}{image filename, the basename of the file must not contain any blank.}
 
 \item{style}{text style}
 
@@ -25,7 +25,7 @@ append an image into a paragraph of an rdocx object
 }
 \examples{
 library(magrittr)
-img.file <- file.path( Sys.getenv("R_HOME"), "doc", "html", "logo.jpg" )
+img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
 x <- read_docx() \%>\%
   body_add_par("R logo: ", style = "Normal") \%>\%
   slip_in_img(src = img.file, style = "strong", width = .3, height = .3)

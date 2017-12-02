@@ -1,7 +1,8 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 #include <iostream>
-
+#include <string>
+#include <iostream>
 // This is a simple example of exporting a C++ function to R. You can
 // source this function into an R session using the Rcpp::sourceCpp
 // function (or via the Source button on the editor toolbar). Learn
@@ -124,3 +125,4 @@ String wml_table(DataFrame x, std::string style_id,
   return os.str();
 
 }
+

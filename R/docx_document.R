@@ -1,6 +1,5 @@
 #' @importFrom xml2 xml_find_all xml_attr read_xml
 #' @import magrittr
-#' @importFrom tibble tibble
 #' @importFrom xml2 xml_ns read_xml xml_find_all xml_name xml_text xml_text<- xml_remove
 docx_document <- R6Class(
   "docx_document",
@@ -35,7 +34,7 @@ docx_document <- R6Class(
     },
 
     length = function( ){
-      xml_find_first(self$get(), "/w:document/w:body") %>% xml_length()
+      xml_length( xml_find_first(self$get(), "/w:document/w:body") )
 
     },
 
@@ -97,9 +96,9 @@ docx_document <- R6Class(
         stop("cannot find bookmark ", shQuote(id), call. = FALSE)
 
       str_ <- sprintf("//w:bookmarkStart[@w:name='%s']/following-sibling::w:r", id )
-      following_start <- map_chr( xml_find_all(self$get(), str_), xml_path )
+      following_start <- sapply( xml_find_all(self$get(), str_), xml_path )
       str_ <- sprintf("//w:bookmarkEnd[@w:id='%s']/preceding-sibling::w:r", xml_attr(bm_start, "id") )
-      preceding_end <- map_chr( xml_find_all(self$get(), str_), xml_path )
+      preceding_end <- sapply( xml_find_all(self$get(), str_), xml_path )
 
       match_path <- base::intersect(following_start, preceding_end)
       if( length(match_path) < 1 )
@@ -111,6 +110,43 @@ docx_document <- R6Class(
         xml_remove(node)
 
       xml_text(run_nodes[[1]] ) <- text
+      self
+    },
+
+    replace_all_text = function( oldValue, newValue, onlyAtCursor=TRUE, ... ) {
+
+      replacement_count <- 0
+
+      base_node <- if (onlyAtCursor) self$get_at_cursor() else self$get()
+
+      # For each matching text node...
+      for (text_node in xml_find_all(base_node, ".//w:t")) {
+        # ...if it contains the oldValue...
+        if (grepl(oldValue, xml_text(text_node), ...)) {
+          replacement_count <- replacement_count + 1
+          # Replace the node text with the newValue.
+          xml_text(text_node) <- gsub(oldValue, newValue, xml_text(text_node), ...)
+        }
+      }
+
+      # Alert the user if no replacements were made.
+      if (replacement_count == 0) {
+        search_zone_text <- if (onlyAtCursor) "at the cursor." else "in the document."
+        warning("Found 0 instances of '", oldValue, "' ", search_zone_text)
+      }
+
+      self
+    },
+
+    docx_show_chunk = function() {
+      # Show the structure of how the text is split along `<w:t>` tags at the
+      # current cursor.
+      text_nodes <- xml_find_all(self$get_at_cursor(), ".//w:t")
+      message(length(text_nodes), " text nodes found at this cursor.")
+      for (text_node in text_nodes) {
+        message("  <w:t>: '", xml_text(text_node), "'")
+      }
+
       self
     },
 
@@ -132,13 +168,13 @@ docx_document <- R6Class(
 
     cursor_forward = function( ){
       xpath_ <- paste0(private$cursor, "/following-sibling::*" )
-      private$cursor <- xml_find_first(self$get(), xpath_ ) %>% xml_path()
+      private$cursor <- xml_path( xml_find_first(self$get(), xpath_ ) )
       self
     },
 
     cursor_backward = function( ){
       xpath_ <- paste0(private$cursor, "/preceding-sibling::*[1]" )
-      private$cursor <- xml_find_first(self$get(), xpath_ ) %>% xml_path()
+      private$cursor <- xml_path( xml_find_first(self$get(), xpath_ ) )
       self
     }
 
@@ -155,12 +191,12 @@ docx_document <- R6Class(
       doc <- read_xml(styles_file)
 
       all_styles <- xml_find_all(doc, "/w:styles/w:style")
-      all_desc <- tibble(
-        style_type = all_styles %>% xml_attr("type"),
-        style_id = all_styles %>% xml_attr("styleId"),
-        style_name = all_styles %>% xml_find_all("w:name") %>% xml_attr("val"),
-        is_custom = all_styles %>% xml_attr("customStyle") %in% "1",
-        is_default = all_styles %>% xml_attr("default") %in% "1"
+      all_desc <- data.frame(stringsAsFactors = FALSE,
+        style_type = xml_attr(all_styles, "type"),
+        style_id = xml_attr(all_styles, "styleId"),
+        style_name = xml_attr(xml_find_all(all_styles, "w:name"), "val"),
+        is_custom = xml_attr(all_styles, "customStyle") %in% "1",
+        is_default = xml_attr(all_styles, "default") %in% "1"
       )
 
       all_desc

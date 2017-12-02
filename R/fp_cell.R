@@ -7,8 +7,8 @@ text.directions <- c( "lrtb", "tbrl", "btlr" )
 #'
 #' @param border shortcut for all borders.
 #' @param border.bottom,border.left,border.top,border.right \code{\link{fp_border}} for borders.
-#' @param vertical.align cell content vertical alignment - a single character value
-#' , expected value is one of "center" or "top" or "bottom"
+#' @param vertical.align cell content vertical alignment - a single character value,
+#' expected value is one of "center" or "top" or "bottom"
 #' @param margin shortcut for all margins.
 #' @param margin.bottom,margin.top,margin.left,margin.right cell margins - 0 or positive integer value.
 #' @param background.color cell background color - a single character value specifying a
@@ -71,22 +71,21 @@ out
 
 #' @export
 #' @rdname fp_cell
-#' @param x,object object \code{fp_cell}
+#' @param x,object \code{fp_cell} object
 #' @param type output type - one of 'wml', 'pml', 'html'.
 #' @param ... further arguments - not used
-#' @importFrom purrr map_dbl
 format.fp_cell = function (x, type = "wml", ...){
   btlr_list <- list(x$border.bottom, x$border.top,
                     x$border.left, x$border.right)
 
-  btlr_cols <- map( btlr_list,
+  btlr_cols <- lapply( btlr_list,
                     function(x) {
                       as.vector(col2rgb(x$color, alpha = TRUE )[,1] )
                     }
   )
   colmat <- do.call( "rbind", btlr_cols )
-  types <- map_chr( btlr_list, "style" )
-  widths <- map_dbl( btlr_list, "width" )
+  types <- sapply(btlr_list, function(x) x$style )
+  widths <- sapply(btlr_list, function(x) x$width )
   shading <- col2rgb(x$background.color, alpha = TRUE )[,1]
 
   if( type == "wml"){
