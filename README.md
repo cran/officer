@@ -11,8 +11,6 @@ The officer package lets R users manipulate Word (`.docx`) and PowerPoint (`*.pp
 
 > Make corporate reporting with minimum hassle
 
-[![Travis-CI Build Status](https://travis-ci.org/davidgohel/officer.svg?branch=master)](https://travis-ci.org/davidgohel/officer) [![Build status](https://ci.appveyor.com/api/projects/status/github/davidgohel/officer?branch=master)](https://ci.appveyor.com/project/davidgohel/officer/branch/master) [![version](http://www.r-pkg.org/badges/version/officer)](https://CRAN.R-project.org/package=officer) ![cranlogs](http://cranlogs.r-pkg.org./badges/officer) ![Active](http://www.repostatus.org/badges/latest/active.svg)
-
 Word documents
 --------------
 
