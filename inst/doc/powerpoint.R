@@ -39,8 +39,13 @@ my_pres <- my_pres %>%
 layout_properties ( x = my_pres, layout = "Two Content", master = "Office Theme" ) %>% head()
 
 ## ------------------------------------------------------------------------
-print(my_pres, target = "assets/pptx/first_example.pptx") %>% 
-  invisible()
+annotate_base(output_file = "assets/pptx/annotated_layout.pptx")
+
+## ----echo=FALSE----------------------------------------------------------
+office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/annotated_layout.pptx" ) )
+
+## ------------------------------------------------------------------------
+print(my_pres, target = "assets/pptx/first_example.pptx") 
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/first_example.pptx" ) )
@@ -68,8 +73,7 @@ doc <- read_pptx() %>%
   ph_with_text(type = "ftr", str = "Slide footer") %>%
   ph_with_text(type = "dt", str = format(Sys.Date()))
 
-print(doc, target = "assets/pptx/ph_with_text.pptx") %>% 
-  invisible()
+print(doc, target = "assets/pptx/ph_with_text.pptx") 
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_text.pptx" ) )
@@ -83,8 +87,7 @@ doc <- doc %>%
   ph_with_text(type = "body", str = "body (index 1) is text", index = 1) %>% 
   ph_with_img(type = "body", index = 2, src = img.file, height = 1.06, width = 1.39 )
 
-print(doc, target = "assets/pptx/ph_with_img.pptx") %>% 
-  invisible()
+print(doc, target = "assets/pptx/ph_with_img.pptx")
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_img.pptx" ) )
@@ -102,8 +105,7 @@ if( require("ggplot2") ){
   if( capabilities(what = "png") )
     doc <- ph_with_gg(doc, value = gg_plot )
 
-  print(doc, target = "assets/pptx/ph_with_gg.pptx" ) %>% 
-  invisible()
+  print(doc, target = "assets/pptx/ph_with_gg.pptx" ) 
 }
 
 ## ----echo=FALSE----------------------------------------------------------
@@ -117,8 +119,7 @@ doc <- doc %>%
   add_slide(layout = "Title and Content", master = "Office Theme") %>%
   ph_with_table(type = "body", value = head(mtcars) )
 
-print(doc, target = "assets/pptx/ph_with_table.pptx") %>% 
-  invisible()
+print(doc, target = "assets/pptx/ph_with_table.pptx")
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_table.pptx" ) )
@@ -130,8 +131,7 @@ doc <- doc %>%
   ph_with_table_at(value = head(mtcars), left = 1, top = 3, 
                  height = 7, width = 7 )
 
-print(doc, target = "assets/pptx/ph_with_table_at.pptx") %>% 
-  invisible()
+print(doc, target = "assets/pptx/ph_with_table_at.pptx")
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_with_table_at.pptx" ) )
@@ -157,8 +157,7 @@ my_pres <- my_pres %>%
   ph_add_par(level = 3) %>%
   ph_add_text(str = "Level 3")
 
-print(my_pres, target = "assets/pptx/ph_add_text_1.pptx") %>% 
-  invisible()
+print(my_pres, target = "assets/pptx/ph_add_text_1.pptx")
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_add_text_1.pptx" ) )
@@ -176,8 +175,7 @@ my_pres <- my_pres %>%
   ph_add_par(level = 2) %>%
   ph_add_text(str = "additional paragraph")
 
-print(my_pres, target = "assets/pptx/ph_add_text_2.pptx") %>% 
-  invisible()
+print(my_pres, target = "assets/pptx/ph_add_text_2.pptx") 
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_add_text_2.pptx" ) )
@@ -190,8 +188,7 @@ doc <- read_pptx() %>%
   add_slide(layout = "Title and Content", master = "Office Theme") %>% 
   ph_with_text(type = "body", str = "placeholder target")
 
-print(doc, target = "assets/pptx/ph_hyperlink.pptx") %>% 
-  invisible()
+print(doc, target = "assets/pptx/ph_hyperlink.pptx")
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_hyperlink.pptx" ) )
@@ -205,8 +202,7 @@ doc <- read_pptx() %>%
   on_slide(index = 1 ) %>% 
   ph_slidelink(type = "body", slide_index = 2)
 
-print(doc, target = "assets/pptx/ph_slidelink.pptx") %>% 
-  invisible()
+print(doc, target = "assets/pptx/ph_slidelink.pptx")
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_slidelink.pptx" ) )
@@ -217,8 +213,7 @@ my_pres <- read_pptx() %>%
   ph_with_text(type = "body", str = "An ") %>% 
   ph_add_text(str = "hyperlink", href = "https://cran.r-project.org" )
 
-print(my_pres, target = "assets/pptx/ph_add_text_3.pptx") %>% 
-  invisible()
+print(my_pres, target = "assets/pptx/ph_add_text_3.pptx")
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/pptx/ph_add_text_3.pptx" ) )

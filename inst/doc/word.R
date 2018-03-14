@@ -60,11 +60,10 @@ if( require("ggplot2") ){
     body_add_par(value = "plot examples", style = "heading 1") %>% 
     body_add_gg(value = gg, style = "centered" ) %>% 
   
-    print(target = "assets/docx/body_add_demo.docx") %>% 
-    invisible()
+    print(target = "assets/docx/body_add_demo.docx")
 }
 
-## ----echo=FALSE----------------------------------------------------------
+## ----echo=FALSE, message=FALSE-------------------------------------------
 if( require("ggplot2") ){
   office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/body_add_demo.docx" ) )
 }
@@ -78,8 +77,7 @@ read_docx() %>%
   slip_in_text(" - This is ", style = "strong", pos = "before") %>% 
   slip_in_seqfield(str = "SEQ Figure \u005C* ARABIC",
     style = 'strong', pos = "before") %>% 
-  print(target = "assets/docx/slip_in_demo.docx") %>% 
-  invisible()
+  print(target = "assets/docx/slip_in_demo.docx")
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/slip_in_demo.docx" ) )
@@ -93,8 +91,7 @@ read_docx() %>%
   body_add_par("paragraph 5", style = "Normal") %>%
   body_add_par("paragraph 6", style = "Normal") %>%
   body_add_par("paragraph 7", style = "Normal") %>%
-  print(target = "assets/docx/init_doc.docx" ) %>% 
-  invisible()
+  print(target = "assets/docx/init_doc.docx" )
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/init_doc.docx" ) )
@@ -120,8 +117,7 @@ doc <- read_docx(path = "assets/docx/init_doc.docx") %>%
   cursor_end() %>%
   body_add_par("The document ends now", style = "Normal")
 
-print(doc, target = "assets/docx/cursor.docx") %>% 
-  invisible()
+print(doc, target = "assets/docx/cursor.docx")
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/cursor.docx" ) )
@@ -141,14 +137,14 @@ my_doc <- read_docx()  %>%
   body_add_par(value = str2, style = "centered") %>% 
   body_add_par(value = str3, style = "Normal") 
 
-print(my_doc, target = "assets/docx/ipsum_doc.docx") %>% invisible()
+print(my_doc, target = "assets/docx/ipsum_doc.docx")
 
 ## ------------------------------------------------------------------------
 my_doc <- read_docx(path = "assets/docx/ipsum_doc.docx")  %>% 
   cursor_reach(keyword = "that text") %>% 
   body_remove()
 
-print(my_doc, target = "assets/docx/ipsum_doc.docx") %>% invisible()
+print(my_doc, target = "assets/docx/ipsum_doc.docx")
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/ipsum_doc.docx" ) )
@@ -212,7 +208,7 @@ my_doc <- read_docx()  %>%
   body_end_section(continuous = TRUE, 
                    colwidths = c(.6, .4), space = .05, sep = FALSE) %>%
   body_add_par(value = str3, style = "Normal") 
-print(my_doc, target = "assets/docx/section.docx") %>% invisible()
+print(my_doc, target = "assets/docx/section.docx")
 
 ## ----echo=FALSE----------------------------------------------------------
 office_doc_link( url = paste0( "https://davidgohel.github.io/officer/articles/", "assets/docx/section.docx" ) )
@@ -262,7 +258,7 @@ doc <- read_docx() %>%
   body_add_par(value = "Table of graphics", style = "heading 2") %>% 
   body_add_toc(style = "graphic title")
 
-print(doc, target = "assets/docx/toc_and_captions.docx") %>% invisible()
+print(doc, target = "assets/docx/toc_and_captions.docx")
 }
 
 ## ----echo=FALSE----------------------------------------------------------

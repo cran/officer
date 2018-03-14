@@ -10,6 +10,8 @@ The officer package facilitates access to and manipulation of
 'Microsoft Word' and 'Microsoft PowerPoint' documents from R.
 }
 \details{
+Examples of manipulations are:
+
 \itemize{
 \item read Word and PowerPoint files into data objects
 \item add/edit/remove image, table and text content from documents and slides
@@ -20,12 +22,7 @@ To learn more about officer, start with the vignettes:
 `browseVignettes(package = "officer")`
 }
 \seealso{
-Useful links:
-\itemize{
-  \item \url{https://davidgohel.github.io/officer}
-  \item Report bugs at \url{https://github.com/davidgohel/officer/issues}
-}
-
+\url{https://davidgohel.github.io/officer/}
 }
 \author{
 \strong{Maintainer}: David Gohel \email{david.gohel@ardata.fr}
@@ -35,6 +32,7 @@ Other contributors:
   \item Frank Hangler \email{frank@plotandscatter.com} (function body_replace_all_text) [contributor]
   \item Liz Sander \email{lsander@civisanalytics.com} (several documentation fixes) [contributor]
   \item Jon Calder \email{jonmcalder@gmail.com} (update vignettes) [contributor]
+  \item John Harrold \email{john.m.harrold@gmail.com} (fuction annotate_base) [contributor]
 }
 
 }

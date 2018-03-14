@@ -1,3 +1,21 @@
+# officer 0.2.2
+
+## Enhancement
+
+* rdocx objects support external docx insertion
+* Word margins can be modified now (thanks to Jonathan Cooper)
+* New function `ph_fpars_at()` to add several formated paragraphs
+  in a new shape.
+* Function annotate_base will generate a slide to identify the
+  placeholder indexes, master names and indexes.
+
+## Issues
+
+* fix issue with duplicated lines in layout_properties(#103)
+* new argument par_default in ph_add_fpar so fpar par. properties
+  can be kept as is.
+* fix issue with images when duplicated `basename()`s
+
 # officer 0.2.1
 
 ## Issues

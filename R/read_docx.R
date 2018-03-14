@@ -27,12 +27,12 @@ read_docx <- function( path = NULL ){
   obj$content_type <- content_type$new( obj )
   obj$doc_obj <- docx_document$new(package_dir)
 
+
   default_refs <- styles_info(obj)
   default_refs <- default_refs[default_refs$is_default,]
   obj$default_styles <- setNames( as.list(default_refs$style_name), default_refs$style_type )
 
   last_sect <- xml_find_first(obj$doc_obj$get(), "/w:document/w:body/w:sectPr[last()]")
-  section_obj <- as_list(last_sect)
   obj$sect_dim <- section_dimensions(last_sect)
 
   obj <- cursor_end(obj)
@@ -182,7 +182,12 @@ set_doc_properties <- function( x, title = NULL, subject = NULL,
 #' docx_dim(read_docx())
 docx_dim <- function(x){
   cursor_elt <- x$doc_obj$get_at_cursor()
-  xpath_ <- file.path( xml_path(cursor_elt), "following-sibling::w:sectPr")
+  xpath_ <- paste0(
+    file.path( xml_path(cursor_elt), "following-sibling::w:sectPr"),
+    "|",
+    file.path( xml_path(cursor_elt), "following-sibling::w:p/w:pPr/w:sectPr")
+  )
+
   next_section <- xml_find_first(x$doc_obj$get(), xpath_)
   sd <- section_dimensions(next_section)
   sd$page <- sd$page / (20*72)
