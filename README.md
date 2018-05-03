@@ -10,20 +10,13 @@ contents, styles and properties of the original document will then be
 available.
 
 *This package is close to ReporteRs as it produces Word and PowerPoint
-files but it is faster, do not require `rJava` (but `xml2`) and has less
-functions that will make it easier to maintain.*
+files but it is faster, do not require `rJava` and is easier to
+maintain.*
 
 <img src="http://www.ardata.fr/images/officerlogo.svg" width = "15%"/>
 
 > Make corporate reporting with minimum hassle
 
-[![Travis-CI Build
-Status](https://travis-ci.org/davidgohel/officer.svg?branch=master)](https://travis-ci.org/davidgohel/officer)
-[![Build
-status](https://ci.appveyor.com/api/projects/status/github/davidgohel/officer?branch=master)](https://ci.appveyor.com/project/davidgohel/officer/branch/master)
-[![version](http://www.r-pkg.org/badges/version/officer)](https://CRAN.R-project.org/package=officer)
-![cranlogs](http://cranlogs.r-pkg.org./badges/officer)
-![Active](http://www.repostatus.org/badges/latest/active.svg)
 
 ## Word documents
 
@@ -73,7 +66,7 @@ PowerPoint slides:
 In a PowerPoint document, one can set a slide as selected and reach a
 particular shape (and remove it or add text).
 
-ile generation is performed with the `print()` function.
+File generation is performed with the `print()` function.
 
 ### import PowerPoint document in a data.frame
 
@@ -116,7 +109,7 @@ Or the latest version on CRAN:
 install.packages("officer")
 ```
 
-## Ressources
+## Resources
 
 ### Online documentation
 
@@ -124,7 +117,7 @@ The help pages are located at <https://davidgohel.github.io/officer/>.
 
 ### Getting help
 
-This project is developped and maintained on my own time. In order to
+This project is developed and maintained on my own time. In order to
 help me to maintain the package, do not send me private emails if you
 only have questions about how to use the package. Instead, visit
 Stackoverflow, `officer` has its own tag [Stackoverflow

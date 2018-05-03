@@ -46,7 +46,7 @@ worksheets <- R6Class(
 
       xml_elt <- paste(
         sprintf("<sheet name=\"%s\" sheetId=\"%.0f\" r:id=\"%s\"/>",
-                private$sheet_name, private$sheet_id, private$sheet_rid),
+                htmlEscape(private$sheet_name), private$sheet_id, private$sheet_rid),
         collapse = "" )
       xml_elt <- paste0( pml_with_ns("sheets"),  xml_elt, "</sheets>")
       xml_elt <- as_xml_document(xml_elt)
@@ -203,7 +203,7 @@ dir_sheet <- R6Class(
 #' @export
 #' @title open a connexion to an 'Excel' file
 #' @description read and import an xlsx file as an R object
-#' representing the document.
+#' representing the document. This function is experimental.
 #' @param path path to the xlsx file to use as base document.
 #' @param x an rpptx object
 #' @examples
@@ -223,7 +223,7 @@ read_xlsx <- function( path = NULL ){
                    .Names = c("package_dir"),
                    class = "rxlsx")
 
-  obj$content_type <- content_type$new( obj )
+  obj$content_type <- content_type$new( package_dir )
   obj$worksheets <- worksheets$new(package_dir)
   obj$sheets <- dir_sheet$new( obj )
   obj$core_properties <- core_properties$new(obj$package_dir)

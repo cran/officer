@@ -1,7 +1,7 @@
 Package: officer
 Type: Package
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.2.2
+Version: 0.3.0
 Authors@R: c(
     person("David", "Gohel", role = c("aut", "cre"),
     email = "david.gohel@ardata.fr"),
@@ -29,7 +29,7 @@ RoxygenNote: 6.0.1.9000
 Suggests: testthat, devEMF, knitr,tibble,ggplot2, rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2018-03-14 08:00:01 UTC; davidgohel
+Packaged: 2018-05-02 13:37:51 UTC; davidgohel
 Author: David Gohel [aut, cre],
   Frank Hangler [ctb] (function body_replace_all_text),
   Liz Sander [ctb] (several documentation fixes),
@@ -37,4 +37,4 @@ Author: David Gohel [aut, cre],
   John Harrold [ctb] (fuction annotate_base)
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2018-03-14 10:15:44 UTC
+Date/Publication: 2018-05-03 06:55:57 UTC

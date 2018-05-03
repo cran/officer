@@ -43,7 +43,7 @@ body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
   new_src <- tempfile( fileext = gsub("(.*)(\\.[a-zA-Z0-0]+)$", "\\2", src) )
   file.copy( src, to = new_src )
 
-  style_id <- x$doc_obj$get_style_id(style=style, type = "paragraph")
+  style_id <- get_style_id(data = x$styles, style=style, type = "paragraph")
 
   ext_img <- external_img(new_src, width = width, height = height)
   xml_elt <- format(ext_img, type = "wml")
@@ -136,6 +136,47 @@ body_add_gg <- function( x, value, width = 6, height = 5, style = NULL, ... ){
 }
 
 #' @export
+#' @title add a list of blocks into a document
+#' @description add a list of blocks produced by \code{block_list} into
+#' into an rdocx object
+#' @inheritParams body_add_break
+#' @param blocks set of blocks to be used as footnote content returned by
+#'   function \code{\link{block_list}}.
+#' @examples
+#' library(magrittr)
+#'
+#' img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
+#' bl <- block_list(
+#'   fpar(ftext("hello", shortcuts$fp_bold())),
+#'   fpar(
+#'     ftext("hello", shortcuts$fp_bold()),
+#'     stext(" world", "strong"),
+#'     external_img(src = img.file, height = 1.06, width = 1.39)
+#'   )
+#' )
+#'
+#' x <- read_docx() %>%
+#'   body_add_blocks( blocks = bl ) %>%
+#'   print(target = "body_add_bl.docx")
+body_add_blocks <- function( x, blocks, pos = "after" ){
+
+  stopifnot(inherits(blocks, "block_list"))
+
+  if( length(blocks) > 0 ){
+    pos_vector <- rep("after", length(blocks))
+    pos_vector[1] <- pos
+    for(i in seq_along(blocks) ){
+      x <- body_add_fpar(x, value = blocks[[i]], pos = pos_vector[i])
+    }
+  }
+
+  x
+}
+
+
+
+
+#' @export
 #' @title add paragraph of text
 #' @description add a paragraph of text into an rdocx object
 #' @param x a docx device
@@ -159,7 +200,7 @@ body_add_par <- function( x, value, style = NULL, pos = "after" ){
   if( is.null(style) )
     style <- x$default_styles$paragraph
 
-  style_id <- x$doc_obj$get_style_id(style=style, type = "paragraph")
+  style_id <- get_style_id(data = x$styles, style=style, type = "paragraph")
 
   xml_elt <- paste0(wml_with_ns("w:p"),
                     "<w:pPr><w:pStyle w:val=\"", style_id, "\"/></w:pPr><w:r><w:t xml:space=\"preserve\">",
@@ -185,25 +226,48 @@ body_add_par <- function( x, value, style = NULL, pos = "after" ){
 #' doc <- read_docx() %>% body_add_fpar(fpar_)
 #'
 #' print(doc, target = "body_add_fpar.docx" )
+#'
+#' # a way of using fpar to center an image in a Word doc ----
+#' rlogo <- file.path( R.home("doc"), "html", "logo.jpg" )
+#' img_in_par <- fpar(
+#'   external_img(src = rlogo, height = 1.06/2, width = 1.39/2),
+#'   fp_p = fp_par(text.align = "center") )
+#'
+#' read_docx() %>% body_add_fpar(img_in_par) %>%
+#'   print(target = "img_in_par.docx" )
+#'
 #' @importFrom xml2 read_xml xml_find_first write_xml xml_add_sibling as_xml_document
 #' @seealso \code{\link{fpar}}
 body_add_fpar <- function( x, value, style = NULL, pos = "after" ){
 
-  if( is.null(style) )
-    style <- x$default_styles$paragraph
-  style_id <- x$doc_obj$get_style_id(style=style, type = "paragraph")
+  img_src <- sapply(value$chunks, function(x){
+    if( inherits(x, "external_img"))
+      as.character(x)
+    else NA_character_
+  })
+  img_src <- unique(img_src[!is.na(img_src)])
 
   xml_elt <- format(value, type = "wml")
   xml_elt <- gsub("<w:p>", wml_with_ns("w:p"), xml_elt )
+
+  x <- docx_reference_img(x, img_src)
+  xml_elt <- wml_link_images( x, xml_elt )
+
+  if( !is.null(style) ){
+    style_id <- get_style_id(data = x$styles, style=style, type = "paragraph")
+    ppr <- xml_child(xml_node, "w:pPr")
+    xml_remove(xml_children(ppr))
+
+    xml_add_child(ppr,
+                  as_xml_document(
+                    paste0(
+                      "<w:pStyle xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" w:val=\"",
+                      style_id, "\"/>"))
+    )
+
+  }
+
   xml_node <- as_xml_document(xml_elt)
-  ppr <- xml_child(xml_node, "w:pPr")
-  xml_remove(xml_children(ppr))
-  xml_add_child(ppr,
-                as_xml_document(
-                  paste0(
-                    "<w:pStyle xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" w:val=\"",
-                    style_id, "\"/>"))
-                )
 
 
   body_add_xml(x = x, str = as.character(xml_node), pos = pos)
@@ -248,7 +312,7 @@ body_add_table <- function( x, value, style = NULL, pos = "after", header = TRUE
   if( is.null(style) )
     style <- x$default_styles$table
 
-  style_id <- x$doc_obj$get_style_id(style=style, type = "table")
+  style_id <- get_style_id(data = x$styles, style=style, type = "table")
 
   value <- characterise_df(value)
 
@@ -335,7 +399,8 @@ body_add_xml <- function(x, str, pos){
 #' @export
 #' @importFrom uuid UUIDgenerate
 #' @title add bookmark
-#' @description Add a bookmark at the cursor location.
+#' @description Add a bookmark at the cursor location. The bookmark
+#' is added on the first run of text in the current paragraph.
 #' @param x an rdocx object
 #' @param id bookmark name
 #' @examples
@@ -405,115 +470,5 @@ body_remove <- function(x){
   x$doc_obj$set_cursor(xml_path(new_cursor_elt))
   x
 }
-
-#' @export
-#' @title replace text at a bookmark location
-#' @description replace text content enclosed in a bookmark
-#' with different text. A bookmark will be considered as valid if enclosing words
-#' within a paragraph; i.e., a bookmark along two or more paragraphs is invalid,
-#' a bookmark set on a whole paragraph is also invalid, but bookmarking few words
-#' inside a paragraph is valid.
-#' @param x a docx device
-#' @param bookmark bookmark id
-#' @param value the replacement string, of type character
-#' @examples
-#' library(magrittr)
-#' doc <- read_docx() %>%
-#'   body_add_par("centered text", style = "centered") %>%
-#'   slip_in_text(". How are you", style = "strong") %>%
-#'   body_bookmark("text_to_replace") %>%
-#'   body_replace_at("text_to_replace", "not left aligned")
-body_replace_at <- function( x, bookmark, value ){
-  stopifnot(is_scalar_character(value), is_scalar_character(bookmark))
-  x$doc_obj$cursor_replace_first_text(bookmark, value)
-  x
-}
-
-#' @export
-#' @title Replace text anywhere in the document, or at a cursor
-#' @description Replace all occurrences of old_value with new_value. This method
-#' uses \code{\link{grepl}}/\code{\link{gsub}} for pattern matching; you may
-#' supply arguments as required (and therefore use \code{\link{regex}} features)
-#' using the optional \code{...} argument.
-#'
-#' Note that by default, grepl/gsub will use \code{fixed=FALSE}, which means
-#' that \code{old_value} and \code{new_value} will be interepreted as regular
-#' expressions.
-#'
-#' \strong{Chunking of text}
-#'
-#' Note that the behind-the-scenes representation of text in a Word document is
-#' frequently not what you might expect! Sometimes a paragraph of text is broken
-#' up (or "chunked") into several "runs," as a result of style changes, pauses
-#' in text entry, later revisions and edits, etc. If you have not styled the
-#' text, and have entered it in an "all-at-once" fashion, e.g. by pasting it or
-#' by outputing it programmatically into your Word document, then this will
-#' likely not be a problem. If you are working with a manually-edited document,
-#' however, this can lead to unexpected failures to find text.
-#'
-#' You can use the officer function \code{\link{docx_show_chunk}} to
-#' show how the paragraph of text at the current cursor has been chunked into
-#' runs, and what text is in each chunk. This can help troubleshoot unexpected
-#' failures to find text.
-#' @seealso \code{\link{grep}}, \code{\link{regex}}, \code{\link{docx_show_chunk}}
-#' @author Frank Hangler, \email{frank@plotandscatter.com}
-#' @param x a docx device
-#' @param old_value the value to replace
-#' @param new_value the value to replace it with
-#' @param only_at_cursor if \code{TRUE}, only search-and-replace at the current
-#' cursor; if \code{FALSE} (default), search-and-replace in the entire document
-#' (this can be slow on large documents!)
-#' @param ... optional arguments to grepl/gsub (e.g. \code{fixed=TRUE})
-#' @examples
-#' library(magrittr)
-#'
-#' doc <- read_docx() %>%
-#'   body_add_par("Placeholder one") %>%
-#'   body_add_par("Placeholder two")
-#'
-#' # Show text chunk at cursor
-#' docx_show_chunk(doc)  # Output is 'Placeholder two'
-#'
-#' # Simple search-and-replace at current cursor, with regex turned off
-#' body_replace_all_text(doc, "Placeholder", "new", only_at_cursor=TRUE, fixed=TRUE)
-#' docx_show_chunk(doc)  # Output is 'new two'
-#'
-#' # Do the same, but in the entire document and ignoring case
-#' body_replace_all_text(doc, "placeholder", "new", only_at_cursor=FALSE, ignore.case=TRUE)
-#' cursor_backward(doc)
-#' docx_show_chunk(doc) # Output is 'new one'
-#'
-#' # Use regex : replace all words starting with "n" with the word "example"
-#' body_replace_all_text(doc, "\\bn.*?\\b", "example")
-#' docx_show_chunk(doc) # Output is 'example one'
-body_replace_all_text <- function( x, old_value, new_value, only_at_cursor = FALSE, ... ){
-  stopifnot(is_scalar_character(old_value),
-            is_scalar_character(new_value),
-            is_scalar_logical(only_at_cursor))
-  x$doc_obj$replace_all_text(old_value, new_value, only_at_cursor, ...)
-  x
-}
-
-#' @export
-#' @title Show underlying text tag structure
-#' @description Show the structure of text tags at the current cursor. This is
-#' most useful when trying to troubleshoot search-and-replace functionality
-#' using \code{\link{body_replace_all_text}}.
-#' @seealso \code{\link{body_replace_all_text}}
-#' @param x a docx device
-#' @examples
-#' library(magrittr)
-#'
-#' doc <- read_docx() %>%
-#'   body_add_par("Placeholder one") %>%
-#'   body_add_par("Placeholder two")
-#'
-#' # Show text chunk at cursor
-#' docx_show_chunk(doc)  # Output is 'Placeholder two'
-docx_show_chunk <- function( x ){
-  x$doc_obj$docx_show_chunk()
-  invisible(x)
-}
-
 
 

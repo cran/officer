@@ -15,7 +15,7 @@ pml_run_str <- function(str, style) {
 
 pml_shape_str <- function(str, ph, offx, offy, cx, cy, ...) {
 
-  sp_pr <- "<p:spPr><a:xfrm><a:off x=\"0\" y=\"0\"/><a:ext cx=\"0\" cy=\"0\"/></a:xfrm></p:spPr>"
+  sp_pr <- sprintf("<p:spPr><a:xfrm><a:off x=\"%.0f\" y=\"%.0f\"/><a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm></p:spPr>", offx, offy, cx, cy)
   # sp_pr <- "<p:spPr/>"
   nv_sp_pr <- "<p:nvSpPr><p:cNvPr id=\"\" name=\"\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr>"
   nv_sp_pr <- sprintf( nv_sp_pr, ifelse(!is.na(ph), ph, "") )
@@ -30,7 +30,8 @@ pml_shape_str <- function(str, ph, offx, offy, cx, cy, ...) {
 
 pml_shape_par <- function(str, ph, offx, offy, cx, cy, ...) {
 
-  sp_pr <- "<p:spPr><a:xfrm><a:off x=\"0\" y=\"0\"/><a:ext cx=\"0\" cy=\"0\"/></a:xfrm></p:spPr>"
+  sp_pr <- sprintf("<p:spPr><a:xfrm><a:off x=\"%.0f\" y=\"%.0f\"/><a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm></p:spPr>", offx, offy, cx, cy)
+
   nv_sp_pr <- "<p:nvSpPr><p:cNvPr id=\"\" name=\"\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr>"
   nv_sp_pr <- sprintf( nv_sp_pr, ifelse(!is.na(ph), ph, "") )
   paste0( pml_with_ns("p:sp"),
@@ -98,18 +99,13 @@ read_xfrm <- function(nodeset, file, name){
           name = name )
 }
 
-filter_master_xfrm <- function( master_xfrm ){
+
+fortify_master_xfrm <- function(master_xfrm){
+  master_xfrm <- as.data.frame(master_xfrm)
   has_type <- grepl("type=", master_xfrm$ph)
   master_xfrm <- master_xfrm[has_type, ]
-  master_xfrm[!duplicated(master_xfrm$type),]
-}
+  master_xfrm <- master_xfrm[!duplicated(master_xfrm$type),]
 
-xfrmize <- function( slide_xfrm, master_xfrm ){
-  slide_xfrm <- as.data.frame( slide_xfrm )
-  master_xfrm <- filter_master_xfrm(as.data.frame(master_xfrm))
-  master_ref <- unique( data.frame(file = master_xfrm$file,
-                                     master_name = master_xfrm$name,
-                                     stringsAsFactors = FALSE ) )
   tmp_names <- names(master_xfrm)
 
   old_ <- c("offx", "offy", "cx", "cy", "name")
@@ -119,13 +115,27 @@ xfrmize <- function( slide_xfrm, master_xfrm ){
   master_xfrm$id <- NULL
   master_xfrm$ph <- NULL
   master_xfrm$ph_label <- NULL
+
+  master_xfrm
+}
+
+xfrmize <- function( slide_xfrm, master_xfrm ){
+
+  slide_xfrm <- as.data.frame( slide_xfrm )
+
+  master_ref <- unique( data.frame(file = master_xfrm$file,
+                                     master_name = master_xfrm$name,
+                                     stringsAsFactors = FALSE ) )
+  master_xfrm <- fortify_master_xfrm(master_xfrm)
+
   slide_key_id <- paste0(slide_xfrm$master_file, slide_xfrm$type)
   master_key_id <- paste0(master_xfrm$file, master_xfrm$type)
 
   slide_xfrm_no_match <- slide_xfrm[!slide_key_id %in% master_key_id, ]
   slide_xfrm_no_match <- merge(slide_xfrm_no_match,
                                master_ref, by.x = "master_file", by.y = "file",
-                               all = FALSE)
+                               all.x = TRUE, all.y = FALSE)
+
   slide_xfrm <- merge(slide_xfrm, master_xfrm,
                       by.x = c("master_file", "type"),
                       by.y = c("file", "type"),
@@ -138,7 +148,13 @@ xfrmize <- function( slide_xfrm, master_xfrm ){
   slide_xfrm$offy_ref <- NULL
   slide_xfrm$cx_ref <- NULL
   slide_xfrm$cy_ref <- NULL
-  rbind(slide_xfrm, slide_xfrm_no_match, stringsAsFactors = FALSE)
+
+  slide_xfrm <- rbind(slide_xfrm, slide_xfrm_no_match, stringsAsFactors = FALSE)
+  slide_xfrm[
+    !is.na( slide_xfrm$offx ) &
+      !is.na( slide_xfrm$offy ) &
+      !is.na( slide_xfrm$cx ) &
+      !is.na( slide_xfrm$cy ),]
 }
 
 
@@ -205,32 +221,6 @@ characterise_df <- function(x){
   data.frame(x, stringsAsFactors = FALSE, check.names = FALSE)
 }
 
-
-section_dimensions <- function(node){
-  section_obj <- as_list(node)
-
-  landscape <- FALSE
-  if( !is.null(attr(section_obj$pgSz, "orient")) && attr(section_obj$pgSz, "orient") == "landscape" ){
-    landscape <- TRUE
-  }
-
-  h_ref <- as.integer(attr(section_obj$pgSz, "h"))
-  w_ref <- as.integer(attr(section_obj$pgSz, "w"))
-
-  mar_t <- as.integer(attr(section_obj$pgMar, "top"))
-  mar_b <- as.integer(attr(section_obj$pgMar, "bottom"))
-  mar_r <- as.integer(attr(section_obj$pgMar, "right"))
-  mar_l <- as.integer(attr(section_obj$pgMar, "left"))
-  mar_h <- as.integer(attr(section_obj$pgMar, "header"))
-  mar_f <- as.integer(attr(section_obj$pgMar, "footer"))
-
-  list( page = c("width" = w_ref, "height" = h_ref),
-        landscape = landscape,
-        margins = c(top = mar_t, bottom = mar_b,
-                    left = mar_l, right = mar_r,
-                    header = mar_h, footer = mar_f) )
-
-}
 
 xpath_content_selector <- "*[self::p:cxnSp or self::p:sp or self::p:graphicFrame or self::p:grpSp or self::p:pic]"
 
