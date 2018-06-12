@@ -1,7 +1,7 @@
 Package: officer
 Type: Package
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: c(
     person("David", "Gohel", role = c("aut", "cre"),
     email = "david.gohel@ardata.fr"),
@@ -21,7 +21,7 @@ Description: Access and manipulate 'Microsoft Word' and 'Microsoft PowerPoint' d
 License: GPL-3
 LazyData: TRUE
 LinkingTo: Rcpp
-Imports: Rcpp (>= 0.12.12), R6,R.utils,grDevices, base64enc, zip,
+Imports: Rcpp (>= 0.12.12), R6, grDevices, base64enc, zip,
         digest,uuid,utils,stats, magrittr,htmltools, xml2 (>= 1.1.0)
 URL: https://davidgohel.github.io/officer
 BugReports: https://github.com/davidgohel/officer/issues
@@ -29,7 +29,7 @@ RoxygenNote: 6.0.1.9000
 Suggests: testthat, devEMF, knitr,tibble,ggplot2, rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2018-05-02 13:37:51 UTC; davidgohel
+Packaged: 2018-06-12 07:30:59 UTC; davidgohel
 Author: David Gohel [aut, cre],
   Frank Hangler [ctb] (function body_replace_all_text),
   Liz Sander [ctb] (several documentation fixes),
@@ -37,4 +37,4 @@ Author: David Gohel [aut, cre],
   John Harrold [ctb] (fuction annotate_base)
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2018-05-03 06:55:57 UTC
+Date/Publication: 2018-06-12 13:33:19 UTC
