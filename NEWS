@@ -1,3 +1,18 @@
+# officer 0.3.2
+
+## Enhancement
+
+* new function `change_styles()` to change paragraph styles in
+  a Word document.
+* new function `move_slide()`: move a slide in a presentation.
+* fix body_add_docx examples
+
+## Issues
+
+* fix issue with text underlined  and justified paragraphs in Word.
+* skip errored test on macOS that can be read on CRAN check page.
+* all examples are now generated in `tempdir()`.
+
 # officer 0.3.1
 
 ## Issues

@@ -56,7 +56,8 @@ read_table_style <- function(path){
 #' @examples
 #' # write a rdocx object in a docx file ----
 #' if( require(magrittr) ){
-#'   read_pptx() %>% print(target = "out.pptx")
+#'   file <- tempfile(fileext = ".pptx")
+#'   read_pptx() %>% print(target = file)
 #'   # full path of produced file is returned
 #'   print(.Last.value)
 #' }
@@ -145,7 +146,8 @@ length.rpptx <- function( x ){
 #' doc <- on_slide( doc, index = 3)
 #' doc <- ph_with_text(x = doc, type = "title", str = "Third title")
 #'
-#' print(doc, target = "on_slide.pptx" )
+#' file <- tempfile(fileext = ".pptx")
+#' print(doc, target = file )
 on_slide <- function( x, index ){
 
   l_ <- length(x)
@@ -156,7 +158,51 @@ on_slide <- function( x, index ){
     stop("unvalid index ", index, " (", l_," slide(s))", call. = FALSE)
   }
 
-  x$cursor <- index
+  filename <- basename( x$presentation$slide_data()$target[index])
+  location <- which( x$slide$get_metadata()$name %in% filename )
+
+  x$cursor <- x$slide$slide_index(filename)
+
+  x
+}
+
+#' @export
+#' @title move a slide
+#' @description move a slide in a pptx presentation
+#' @param x rpptx object
+#' @param index slide index, default to current slide position.
+#' @param to new slide index.
+#' @note cursor is set on the last slide.
+#' @examples
+#' x <- read_pptx()
+#' x <- add_slide(x, layout = "Title and Content",
+#'   master = "Office Theme")
+#' x <- ph_with_text(x, type = "body", str = "Hello world 1")
+#' x <- add_slide(x, layout = "Title and Content",
+#'   master = "Office Theme")
+#' x <- ph_with_text(x, type = "body", str = "Hello world 2")
+#' x <- move_slide(x, index = 1, to = 2)
+move_slide <- function( x, index, to ){
+
+  x$presentation$slide_data()
+
+  if( is.null(index) )
+    index <- x$cursor
+
+  l_ <- length(x)
+
+  if( l_ < 1 ){
+    stop("presentation contains no slide", call. = FALSE)
+  }
+  if( !between(index, 1, l_ ) ){
+    stop("unvalid index ", index, " (", l_," slide(s))", call. = FALSE)
+  }
+  if( !between(to, 1, l_ ) ){
+    stop("unvalid 'to' ", to, " (", l_," slide(s))", call. = FALSE)
+  }
+
+  x$presentation$move_slide(from = index, to = to)
+  x$cursor <- to
   x
 }
 
@@ -188,7 +234,11 @@ remove_slide <- function( x, index = NULL ){
     stop("unvalid index ", index, " (", l_," slide(s))", call. = FALSE)
   }
 
-  del_file <- x$slide$remove_slide(index)
+  filename <- basename( x$presentation$slide_data()$target[index])
+  location <- which( x$slide$get_metadata()$name %in% filename )
+
+  slide_col_id <- x$slide$slide_index(filename)
+  del_file <- x$slide$remove_slide(slide_col_id)
   # update presentation elements
   x$presentation$remove_slide(del_file)
   x$content_type$remove_slide(partname = del_file )
@@ -251,14 +301,12 @@ layout_properties <- function( x, layout = NULL, master = NULL ){
 #' @param output_file filename to store the annotated powerpoint file or NULL to suppress generation
 #' @return x rpptx object of the annotated PowerPoint file
 #' @examples
-#' # To generate an anotation of the default base documet with officer and place
-#' # the output in the file annotated_layout.pptx:
-#'   annotate_base()
+#' # To generate an anotation of the default base document with officer:
+#' annotate_base(output_file = tempfile(fileext = ".pptx"))
 #'
 #' # To generate an annotation of the base document 'mydoc.pptx' and place the
 #' # annotated output in 'mydoc_annotate.pptx'
 #' # annotate_base(path = 'mydoc.pptx', output_file='mydoc_annotate.pptx')
-#'
 #'
 annotate_base <- function(path = NULL, output_file = 'annotated_layout.pptx' ){
 

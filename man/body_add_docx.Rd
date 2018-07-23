@@ -17,19 +17,29 @@ one of "after", "before", "on".}
 \description{
 add content of a docx into an rdocx object.
 }
+\note{
+The function is using a 'Microsoft Word' feature: when the
+document will be edited, the content of the file will be
+inserted in the main document.
+
+This feature is unlikely to work as expected if the
+resulting document is edited by another software.
+}
 \examples{
 
-img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
-if( file.exists(img.file) ){
-  # create a example file to be inserted later in the final doc----
-  doc <- read_docx()
-  doc <- body_add_img(x = doc, src = img.file, height = 1.06, width = 1.39 )
-  print(doc, target = "external_file.docx")
+library(magrittr)
+file1 <- tempfile(fileext = ".docx")
+file2 <- tempfile(fileext = ".docx")
+file3 <- tempfile(fileext = ".docx")
+read_docx() \%>\%
+  body_add_par("hello world 1", style = "Normal") \%>\%
+  print(target = file1)
+read_docx() \%>\%
+  body_add_par("hello world 2", style = "Normal") \%>\%
+  print(target = file2)
 
-  # insert external_file.docx in the final doc----
-  final_doc <- read_docx()
-  doc <- body_add_docx(x = doc, src = "external_file.docx" )
-  print(doc, target = "final.docx")
-}
-
+read_docx(path = file1) \%>\%
+  body_add_break() \%>\%
+  body_add_docx(src = file2) \%>\%
+  print(target = file3)
 }
