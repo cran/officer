@@ -1,12 +1,13 @@
 Package: officer
 Type: Package
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.3.2
+Version: 0.3.3
 Authors@R: c(
     person("David", "Gohel", role = c("aut", "cre"),
     email = "david.gohel@ardata.fr"),
     person("Frank", "Hangler", role = "ctb", email = "frank@plotandscatter.com", comment = "function body_replace_all_text"),
     person("Liz", "Sander", role = "ctb", email = 'lsander@civisanalytics.com', comment = "several documentation fixes"),
+    person("Anton", "Victorson", role = "ctb", email = 'anton@victorson.se',comment = "fixes xml structures"),
     person("Jon", "Calder", role = "ctb", email = 'jonmcalder@gmail.com', comment = "update vignettes"),
     person("John", "Harrold", role = "ctb", email = 'john.m.harrold@gmail.com', comment = "fuction annotate_base")
     )
@@ -21,20 +22,22 @@ Description: Access and manipulate 'Microsoft Word' and 'Microsoft PowerPoint' d
 License: GPL-3
 LazyData: TRUE
 LinkingTo: Rcpp
-Imports: Rcpp (>= 0.12.12), R6, grDevices, base64enc, zip,
-        digest,uuid,utils,stats, magrittr,htmltools, xml2 (>= 1.1.0)
+Imports: Rcpp (>= 0.12.12), R6, grDevices, base64enc, zip (>= 2.0.0),
+        digest,uuid,stats, magrittr,htmltools,rlang, xml2 (>= 1.1.0)
 URL: https://davidgohel.github.io/officer
+Encoding: UTF-8
 BugReports: https://github.com/davidgohel/officer/issues
-RoxygenNote: 6.0.1.9000
-Suggests: testthat, devEMF, knitr,tibble,ggplot2, rmarkdown
+RoxygenNote: 6.1.1
+Suggests: testthat, devEMF,tibble,ggplot2, rmarkdown, knitr
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2018-07-23 08:03:56 UTC; davidgohel
+Packaged: 2019-03-01 15:12:05 UTC; davidgohel
 Author: David Gohel [aut, cre],
   Frank Hangler [ctb] (function body_replace_all_text),
   Liz Sander [ctb] (several documentation fixes),
+  Anton Victorson [ctb] (fixes xml structures),
   Jon Calder [ctb] (update vignettes),
   John Harrold [ctb] (fuction annotate_base)
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2018-07-23 09:10:03 UTC
+Date/Publication: 2019-03-01 17:00:03 UTC

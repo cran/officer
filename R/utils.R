@@ -8,54 +8,6 @@ pml_with_ns <- function(x){
   sprintf("<%s %s>", x, base_ns)
 }
 
-pml_run_str <- function(str, style) {
-  str_ <- paste0( pml_with_ns("a:r"), "%s<a:t>%s</a:t></a:r>" )
-  sprintf(str_, format(style, type = "pml"), htmlEscape(str))
-}
-
-pml_shape_str <- function(str, ph, offx, offy, cx, cy, ...) {
-
-  sp_pr <- sprintf("<p:spPr><a:xfrm><a:off x=\"%.0f\" y=\"%.0f\"/><a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm></p:spPr>", offx, offy, cx, cy)
-  # sp_pr <- "<p:spPr/>"
-  nv_sp_pr <- "<p:nvSpPr><p:cNvPr id=\"\" name=\"\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr>"
-  nv_sp_pr <- sprintf( nv_sp_pr, ifelse(!is.na(ph), ph, "") )
-  paste0( pml_with_ns("p:sp"),
-                  nv_sp_pr, sp_pr,
-                  "<p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr/><a:t>",
-                  htmlEscape(str),
-                  "</a:t></a:r></a:p></p:txBody></p:sp>"
-                  )
-}
-
-
-pml_shape_par <- function(str, ph, offx, offy, cx, cy, ...) {
-
-  sp_pr <- sprintf("<p:spPr><a:xfrm><a:off x=\"%.0f\" y=\"%.0f\"/><a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm></p:spPr>", offx, offy, cx, cy)
-
-  nv_sp_pr <- "<p:nvSpPr><p:cNvPr id=\"\" name=\"\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr>"
-  nv_sp_pr <- sprintf( nv_sp_pr, ifelse(!is.na(ph), ph, "") )
-  paste0( pml_with_ns("p:sp"),
-          nv_sp_pr, sp_pr,
-          "<p:txBody><a:bodyPr/><a:lstStyle/>",
-          str,
-          "</p:txBody></p:sp>"
-  )
-}
-
-
-is.color = function(x) {
-  # http://stackoverflow.com/a/13290832/3315962
-  out = sapply(x, function( x ) {
-    tryCatch( is.matrix( col2rgb( x ) ), error = function( e ) F )
-  })
-
-  nout <- names(out)
-  if( !is.null(nout) && any( is.na( nout ) ) )
-    out[is.na( nout )] = FALSE
-
-  out
-}
-
 
 attr_chunk <- function( x ){
   if( !is.null(x) && length( x ) > 0){
@@ -99,6 +51,23 @@ read_xfrm <- function(nodeset, file, name){
           name = name )
 }
 
+fortify_pml_images <- function(x, str){
+
+  slide <- x$slide$get_slide(x$cursor)
+  ref <- slide$rel_df()
+
+  ref <- ref[ref$ext_src != "",]
+  doc <- as_xml_document(str)
+  for(id in seq_along(ref$ext_src) ){
+    xpth <- paste0("//p:pic/p:blipFill/a:blip",
+                   sprintf( "[contains(@r:embed,'%s')]", ref$ext_src[id]),
+                   "")
+
+    src_nodes <- xml_find_all(doc, xpth)
+    xml_attr(src_nodes, "r:embed") <- ref$id[id]
+  }
+  as.character(doc)
+}
 
 fortify_master_xfrm <- function(master_xfrm){
   master_xfrm <- as.data.frame(master_xfrm)
@@ -274,3 +243,41 @@ is_scalar_character <- function( x ) {
 is_scalar_logical <- function( x ) {
   is.logical(x) && length(x) == 1
 }
+
+
+wml_image <- function(src, width, height){
+  str <- paste0(wml_with_ns("w:r"),
+                "<w:rPr/><w:drawing><wp:inline distT=\"0\" distB=\"0\" distL=\"0\" distR=\"0\">",
+                sprintf("<wp:extent cx=\"%.0f\" cy=\"%.0f\"/>", width * 12700*72, height * 12700*72),
+                "<wp:docPr id=\"\" name=\"\"/>",
+                "<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" noChangeAspect=\"1\"/></wp:cNvGraphicFramePr>",
+                "<a:graphic xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\"><a:graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/picture\"><pic:pic xmlns:pic=\"http://schemas.openxmlformats.org/drawingml/2006/picture\">",
+                "<pic:nvPicPr>",
+                "<pic:cNvPr id=\"\" name=\"\"/>",
+                "<pic:cNvPicPr><a:picLocks noChangeAspect=\"1\" noChangeArrowheads=\"1\"/>",
+                "</pic:cNvPicPr></pic:nvPicPr>",
+                "<pic:blipFill>",
+                sprintf("<a:blip r:embed=\"%s\"/>", src),
+                "<a:srcRect/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>",
+                "<pic:spPr bwMode=\"auto\"><a:xfrm><a:off x=\"0\" y=\"0\"/>",
+                sprintf("<a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom><a:noFill/></pic:spPr>", width * 12700, height * 12700),
+                "</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>"
+  )
+  str
+}
+
+
+pml_image <- function(src, width, height){
+  str <- paste0("<p:pic xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\">",
+                "<p:nvPicPr><p:cNvPr id=\"\" name=\"pic\"/><p:cNvPicPr/>",
+                "<p:nvPr/></p:nvPicPr><p:blipFill>",
+                sprintf("<a:blip cstate=\"print\" r:embed=\"%s\"/>", src),
+                "<a:stretch><a:fillRect/></a:stretch>",
+                "</p:blipFill><p:spPr>",
+                sprintf("<a:xfrm><a:off x=\"\" y=\"\"/><a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm>",
+                        width * 12700*72, height * 12700*72),
+                "<a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom></p:spPr></p:pic>"
+  )
+  str
+}
+

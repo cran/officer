@@ -13,7 +13,7 @@ std::string rpr::a_tag()
 
   std::stringstream os;
 
-  os << "<a:rPr";
+  os << "<a:rPr cap=\"none\"";
   if( this->size > 0 ){
     os << " sz=\"";
     os << (int)(this->size*100);
@@ -32,11 +32,10 @@ std::string rpr::a_tag()
 
   os << ">";
   os << col_.solid_fill();
-  os << "<a:latin typeface=\"" << this->fontname << "\"/>";
-  os << "<a:cs typeface=\"" << this->fontname << "\"/>";
-
   if( shading_.is_visible() > 0 )
     os << shading_.highlight();
+  os << "<a:latin typeface=\"" << this->fontname << "\"/>";
+  os << "<a:cs typeface=\"" << this->fontname << "\"/>";
 
   os << "</a:rPr>";
 
@@ -55,6 +54,7 @@ std::string rpr::w_tag()
   os << "<w:rFonts";
   os << " w:ascii=\"" << this->fontname << "\"";
   os << " w:hAnsi=\"" << this->fontname << "\"";
+  os << " w:eastAsia=\"" << this->fontname << "\"";
   os << " w:cs=\"" << this->fontname << "\"";
   os << "/>";
 

@@ -19,7 +19,7 @@ Examples of manipulations are:
 }
 
 To learn more about officer, start with the vignettes:
-`browseVignettes(package = "officer")`
+\code{browseVignettes(package = "officer")}
 }
 \seealso{
 \url{https://davidgohel.github.io/officer/}
@@ -31,6 +31,7 @@ Other contributors:
 \itemize{
   \item Frank Hangler \email{frank@plotandscatter.com} (function body_replace_all_text) [contributor]
   \item Liz Sander \email{lsander@civisanalytics.com} (several documentation fixes) [contributor]
+  \item Anton Victorson \email{anton@victorson.se} (fixes xml structures) [contributor]
   \item Jon Calder \email{jonmcalder@gmail.com} (update vignettes) [contributor]
   \item John Harrold \email{john.m.harrold@gmail.com} (fuction annotate_base) [contributor]
 }

@@ -1,3 +1,15 @@
+# officer 0.3.3
+
+## Enhancement
+
+* new generic function `ph_with()` and function `ph_location*()` to ease insertion
+  of elements.
+* new function `slide_size()` provide size of slides.
+
+## Issues
+
+* fix issue with fonts when east asian characters are used in Word.
+
 # officer 0.3.2
 
 ## Enhancement

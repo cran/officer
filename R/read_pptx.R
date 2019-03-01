@@ -132,6 +132,20 @@ length.rpptx <- function( x ){
 }
 
 #' @export
+#' @rdname read_pptx
+#' @section slides width and height:
+#' Function \code{slide_size} will return the size of slides.
+#' @importFrom xml2 xml_attrs xml_find_first
+slide_size <- function(x) {
+  pres <- x$presentation$get()
+  dimensions <- xml_attrs(xml_find_first(pres, "p:sldSz"))
+  dimensions <- as.list(as.integer(dimensions[c("cx", "cy")]) / 914400)
+  names(dimensions) <- c("width", "height")
+  dimensions
+}
+
+
+#' @export
 #' @title change current slide
 #' @description change current slide index of an rpptx object.
 #' @param x rpptx object
@@ -284,7 +298,7 @@ layout_properties <- function( x, layout = NULL, master = NULL ){
   } else if( !is.null(layout) && is.null(master) ){
     data <- data[data$name == layout,]
   }
-  data <- data[,c("master_name", "name", "type", "id", "ph_label", "offx", "offy", "cx", "cy")]
+  data <- data[,c("master_name", "name", "type", "id", "ph_label", "ph", "offx", "offy", "cx", "cy")]
   data[["offx"]] <- data[["offx"]] / 914400
   data[["offy"]] <- data[["offy"]] / 914400
   data[["cx"]] <- data[["cx"]] / 914400
@@ -316,8 +330,10 @@ annotate_base <- function(path = NULL, output_file = 'annotated_layout.pptx' ){
   lay_sum <- layout_summary(ppt)
 
   # Looping through each layout
-  for(lidx in 1:length(lay_sum[,1])){
+
+  for(lidx in seq_len(nrow(lay_sum))){
     # Pulling out the layout properties
+
     layout <- lay_sum[lidx, 1]
     master <- lay_sum[lidx, 2]
     lp <- layout_properties ( x = ppt, layout = layout, master = master)
@@ -328,15 +344,24 @@ annotate_base <- function(path = NULL, output_file = 'annotated_layout.pptx' ){
     # Blank slides have nothing
     if(length(lp[,1] > 0)){
 
+
+
       # Now we go through each placholder
-      for(pidx in 1:length(lp[,1])){
+      for(pidx in seq_len(nrow(lp))){
 
         # If it's a text placeholder "body" or "title" we add text indicating
         # the type and index. If it's title we put the layout and master
         # information in there as well.
+        ss <- slide_summary(ppt)
+
+        index <- 1
+        existing_id <- which( lp[pidx, ]$type %in% ss$type )
+        if( length(existing_id) ) index <- sum(ss$type %in% lp[pidx, ]$type) + 1
+
         if(lp[pidx, ]$type == "body"){
-          textstr <- sprintf('type="body", index =%d', pidx)
-          ppt <- ph_with_text(x=ppt, type="body", index=pidx, str=textstr)
+
+          textstr <- sprintf('type="body", index =%d', index)
+          ppt <- ph_with_text(x=ppt, type="body", index=index, str=textstr)
         }
         if(lp[pidx, ]$type %in% c("title", "ctrTitle", "subTitle")){
           textstr <- sprintf('layout ="%s", master = "%s", type="%s", index =%d', layout, master, lp[pidx, ]$type,  pidx)
@@ -358,6 +383,11 @@ annotate_base <- function(path = NULL, output_file = 'annotated_layout.pptx' ){
 #' @description get content and positions of current slide
 #' into a data.frame. Data for any tables, images, or paragraphs are
 #' imported into the resulting data.frame.
+#' @note
+#' The column \code{id} of the result is not to be used by users.
+#' This is a technical string id whose value will be used by office
+#' when the document will be rendered. This is not related to argument
+#' \code{index} required by functions \code{ph_with_zzz}.
 #' @param x rpptx object
 #' @param index slide index
 #' @examples
