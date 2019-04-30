@@ -34,7 +34,16 @@
 #'   master = "Office Theme")
 #' img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
 #' doc <- ph_with(x = doc, external_img(img.file, 100/72, 76/72),
-#'                location = ph_location_right() )
+#'                location = ph_location_right(), use_loc_size = FALSE )
+#'
+#' svg_file <- file.path(R.home(component = "doc"), "html/Rlogo.svg")
+#' if( require("rsvg") ){
+#'   doc <- ph_with(x = doc, external_img(svg_file),
+#'     location = ph_location_left(),
+#'     use_loc_size = TRUE )
+#' }
+#'
+#'
 #'
 #' # unordered_list ----
 #' ul <- unordered_list(
@@ -57,17 +66,22 @@ ph_with <- function(x, value, ...){
 ph <- function( left = 0, top = 0, width = 3, height = 3,
                 bg = "transparent", rot = 0, label = "", ph = "<p:ph/>"){
 
-  if( is.null(bg)) bg <- "transparent"
   if( is.null(rot)) rot <- 0
 
-  if( !is.color( bg ) )
+  if( !is.null(bg) && !is.color( bg ) )
     stop("bg must be a valid color.", call. = FALSE )
 
-  str <- "<p:nvSpPr><p:cNvPr id=\"0\" name=\"%s\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr><p:spPr><a:xfrm rot=\"%.0f\"><a:off x=\"%.0f\" y=\"%.0f\"/><a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm><a:solidFill><a:srgbClr val=\"%s\"><a:alpha val=\"%.0f\"/></a:srgbClr></a:solidFill></p:spPr>"
+  bg_str <- ""
+  if( !is.null(bg)){
+    bg_str <- sprintf("<a:solidFill><a:srgbClr val=\"%s\"><a:alpha val=\"%.0f\"/></a:srgbClr></a:solidFill>",
+            colcode0(bg), colalpha(bg) )
+  }
+
+  str <- "<p:nvSpPr><p:cNvPr id=\"0\" name=\"%s\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr><p:spPr><a:xfrm rot=\"%.0f\"><a:off x=\"%.0f\" y=\"%.0f\"/><a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm>%s</p:spPr>"
   sprintf(str, label, ph, -rot * 60000,
           left * 914400, top * 914400,
           width * 914400, height * 914400,
-          colcode0(bg), colalpha(bg)
+          bg_str
   )
 }
 
@@ -303,15 +317,39 @@ ph_with.gg <- function(x, value, location, ...){
 #' @export
 #' @section with a external_img object:
 #' When value is a external_img object, image will be copied
-#' into the PowerPoint presentation.
+#' into the PowerPoint presentation. The width and height
+#' specified in call to \code{\link{external_img}} will be
+#' ignored, their values will be those of the location,
+#' unless use_loc_size is set to FALSE.
+#' @param use_loc_size if set to FALSE, external_img width and height will
+#' be used.
 #' @rdname ph_with
-ph_with.external_img <- function(x, value, location, ...){
+ph_with.external_img <- function(x, value, location, use_loc_size = TRUE, ...){
   location <- loc_call(rlang::enquo(location), x)
 
   slide <- x$slide$get_slide(x$cursor)
 
-  width <- attr(value, "dims")$width
-  height <- attr(value, "dims")$height
+  if( use_loc_size ){
+    width <- location$width
+    height <- location$height
+  } else {
+    width <- attr(value, "dims")$width
+    height <- attr(value, "dims")$height
+  }
+
+  file_type <- gsub("(.*)(\\.[a-zA-Z0-0]+)$", "\\2", value)
+
+  if( file_type %in% ".svg" ){
+    if (!requireNamespace("rsvg")){
+      stop("package 'rsvg' is required to convert svg file to rasters")
+    }
+
+    file <- tempfile(fileext = ".png")
+    rsvg::rsvg_png(as.character(value), file = file)
+    value[1] <- file
+    file_type <- ".png"
+  }
+
   new_src <- tempfile( fileext = gsub("(.*)(\\.[a-zA-Z0-0]+)$", "\\2", as.character(value)) )
   file.copy( as.character(value), to = new_src )
   ext_img <- external_img(new_src, width = width, height = height)

@@ -30,12 +30,17 @@ pack_folder <- function( folder, target ){
   if( .Platform$OS.type %in% "windows")
     target <- enc2native(target)
   tryCatch(
-    zip::zip(zipfile = target,
-        files = list.files(all.files = TRUE, recursive = TRUE))
+    suppressMessages(
+      zip::zip(zipfile = target,
+        files = list.files(all.files = TRUE, recursive = TRUE)) )
     , error = function(e) {
       stop("Could not write ", shQuote(target), " [", e$message, "]")
-    }
-    , finally = {
+    },
+    # deprecated = function(e) {
+    #   if( !grepl("zip::zipr", e))
+    #     warning(e)
+    # },
+    finally = {
       setwd(curr_wd)
     })
 
@@ -47,17 +52,26 @@ pack_folder <- function( folder, target ){
 #' @title Extract files from a zip file
 #' @description Extract files from a zip file to a folder. The
 #' function returns the complete path to destination folder.
-#' @details
-#' The function is using \link[utils]{unzip}, it needs an unzip program.
 #' @param file path of the archive to unzip
 #' @param folder folder to create
 unpack_folder <- function( file, folder ){
 
   stopifnot(file.exists(file))
 
+  file_type <- gsub("(.*)(\\.[a-zA-Z0-0]+)$", "\\2", file)
+
+  # force deletion if already existing
   unlink(folder, recursive = TRUE, force = TRUE)
 
-  zip::unzip( zipfile = file, exdir = folder )
+  if( l10n_info()$`UTF-8` ){
+    zip::unzip( zipfile = file, exdir = folder )
+  } else {
+    # unable to unzip a file with accent when on windows
+    newfile <- tempfile(fileext = file_type)
+    file.copy(from = file, to = newfile)
+    zip::unzip( zipfile = newfile, exdir = folder )
+    unlink(newfile, force = TRUE)
+  }
 
   absolute_path(folder)
 }
