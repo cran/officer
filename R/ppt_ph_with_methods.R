@@ -63,7 +63,7 @@ ph_with <- function(x, value, ...){
   UseMethod("ph_with", value)
 }
 
-ph <- function( left = 0, top = 0, width = 3, height = 3,
+gen_ph_str <- function( left = 0, top = 0, width = 3, height = 3,
                 bg = "transparent", rot = 0, label = "", ph = "<p:ph/>"){
 
   if( is.null(rot)) rot <- 0
@@ -77,22 +77,68 @@ ph <- function( left = 0, top = 0, width = 3, height = 3,
             colcode0(bg), colalpha(bg) )
   }
 
-  str <- "<p:nvSpPr><p:cNvPr id=\"0\" name=\"%s\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr><p:spPr><a:xfrm rot=\"%.0f\"><a:off x=\"%.0f\" y=\"%.0f\"/><a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm>%s</p:spPr>"
-  sprintf(str, label, ph, -rot * 60000,
-          left * 914400, top * 914400,
-          width * 914400, height * 914400,
-          bg_str
-  )
+  if( is.na(ph)){
+    xfrm_str <- "<a:xfrm rot=\"%.0f\"><a:off x=\"%.0f\" y=\"%.0f\"/><a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm>"
+    xfrm_str <- sprintf(xfrm_str, -rot * 60000,
+                        left * 914400, top * 914400,
+                        width * 914400, height * 914400)
+    ph = "<p:ph/>"
+  } else {
+    xfrm_str <- ""
+  }
+
+
+  str <- "<p:nvSpPr><p:cNvPr id=\"0\" name=\"%s\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr><p:spPr>%s%s</p:spPr>"
+  sprintf(str, label, ph, xfrm_str, bg_str )
+
+}
+gen_ph_str_old <- function( left = 0, top = 0, width = 3, height = 3,
+                bg = "transparent", rot = 0, label = "", ph = "<p:ph/>"){
+
+  if( is.null(rot)) rot <- 0
+
+  if( !is.null(bg) && !is.color( bg ) )
+    stop("bg must be a valid color.", call. = FALSE )
+
+  bg_str <- ""
+  if( !is.null(bg)){
+    bg_str <- sprintf("<a:solidFill><a:srgbClr val=\"%s\"><a:alpha val=\"%.0f\"/></a:srgbClr></a:solidFill>",
+            colcode0(bg), colalpha(bg) )
+  }
+
+  xfrm_str <- "<a:xfrm rot=\"%.0f\"><a:off x=\"%.0f\" y=\"%.0f\"/><a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm>"
+  xfrm_str <- sprintf(xfrm_str, -rot * 60000,
+                      left * 914400, top * 914400,
+                      width * 914400, height * 914400)
+
+
+  str <- "<p:nvSpPr><p:cNvPr id=\"0\" name=\"%s\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr><p:spPr>%s%s</p:spPr>"
+  sprintf(str, label, ph, xfrm_str, bg_str )
+
 }
 
-loc_call <- function(call, x){
+#' @export
+#' @title eval a location on the current slide
+#' @description Eval a shape location against the current slide.
+#' This function is to be used to add custom openxml code.
+#' @param location a location for a placeholder. It has to be a
+#' quosure.
+#' @param x an rpptx object
+#' @examples
+#' library(rlang)
+#' doc <- read_pptx()
+#' doc <- add_slide(doc, layout = "Title and Content",
+#'   master = "Office Theme")
+#' location_eval(quo(ph_location_fullsize()), doc)
+#' @seealso \code{\link{ph_location}}, \code{\link{ph_with}}
+location_eval <- function(location, x){
   slide <- x$slide$get_slide(x$cursor)
   xfrm <- slide$get_xfrm()
-  call <- rlang::call_modify(call, x = x,
+  location <- rlang::call_modify(location, x = x,
                              layout = unique( xfrm$name ),
                              master = unique(xfrm$master_name)
   )
-  eval_tidy(call, data = x)
+  eval_tidy(location, data = x)
 }
 
 #' @export
@@ -103,13 +149,12 @@ loc_call <- function(call, x){
 ph_with.character <- function(x, value, location, ...){
   slide <- x$slide$get_slide(x$cursor)
 
-  location <- loc_call(rlang::enquo(location), x)
+  location <- location_eval(rlang::enquo(location), x)
 
-  new_ph <- ph(left = location$left, top = location$top,
+  new_ph <- gen_ph_str(left = location$left, top = location$top,
                width = location$width, height = location$height,
                label = location$ph_label, ph = location$ph,
                rot = location$rotation, bg = location$bg)
-
   pars <- paste0("<a:p><a:r><a:rPr/><a:t>", htmlEscape(value), "</a:t></a:r></a:p>", collapse = "")
   xml_elt <- paste0( pml_with_ns("p:sp"), new_ph,
                      "<p:txBody><a:bodyPr/><a:lstStyle/>",
@@ -131,9 +176,9 @@ ph_with.character <- function(x, value, location, ...){
 ph_with.numeric <- function(x, value, location, format_fun = format, ...){
   slide <- x$slide$get_slide(x$cursor)
   value <- format_fun(value, ...)
-  location <- loc_call(rlang::enquo(location), x)
+  location <- location_eval(rlang::enquo(location), x)
 
-  new_ph <- ph(left = location$left, top = location$top,
+  new_ph <- gen_ph_str(left = location$left, top = location$top,
                width = location$width, height = location$height,
                label = location$ph_label, ph = location$ph,
                rot = location$rotation, bg = location$bg)
@@ -155,9 +200,9 @@ ph_with.numeric <- function(x, value, location, format_fun = format, ...){
 ph_with.factor <- function(x, value, location, ...){
   slide <- x$slide$get_slide(x$cursor)
   value <- as.character(value)
-  location <- loc_call(rlang::enquo(location), x)
+  location <- location_eval(rlang::enquo(location), x)
 
-  new_ph <- ph(left = location$left, top = location$top,
+  new_ph <- gen_ph_str(left = location$left, top = location$top,
                width = location$width, height = location$height,
                label = location$ph_label, ph = location$ph,
                rot = location$rotation, bg = location$bg)
@@ -185,12 +230,12 @@ ph_with.logical <- ph_with.numeric
 ph_with.block_list <- function(x, value, location, ...){
   slide <- x$slide$get_slide(x$cursor)
 
-  location <- loc_call(rlang::enquo(location), x)
+  location <- location_eval(rlang::enquo(location), x)
 
   pars <- sapply(value, format, type = "pml")
   pars <- paste0(pars, collapse = "")
 
-  new_ph <- ph(left = location$left, top = location$top,
+  new_ph <- gen_ph_str(left = location$left, top = location$top,
                width = location$width, height = location$height,
                label = location$ph_label, ph = location$ph,
                rot = location$rotation, bg = location$bg)
@@ -214,7 +259,7 @@ ph_with.block_list <- function(x, value, location, ...){
 #' @rdname ph_with
 ph_with.unordered_list <- function(x, value, location, ...){
   slide <- x$slide$get_slide(x$cursor)
-  location <- loc_call(rlang::enquo(location), x)
+  location <- location_eval(rlang::enquo(location), x)
 
   if( !is.null(value$style)){
     style_str <- sapply(value$style, format, type = "pml")
@@ -226,7 +271,7 @@ ph_with.unordered_list <- function(x, value, location, ...){
   p <- sprintf(tmpl, lvl, style_str, htmlEscape(value$str) )
   p <- paste(p, collapse = "")
 
-  new_ph <- ph(left = location$left, top = location$top,
+  new_ph <- gen_ph_str(left = location$left, top = location$top,
                width = location$width, height = location$height,
                label = location$ph_label, ph = location$ph,
                rot = location$rotation, bg = location$bg)
@@ -253,7 +298,7 @@ ph_with.unordered_list <- function(x, value, location, ...){
 ph_with.data.frame <- function(x, value, location, header = TRUE,
                                first_row = TRUE, first_column = FALSE,
                                last_row = FALSE, last_column = FALSE, ...){
-  location <- loc_call(rlang::enquo(location), x)
+  location <- location_eval(rlang::enquo(location), x)
 
   slide <- x$slide$get_slide(x$cursor)
   xml_elt <- table_shape(x = x, value = value, left = location$left*914400, top = location$top*914400,
@@ -275,7 +320,7 @@ ph_with.data.frame <- function(x, value, location, header = TRUE,
 #' instead for more advanced graphical features.
 #' @rdname ph_with
 ph_with.gg <- function(x, value, location, ...){
-  location <- loc_call(rlang::enquo(location), x)
+  location <- location_eval(rlang::enquo(location), x)
 
   slide <- x$slide$get_slide(x$cursor)
   if( !requireNamespace("ggplot2") )
@@ -325,7 +370,7 @@ ph_with.gg <- function(x, value, location, ...){
 #' be used.
 #' @rdname ph_with
 ph_with.external_img <- function(x, value, location, use_loc_size = TRUE, ...){
-  location <- loc_call(rlang::enquo(location), x)
+  location <- location_eval(rlang::enquo(location), x)
 
   slide <- x$slide$get_slide(x$cursor)
 
@@ -379,11 +424,11 @@ ph_with.external_img <- function(x, value, location, use_loc_size = TRUE, ...){
 ph_with.fpar <- function( x, value, location,
                           template_type = NULL, template_index = 1, ... ){
 
-  location <- loc_call(rlang::enquo(location), x)
+  location <- location_eval(rlang::enquo(location), x)
 
   slide <- x$slide$get_slide(x$cursor)
 
-  new_ph <- ph(left = location$left, top = location$top,
+  new_ph <- gen_ph_str(left = location$left, top = location$top,
                width = location$width, height = location$height, label = location$label,
                rot = location$rotation, bg = location$bg, ph = location$ph)
   new_ph <- paste0( pml_with_ns("p:sp"), new_ph,"</p:sp>")
@@ -438,32 +483,47 @@ ph_empty <- function( x, type = "body", index = 1, location = NULL ){
   stopifnot( type %in% c("ctrTitle", "subTitle", "dt", "ftr", "sldNum", "title", "body") )
   slide <- x$slide$get_slide(x$cursor)
 
-
-  if( !is.null( rlang::get_expr(rlang::enquo(location)) ) )
-    location <- loc_call(rlang::enquo(location), x)
-
-  if( is.null(location) ){
-    empty_shape <- paste0(pml_with_ns("p:sp"),
-                          "<p:nvSpPr><p:cNvPr id=\"\" name=\"\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr><p:spPr/></p:sp>")
-    xfrm_df <- slide$get_xfrm(type = type, index = index)
-    xml_elt <- sprintf( empty_shape, xfrm_df$ph )
+  if( !is.null( rlang::get_expr(rlang::enquo(location)) ) ){
+    location <- location_eval(rlang::enquo(location), x)
   } else {
-    empty_shape <- paste0(pml_with_ns("p:sp"),
-                          "<p:nvSpPr><p:cNvPr id=\"\" name=\"%s\"/>",
-                          "<p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr>",
-                          "<p:nvPr>%s</p:nvPr></p:nvSpPr><p:spPr>%s</p:spPr></p:sp>")
-    xfrm <- sprintf('<a:xfrm><a:off x="%.0f" y="%.0f"/><a:ext cx="%.0f" cy="%.0f"/></a:xfrm>',
-            location$left * 914400, location$top * 914400, location$width * 914400, location$height * 914400 )
-
-    xml_elt <- sprintf( empty_shape, location$ph_label, location$ph, xfrm )
+    slide <- x$slide$get_slide(x$cursor)
+    sh_pr_df <- slide$get_location(type = type, index = index)
+    location <- ph_location(ph = sh_pr_df$ph, label = sh_pr_df$ph_label,
+                            left = sh_pr_df$left, top = sh_pr_df$top,
+                            width = sh_pr_df$width, height = sh_pr_df$height)
   }
 
-  xml_add_child(xml_find_first(slide$get(), "//p:spTree"), as_xml_document(xml_elt))
+  new_ph <- gen_ph_str(left = location$left, top = location$top,
+                       width = location$width, height = location$height,
+                       label = location$ph_label, ph = location$ph,
+                       rot = location$rotation, bg = location$bg)
+  xml_elt <- paste0( pml_with_ns("p:sp"), new_ph, "</p:sp>" )
+  node <- as_xml_document(xml_elt)
 
+  xml_add_child(xml_find_first(slide$get(), "//p:spTree"), node)
   slide$fortify_id()
   x
 }
 
+
+#' @export
+#' @section with xml_document:
+#' When value is an xml_document object, its content will be
+#' added as a new shape in the current slide. This function
+#' is to be used to add custom openxml code.
+#' @rdname ph_with
+ph_with.xml_document <- function( x, value, location, ... ){
+  slide <- x$slide$get_slide(x$cursor)
+
+  location <- location_eval(rlang::enquo(location), x)
+  node <- xml_find_first( value, as_xpath_content_sel("//") )
+  node <- set_xfrm_attr(node, offx = location$left*914400, offy = location$top*914400,
+                        cx = location$width*914400, cy = location$height*914400)
+  xml_add_child(xml_find_first(slide$get(), "//p:spTree"), value)
+
+  slide$fortify_id()
+  x
+}
 
 #' @export
 #' @title add an xml string as new shape
@@ -516,6 +576,8 @@ ph_from_xml_at <- function( x, value, left, top, width, height ){
 #' @export
 #' @title add text into a new shape
 #' @description add text into a new shape in a slide.
+#' This function will be deprecated in favor of \code{\link{ph_with}}
+#' in the next release.
 #' @inheritParams ph_empty
 #' @param str text to add
 #' @examples
@@ -553,6 +615,8 @@ ph_with_text <- function( x, str, type = "title", index = 1, location = NULL ){
 #' @export
 #' @title add table
 #' @description add a table as a new shape in the current slide.
+#' This function will be deprecated in favor of \code{\link{ph_with}}
+#' in the next release.
 #' @inheritParams ph_empty
 #' @param value data.frame
 #' @param header display header if TRUE
@@ -593,6 +657,8 @@ ph_with_table <- function( x, value, type = "body", index = 1,
 #' @export
 #' @title add image
 #' @description add an image as a new shape in the current slide.
+#' This function will be deprecated in favor of \code{\link{ph_with}}
+#' in the next release.
 #' @inheritParams ph_empty
 #' @param src image filename, the basename of the file must not contain any blank.
 #' @param width,height image size in inches
@@ -628,6 +694,8 @@ ph_with_img <- function( x, src, type = "body", index = 1,
 #' @export
 #' @title add ggplot to a pptx presentation
 #' @description add a ggplot as a png image into an rpptx object
+#' This function will be deprecated in favor of \code{\link{ph_with}}
+#' in the next release.
 #' @inheritParams ph_empty
 #' @param value ggplot object
 #' @param width,height image size in inches
@@ -672,7 +740,8 @@ ph_with_gg <- function( x, value, type = "body", index = 1,
 #' @description add an unordered list of text
 #' into an rpptx object. Each text is associated with
 #' a hierarchy level.
-#'
+#' This function will be deprecated in favor of \code{\link{ph_with}}
+#' in the next release.
 #' @inheritParams ph_empty
 #' @param str_list list of strings to be included in the object
 #' @param level_list list of levels for hierarchy structure
@@ -738,23 +807,29 @@ ph_with_ul <- function(x, type = "body", index = 1,
 ph_empty_at <- function( x, left, top, width, height, bg = "transparent", rot = 0,
                          template_type = NULL, template_index = 1 ){
 
-  ph <- ""
+  ph <- NA_character_
   label <- ""
+  type <- "body"
+  slide <- x$slide$get_slide(x$cursor)
+
   if( !is.null( template_type ) ){
-    slide <- x$slide$get_slide(x$cursor)
     xfrm_df <- slide$get_xfrm(type = template_type, index = template_index)
     ph <- xfrm_df$ph
-    label <- xfrm_df$ph_label
+  } else {
+    ph <- sprintf('<p:ph type="%s"/>', type)
   }
+  new_ph <- gen_ph_str_old(left = left, top = top,
+                           width = width, height = height,
+                           label = "", ph = ph,
+                           rot = rot, bg = bg)
 
-  ph_empty(
-    x,
-    location = ph_location(
-      ph = ph,
-      label = label,
-      left = left, top = top,
-      width = width, height = height)
-  )
+
+  xml_elt <- paste0( pml_with_ns("p:sp"), new_ph, "</p:sp>" )
+  node <- as_xml_document(xml_elt)
+
+  xml_add_child(xml_find_first(slide$get(), "//p:spTree"), node)
+  slide$fortify_id()
+  x
 
 }
 
