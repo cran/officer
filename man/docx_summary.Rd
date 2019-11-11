@@ -2,7 +2,7 @@
 % Please edit documentation in R/fortify_docx.R
 \name{docx_summary}
 \alias{docx_summary}
-\title{get Word content in a tidy format}
+\title{get Word content in a data.frame}
 \usage{
 docx_summary(x)
 }
@@ -12,6 +12,10 @@ docx_summary(x)
 \description{
 read content of a Word document and
 return a tidy dataset representing the document.
+}
+\note{
+Documents included with \code{body_add_docx()} will
+not be accessible in the results.
 }
 \examples{
 example_pptx <- system.file(package = "officer",

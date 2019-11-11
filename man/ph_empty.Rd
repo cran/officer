@@ -11,7 +11,7 @@ ph_empty_at(x, left, top, width, height, bg = "transparent", rot = 0,
   template_type = NULL, template_index = 1)
 }
 \arguments{
-\item{x}{a pptx device}
+\item{x}{an pptx object}
 
 \item{type}{placeholder type (i.e. 'body', 'title')}
 
@@ -44,6 +44,8 @@ type 'body'.}
 }
 \description{
 add a new empty shape in the current slide.
+This function was implemented for development purpose and
+should not be used.
 }
 \examples{
 fileout <- tempfile(fileext = ".pptx")
@@ -51,14 +53,6 @@ doc <- read_pptx()
 doc <- add_slide(doc, layout = "Title and Content", master = "Office Theme")
 doc <- ph_empty(x = doc, type = "body", index = 1)
 doc <- ph_empty(x = doc, location = ph_location_right())
-
-print(doc, target = fileout )
-
-# demo ph_empty_at ------
-fileout <- tempfile(fileext = ".pptx")
-doc <- read_pptx()
-doc <- add_slide(doc, layout = "Title and Content", master = "Office Theme")
-doc <- ph_empty_at(x = doc, left = 1, top = 2, width = 5, height = 4)
 
 print(doc, target = fileout )
 }

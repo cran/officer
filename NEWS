@@ -1,3 +1,24 @@
+# officer 0.3.6
+
+## Enhancement
+
+* support now for template generated from google docs thanks to Adam Lyon
+* ph_location results can now be assigned and used as normal objetcs (and not only
+as quosures).
+
+## Changes
+
+* `id_chr` is now depreacted in favor of `id` in function `ph_remove`, `ph_slidelink`, `ph_hyperlink`,
+  `ph_add_text`, `ph_add_par`, `ph_add_fpar`.
+
+## Issues
+
+* fix ph_with.xml_document so that placeholders' labels are not forgotten (for rvg, flextable, etc.)
+* fix underline text issue when used with powerpoint (#229).
+* fix slip_in_text issue by escaping HTML entities (#234).
+* fix issue with move_slide (#223).
+
+
 # officer 0.3.5
 
 ## Enhancement

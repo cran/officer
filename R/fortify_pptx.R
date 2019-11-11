@@ -96,30 +96,39 @@ media_extract <- function( x, path, target ){
   file.copy(from = media, to = target)
 }
 
-#' @title get PowerPoint content in a tidy format
+#' @title get PowerPoint content in a data.frame
 #' @description read content of a PowerPoint document and
-#' return a tidy dataset representing the document.
+#' return a dataset representing the document.
 #' @param x an rpptx object
 #' @examples
 #' example_pptx <- system.file(package = "officer",
 #'   "doc_examples/example.pptx")
 #' doc <- read_pptx(example_pptx)
 #' pptx_summary(doc)
+#' pptx_summary(example_pptx)
 #' @export
 pptx_summary <- function( x ){
-
+  if (is.character(x)) {
+    x = read_pptx(x)
+  }
   list_content <- list()
   for( i in seq_len( length(x) )){
     slide <- x$slide$get_slide(i)
     str = as_xpath_content_sel("p:cSld/p:spTree/")
     nodes <- xml_find_all(slide$get(), str)
-    data <- read_xfrm(nodes, file = "slide", name = "" )
 
-    content <- mapply(function(node, id, slide_id){
+    if( length(nodes) < 1 ) { # when slide is empty
+      list_content[[length(list_content)+1]] <- data.frame( id = character(0), content_type = character(0), slide_id = integer(0),
+                                                            stringsAsFactors = FALSE)
+      next
+    }
+
+    content <- mapply(function(node, slide_id){
 
       is_table <- !inherits( xml_child(node, "/a:graphic/a:graphicData/a:tbl"), "xml_missing")
       is_par <- !inherits( xml_child(node, "/p:txBody/a:p"), "xml_missing")
       is_img <- xml_name(node) == "pic"
+      id <- xml_attr(xml_child(node, "/p:cNvPr"), "id")
 
       if( is_table ){
         ppt_tab <- pptxtable_as_tibble(node)
@@ -148,7 +157,7 @@ pptx_summary <- function( x ){
         data.frame( id = id, content_type = "unknown", slide_id = slide_id,
                     stringsAsFactors = FALSE)
       }
-    }, nodes, data$id, slide_id = i, SIMPLIFY = FALSE)
+    }, nodes, slide_id = i, SIMPLIFY = FALSE)
     list_content[[length(list_content)+1]] <- rbind.match.columns(content)
   }
   rbind.match.columns(list_content)

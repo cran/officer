@@ -8,7 +8,7 @@ ph_with_ul(x, type = "body", index = 1, str_list = character(0),
   level_list = integer(0), style = NULL, location = NULL)
 }
 \arguments{
-\item{x}{a pptx device}
+\item{x}{an pptx object}
 
 \item{type}{placeholder type (i.e. 'body', 'title')}
 
@@ -37,16 +37,4 @@ into an rpptx object. Each text is associated with
 a hierarchy level.
 This function will be deprecated in favor of \code{\link{ph_with}}
 in the next release.
-}
-\examples{
-library(magrittr)
-pptx <- read_pptx()
-pptx <- add_slide(x = pptx, layout = "Title and Content", master = "Office Theme")
-pptx <- ph_with_text(x = pptx, type = "title", str = "Example title")
-pptx <- ph_with_ul(
-  x = pptx, location = ph_location_type(type="body"),
-  str_list = c("Level1", "Level2", "Level2", "Level3", "Level3", "Level1"),
-  level_list = c(1, 2, 2, 3, 3, 1),
-  style = fp_text(color = "red", font.size = 0) )
-print(pptx, target = tempfile(fileext = ".pptx"))
 }

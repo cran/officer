@@ -142,12 +142,12 @@ print.rdocx <- function(x, target = NULL, ...){
     int_id <- int_id + 1
   }
 
-  sections_ <- xml_find_all(x$doc_obj$get(), "//w:sectPr")
-  last_sect <- sections_[length(sections_)]
-  if( inherits( xml_find_first(x$doc_obj$get(), file.path( xml_path(last_sect), "w:type")), "xml_missing" ) ){
-    xml_add_child( last_sect,
-      as_xml_document("<w:type xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" w:val=\"continuous\"/>")
-      )
+  body <- xml_find_first(x$doc_obj$get(), "w:body")
+
+  # If body is not ending with an sectPr, create a continuous one append it
+  if( !xml_name(xml_child(body, search = xml_length(body))) %in% "sectPr" ){
+    str <- paste0( wml_with_ns("w:sectPr"), "<w:officersection/><w:type w:val=\"continuous\"/></w:sectPr>")
+    xml_add_child( body, as_xml_document(str) )
   }
 
   for(header in x$headers){
@@ -167,7 +167,7 @@ print.rdocx <- function(x, target = NULL, ...){
   x$doc_properties['modified','value'] <- format( Sys.time(), "%Y-%m-%dT%H:%M:%SZ")
   x$doc_properties['lastModifiedBy','value'] <- Sys.getenv("USER")
   write_core_properties(x$doc_properties, x$package_dir)
-  pack_folder(folder = x$package_dir, target = target )
+  invisible(pack_folder(folder = x$package_dir, target = target ))
 }
 
 #' @export

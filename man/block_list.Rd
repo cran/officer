@@ -2,7 +2,7 @@
 % Please edit documentation in R/block_list.R
 \name{block_list}
 \alias{block_list}
-\title{list of blocks}
+\title{create paragraph blocks}
 \usage{
 block_list(...)
 }
@@ -14,15 +14,14 @@ block_list(...)
 a list of blocks can be used to gather
 several blocks (paragraphs or tables) into a single
 object. The function is to be used when adding
-footnotes for example.
+footnotes or formatted paragraphs into a new slide.
 }
 \examples{
 img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
 bl <- block_list(
   fpar(ftext("hello world", shortcuts$fp_bold())),
   fpar(
-    ftext("hello", shortcuts$fp_bold()),
-    stext(" world", "strong"),
+    ftext("hello world", shortcuts$fp_bold()),
     external_img(src = img.file, height = 1.06, width = 1.39)
   )
 )
