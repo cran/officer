@@ -1,5 +1,3 @@
-context("add elements in docx")
-
 getncheck <- function(x, str){
   child_ <- xml_child(x, str)
   expect_false( inherits(child_, "xml_missing") )
@@ -91,13 +89,10 @@ test_that("body_add_toc", {
   node <- x$doc_obj$get_at_cursor()
 
   child_ <- getncheck(node, "w:r/w:fldChar[@w:fldCharType='begin']")
-  expect_equal( xml_attr(child_, "dirty"), "true")
 
   child_ <- getncheck(node, "w:r/w:fldChar[@w:fldCharType='end']")
-  expect_equal( xml_attr(child_, "dirty"), "true")
 
   child_ <- getncheck(node, "w:r/w:instrText")
-  expect_equal( xml_attr(child_, "dirty"), "true")
   expect_equal( xml_text(child_), "TOC \\o \"1-3\" \\h \\z \\u" )
 
 
@@ -106,13 +101,10 @@ test_that("body_add_toc", {
   node <- x$doc_obj$get_at_cursor()
 
   child_ <- getncheck(node, "w:r/w:fldChar[@w:fldCharType='begin']")
-  expect_equal( xml_attr(child_, "dirty"), "true")
 
   child_ <- getncheck(node, "w:r/w:fldChar[@w:fldCharType='end']")
-  expect_equal( xml_attr(child_, "dirty"), "true")
 
   child_ <- getncheck(node, "w:r/w:instrText")
-  expect_equal( xml_attr(child_, "dirty"), "true")
   expect_equal( xml_text(child_), "TOC \\h \\z \\t \"Normal;1\"" )
 
 })
@@ -144,7 +136,8 @@ test_that("ggplot add", {
   gg_plot <- ggplot(data = iris ) +
     geom_point(mapping = aes(Sepal.Length, Petal.Length))
   x <- read_docx() %>%
-    body_add_gg(value = gg_plot, style = "centered" )
+    body_add(value = gg_plot, style = "centered" )
+  x <- cursor_end(x)
   node <- x$doc_obj$get_at_cursor()
   getncheck(node, "w:r/w:drawing")
 })

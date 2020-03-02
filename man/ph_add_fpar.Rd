@@ -4,8 +4,16 @@
 \alias{ph_add_fpar}
 \title{append fpar}
 \usage{
-ph_add_fpar(x, value, type = "body", id = 1, id_chr = NULL,
-  ph_label = NULL, level = 1, par_default = TRUE)
+ph_add_fpar(
+  x,
+  value,
+  type = "body",
+  id = 1,
+  id_chr = NULL,
+  ph_label = NULL,
+  level = 1,
+  par_default = TRUE
+)
 }
 \arguments{
 \item{x}{an rpptx object}
@@ -53,7 +61,7 @@ fpar_ <- fpar(ftext("Hello ", prop = bold_face),
 
 doc <- read_pptx() \%>\%
   add_slide(layout = "Title and Content", master = "Office Theme") \%>\%
-  ph_empty(location = ph_location(bg = "wheat", newlabel = "myph")) \%>\%
+  ph_with("", location = ph_location(bg = "wheat", newlabel = "myph")) \%>\%
   ph_add_fpar(value = fpar_, ph_label = "myph", level = 2)
 
 print(doc, target = tempfile(fileext = ".pptx"))

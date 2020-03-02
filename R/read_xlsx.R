@@ -46,9 +46,10 @@ worksheets <- R6Class(
 
       xml_elt <- paste(
         sprintf("<sheet name=\"%s\" sheetId=\"%.0f\" r:id=\"%s\"/>",
-                htmlEscape(private$sheet_name), private$sheet_id, private$sheet_rid),
+                htmlEscapeCopy(private$sheet_name), private$sheet_id, private$sheet_rid),
         collapse = "" )
-      xml_elt <- paste0( pml_with_ns("sheets"),  xml_elt, "</sheets>")
+      xml_elt <- paste0( "<sheets xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\">",
+                                     xml_elt, "</sheets>")
       xml_elt <- as_xml_document(xml_elt)
 
       if( !inherits(xml_list, "xml_missing")){
@@ -113,7 +114,6 @@ worksheets <- R6Class(
 )
 
 # sheet ------------------------------------------------------------
-#' @importFrom xml2 xml_replace xml_add_parent
 sheet <- R6Class(
   "sheet",
   inherit = openxml_document,
@@ -215,6 +215,10 @@ read_xlsx <- function( path = NULL ){
 
   if( is.null(path) )
     path <- system.file(package = "officer", "template/template.xlsx")
+
+  if(!grepl("\\.xlsx$", path, ignore.case = TRUE)){
+    stop("read_xlsx only support xlsx files", call. = FALSE)
+  }
 
   package_dir <- tempfile()
   unpack_folder( file = path, folder = package_dir )

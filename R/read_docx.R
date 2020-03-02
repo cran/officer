@@ -2,13 +2,13 @@
 #' @title open a connection to a 'Word' file
 #' @description read and import a docx file as an R object
 #' representing the document.
-#' @param path path to the docx file to use as base document.
 #' @param x an rdocx object
+#' @param path path to the docx file to use as base document.
 #' @examples
 #' # create an rdocx object with default template ---
 #' read_docx()
 #'
-#' @importFrom xml2 read_xml xml_length xml_find_first as_list
+#' @seealso [print.rdocx], [body_add]
 read_docx <- function( path = NULL ){
 
   if( !is.null(path) && !file.exists(path))
@@ -16,6 +16,10 @@ read_docx <- function( path = NULL ){
 
   if( is.null(path) )
     path <- system.file(package = "officer", "template/template.docx")
+
+  if(!grepl("\\.docx$", path, ignore.case = TRUE)){
+    stop("read_docx only support docx files", call. = FALSE)
+  }
 
   package_dir <- tempfile()
   unpack_folder( file = path, folder = package_dir )
@@ -83,7 +87,6 @@ read_docx <- function( path = NULL ){
 #'   read_docx() %>% print(target = tempfile(fileext = ".docx"))
 #' }
 #'
-#' @importFrom xml2 xml_attr<- xml_find_all xml_find_all
 print.rdocx <- function(x, target = NULL, ...){
 
   if( is.null( target) ){
@@ -146,7 +149,8 @@ print.rdocx <- function(x, target = NULL, ...){
 
   # If body is not ending with an sectPr, create a continuous one append it
   if( !xml_name(xml_child(body, search = xml_length(body))) %in% "sectPr" ){
-    str <- paste0( wml_with_ns("w:sectPr"), "<w:officersection/><w:type w:val=\"continuous\"/></w:sectPr>")
+    str <- paste0( "<w:sectPr xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\">",
+                   "<w:officersection/><w:type w:val=\"continuous\"/></w:sectPr>")
     xml_add_child( body, as_xml_document(str) )
   }
 
@@ -171,12 +175,16 @@ print.rdocx <- function(x, target = NULL, ...){
 }
 
 #' @export
+#' @title number of blocks inside an rdocx object
+#' @description return the number of blocks inside an rdocx object.
+#' This number also include the default section definition of a
+#' Word document - default Word section is an uninvisible element.
+#' @param x an rdocx object
 #' @examples
-#' # how many elements are there in the document ----
+#' # how many elements are there in an new document produced
+#' # with the default template.
 #' length( read_docx() )
-#'
-#' @importFrom xml2 read_xml xml_length xml_find_first xml_child
-#' @rdname read_docx
+#' @family functions for Word document informations
 length.rdocx <- function( x ){
   length(xml_child(x$doc_obj$get(), "w:body"))
 }
@@ -187,8 +195,9 @@ length.rdocx <- function( x ){
 #' a tidy data.frame.
 #' @param x an rdocx object
 #' @examples
-#' library(magrittr)
-#' read_docx() %>% styles_info()
+#' x <- read_docx()
+#' styles_info(x)
+#' @family functions for Word document informations
 styles_info <- function( x ){
   x$styles
 }
@@ -199,8 +208,9 @@ styles_info <- function( x ){
 #' and get results in a data.frame.
 #' @param x an \code{rdocx} or \code{rpptx} object
 #' @examples
-#' library(magrittr)
-#' read_docx() %>% doc_properties()
+#' x <- read_docx()
+#' doc_properties(x)
+#' @family functions for Word document informations
 doc_properties <- function( x ){
   if( inherits(x, "rdocx"))
     cp <- x$doc_properties
@@ -223,11 +233,13 @@ doc_properties <- function( x ){
 #' @param title,subject,creator,description text fields
 #' @param created a date object
 #' @examples
-#' library(magrittr)
-#' read_docx() %>% set_doc_properties(title = "title",
+#' x <- read_docx()
+#' x <- set_doc_properties(x, title = "title",
 #'   subject = "document subject", creator = "Me me me",
 #'   description = "this document is empty",
-#'   created = Sys.time()) %>% doc_properties()
+#'   created = Sys.time())
+#' x <- doc_properties(x)
+#' @family functions for Word document informations
 set_doc_properties <- function( x, title = NULL, subject = NULL,
                                 creator = NULL, description = NULL, created = NULL ){
 
@@ -257,6 +269,7 @@ set_doc_properties <- function( x, title = NULL, subject = NULL,
 #' @param x an \code{rdocx} object
 #' @examples
 #' docx_dim(read_docx())
+#' @family functions for Word document informations
 docx_dim <- function(x){
   cursor_elt <- x$doc_obj$get_at_cursor()
   xpath_ <- paste0(
@@ -290,6 +303,7 @@ docx_dim <- function(x){
 #' docx_bookmarks(doc)
 #'
 #' docx_bookmarks(read_docx())
+#' @family functions for Word document informations
 docx_bookmarks <- function(x){
   stopifnot(inherits(x, "rdocx"))
 

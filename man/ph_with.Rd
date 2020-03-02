@@ -10,12 +10,14 @@
 \alias{ph_with.unordered_list}
 \alias{ph_with.data.frame}
 \alias{ph_with.gg}
+\alias{ph_with.plot_instr}
 \alias{ph_with.external_img}
 \alias{ph_with.fpar}
+\alias{ph_with.empty_content}
 \alias{ph_with.xml_document}
 \title{add objects into a new shape on the current slide}
 \usage{
-ph_with(x, value, ...)
+ph_with(x, value, location, ...)
 
 \method{ph_with}{character}(x, value, location, ...)
 
@@ -25,20 +27,31 @@ ph_with(x, value, ...)
 
 \method{ph_with}{logical}(x, value, location, format_fun = format, ...)
 
-\method{ph_with}{block_list}(x, value, location, ...)
+\method{ph_with}{block_list}(x, value, location, is_list = FALSE, ...)
 
 \method{ph_with}{unordered_list}(x, value, location, ...)
 
-\method{ph_with}{data.frame}(x, value, location, header = TRUE,
-  first_row = TRUE, first_column = FALSE, last_row = FALSE,
-  last_column = FALSE, ...)
+\method{ph_with}{data.frame}(
+  x,
+  value,
+  location,
+  header = TRUE,
+  first_row = TRUE,
+  first_column = FALSE,
+  last_row = FALSE,
+  last_column = FALSE,
+  ...
+)
 
-\method{ph_with}{gg}(x, value, location, ...)
+\method{ph_with}{gg}(x, value, location, res = 300, ...)
 
-\method{ph_with}{external_img}(x, value, location, use_loc_size = TRUE,
-  ...)
+\method{ph_with}{plot_instr}(x, value, location, res = 300, ...)
+
+\method{ph_with}{external_img}(x, value, location, use_loc_size = TRUE, ...)
 
 \method{ph_with}{fpar}(x, value, location, ...)
+
+\method{ph_with}{empty_content}(x, value, location, ...)
 
 \method{ph_with}{xml_document}(x, value, location, ...)
 }
@@ -51,18 +64,26 @@ unordered list of formatted paragraphs,
 pretty tables with package flextable, editable graphics with
 package rvg, 'Microsoft' charts with package mschart.}
 
-\item{...}{Arguments to be passed to methods}
-
 \item{location}{a placeholder location object.
 It will be used to specify the location of the new shape. This location
 can be defined with a call to one of the ph_location functions. See
-section \code{see also}.}
+section \code{"see also"}.}
+
+\item{...}{further arguments passed to or from other methods. When
+adding a \code{ggplot} object or \code{plot_instr}, these arguments will be used
+by png function.}
 
 \item{format_fun}{format function for non character vectors}
+
+\item{is_list}{experimental paramater to make
+block_list formated as an unordered list. This
+should evolve in the next versions.}
 
 \item{header}{display header if TRUE}
 
 \item{first_row, last_row, first_column, last_column}{logical for PowerPoint table options}
+
+\item{res}{resolution of the png image in ppi}
 
 \item{use_loc_size}{if set to FALSE, external_img width and height will
 be used.}
@@ -98,6 +119,9 @@ package \code{flextable} instead for more advanced formattings.
 \item \code{gg}: add a ggplot object to a new shape on the
 current slide. Use package \code{rvg} for more advanced graphical features.
 
+\item \code{plot_instr}: add an R plot to a new shape on the
+current slide. Use package \code{rvg} for more advanced graphical features.
+
 \item \code{external_img}: add a \code{\link{external_img}} to a new shape
 on the current slide.
 
@@ -109,6 +133,9 @@ unless use_loc_size is set to FALSE.
 
 \item \code{fpar}: add an \code{\link{fpar}} to a new shape
 on the current slide as a single paragraph in a \code{\link{block_list}}.
+
+\item \code{empty_content}: add an \code{\link{empty_content}} to a new shape
+on the current slide.
 
 \item \code{xml_document}: add an xml_document object to a new shape on the
 current slide. This function is to be used to add custom openxml code.
@@ -124,6 +151,17 @@ doc <- ph_with(x = doc, value = c("Un titre", "Deux titre"),
 doc <- ph_with(x = doc, value = iris[1:4, 3:5],
                location = ph_location_right() )
 
+
+anyplot <- plot_instr(code = {
+  barplot(1:5, col = 2:6)
+})
+
+doc <- add_slide(doc)
+doc <- ph_with(
+  doc, anyplot,
+  location = ph_location_fullsize(),
+  bg = "#00000066", pointsize = 12)
+
 if( require("ggplot2") ){
   doc <- add_slide(doc)
   gg_plot <- ggplot(data = iris ) +
@@ -131,7 +169,8 @@ if( require("ggplot2") ){
       size = 3) +
     theme_minimal()
   doc <- ph_with(x = doc, value = gg_plot,
-                 location = ph_location_fullsize() )
+                 location = ph_location_fullsize(),
+                 bg = "transparent" )
   doc <- ph_with(x = doc, value = "graphic title",
                location = ph_location_type(type="title") )
 }

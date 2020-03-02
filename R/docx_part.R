@@ -1,6 +1,4 @@
-#' @importFrom xml2 xml_find_all xml_attr read_xml
 #' @import magrittr
-#' @importFrom xml2 xml_ns read_xml xml_find_all xml_name xml_text xml_text<- xml_remove
 docx_part <- R6Class(
   "docx_part",
   inherit = openxml_document,
@@ -133,7 +131,7 @@ docx_part <- R6Class(
       dir.create(img_path, recursive = TRUE, showWarnings = FALSE)
       file.copy(from = new_src, to = file.path(private$package_dir, "word", "media", basename(new_src)))
 
-      out <- wml_image(paste0("rId", blip_id), width = width, height = height)
+      out <- to_wml(external_img(paste0("rId", blip_id), width = width, height = height), add_ns = TRUE)
 
       xml_replace(run_nodes[[1]], as_xml_document(out) )
       self

@@ -1,21 +1,9 @@
-wml_with_ns <- function(x){
-  base_ns <- "xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\""
-  sprintf("<%s %s>", x, base_ns)
-}
+#' @importFrom xml2 xml_attr<- xml_name<- xml_text<- as_list as_xml_document read_xml
+#' write_xml xml_add_child xml_add_parent xml_add_sibling xml_attr xml_attrs xml_child
+#' xml_children xml_find_all xml_find_first xml_length xml_missing xml_name xml_ns
+#' xml_path xml_remove xml_replace xml_set_attr xml_set_attrs xml_text
+#' @importFrom stats setNames
 
-pml_with_ns <- function(x){
-  base_ns <- "xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\""
-  sprintf("<%s %s>", x, base_ns)
-}
-
-
-attr_chunk <- function( x ){
-  if( !is.null(x) && length( x ) > 0){
-    attribs <- paste0(names(x), "=", shQuote(x, type = "cmd"), collapse = " " )
-    attribs <- paste0(" ", attribs)
-  } else attribs <- ""
-  attribs
-}
 
 read_xfrm <- function(nodeset, file, name){
   if( length(nodeset) < 1 ){
@@ -70,6 +58,7 @@ fortify_pml_images <- function(x, str){
 }
 
 fortify_master_xfrm <- function(master_xfrm){
+
   master_xfrm <- as.data.frame(master_xfrm)
   has_type <- grepl("type=", master_xfrm$ph)
   master_xfrm <- master_xfrm[has_type, ]
@@ -127,22 +116,6 @@ xfrmize <- function( slide_xfrm, master_xfrm ){
 }
 
 
-set_xfrm_attr <- function( node, offx, offy, cx, cy ){
-  off <- xml_child(node, "p:xfrm/a:off")
-  ext <- xml_child(node, "p:xfrm/a:ext")
-
-  xml_attr( off, "x") <- sprintf( "%.0f", offx )
-  xml_attr( off, "y") <- sprintf( "%.0f", offy )
-  xml_attr( ext, "cx") <- sprintf( "%.0f", cx )
-  xml_attr( ext, "cy") <- sprintf( "%.0f", cy )
-
-  cnvpr <- xml_child(node, "*/p:cNvPr")
-  xml_attr( cnvpr, "id") <- ""
-  node
-}
-
-
-
 read_theme_colors <- function(doc, theme){
 
   nodes <- xml_find_all(doc, "//a:clrScheme/*")
@@ -158,11 +131,11 @@ read_theme_colors <- function(doc, theme){
 
 
 characterise_df <- function(x){
-  names(x) <- htmlEscape(names(x))
+  names(x) <- htmlEscapeCopy(names(x))
   x <- lapply(x, function( x ) {
-    if( is.character(x) ) htmlEscape(x)
-    else if( is.factor(x) ) htmlEscape(as.character(x))
-    else gsub("(^ | $)+", "", htmlEscape(format(x)))
+    if( is.character(x) ) htmlEscapeCopy(x)
+    else if( is.factor(x) ) htmlEscapeCopy(as.character(x))
+    else gsub("(^ | $)+", "", htmlEscapeCopy(format(x)))
   })
   data.frame(x, stringsAsFactors = FALSE, check.names = FALSE)
 }
@@ -215,47 +188,59 @@ set_row_span <- function( row_details ){
 }
 
 
-is_scalar_character <- function( x ) {
-  is.character(x) && length(x) == 1
-}
-is_scalar_logical <- function( x ) {
-  is.logical(x) && length(x) == 1
+#' @importFrom grDevices col2rgb rgb
+is.color = function(x) {
+  # http://stackoverflow.com/a/13290832/3315962
+  out = sapply(x, function( x ) {
+    tryCatch( is.matrix( col2rgb( x ) ), error = function( e ) F )
+  })
+
+  nout <- names(out)
+  if( !is.null(nout) && any( is.na( nout ) ) )
+    out[is.na( nout )] = FALSE
+
+  out
 }
 
 
-wml_image <- function(src, width, height){
-  str <- paste0(wml_with_ns("w:r"),
-                "<w:rPr/><w:drawing><wp:inline distT=\"0\" distB=\"0\" distL=\"0\" distR=\"0\">",
-                sprintf("<wp:extent cx=\"%.0f\" cy=\"%.0f\"/>", width * 12700*72, height * 12700*72),
-                "<wp:docPr id=\"\" name=\"\"/>",
-                "<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" noChangeAspect=\"1\"/></wp:cNvGraphicFramePr>",
-                "<a:graphic xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\"><a:graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/picture\"><pic:pic xmlns:pic=\"http://schemas.openxmlformats.org/drawingml/2006/picture\">",
-                "<pic:nvPicPr>",
-                "<pic:cNvPr id=\"\" name=\"\"/>",
-                "<pic:cNvPicPr><a:picLocks noChangeAspect=\"1\" noChangeArrowheads=\"1\"/>",
-                "</pic:cNvPicPr></pic:nvPicPr>",
-                "<pic:blipFill>",
-                sprintf("<a:blip r:embed=\"%s\"/>", src),
-                "<a:srcRect/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>",
-                "<pic:spPr bwMode=\"auto\"><a:xfrm><a:off x=\"0\" y=\"0\"/>",
-                sprintf("<a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom><a:noFill/></pic:spPr>", width * 12700, height * 12700),
-                "</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>"
+htmlEscapeCopy <- local({
+
+  .htmlSpecials <- list(
+    `&` = '&amp;',
+    `<` = '&lt;',
+    `>` = '&gt;'
   )
-  str
-}
-
-
-pml_image <- function(src, width, height){
-  str <- paste0("<p:pic xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\">",
-                "<p:nvPicPr><p:cNvPr id=\"\" name=\"pic\"/><p:cNvPicPr/>",
-                "<p:nvPr/></p:nvPicPr><p:blipFill>",
-                sprintf("<a:blip cstate=\"print\" r:embed=\"%s\"/>", src),
-                "<a:stretch><a:fillRect/></a:stretch>",
-                "</p:blipFill><p:spPr>",
-                sprintf("<a:xfrm><a:off x=\"\" y=\"\"/><a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm>",
-                        width * 12700*72, height * 12700*72),
-                "<a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom></p:spPr></p:pic>"
+  .htmlSpecialsPattern <- paste(names(.htmlSpecials), collapse='|')
+  .htmlSpecialsAttrib <- c(
+    .htmlSpecials,
+    `'` = '&#39;',
+    `"` = '&quot;',
+    `\r` = '&#13;',
+    `\n` = '&#10;'
   )
-  str
-}
+  .htmlSpecialsPatternAttrib <- paste(names(.htmlSpecialsAttrib), collapse='|')
+  function(text, attribute=FALSE) {
+    pattern <- if(attribute)
+      .htmlSpecialsPatternAttrib
+    else
+      .htmlSpecialsPattern
+    text <- enc2utf8(as.character(text))
+    # Short circuit in the common case that there's nothing to escape
+    if (!any(grepl(pattern, text, useBytes = TRUE)))
+      return(text)
+    specials <- if(attribute)
+      .htmlSpecialsAttrib
+    else
+      .htmlSpecials
+    for (chr in names(specials)) {
+      text <- gsub(chr, specials[[chr]], text, fixed = TRUE, useBytes = TRUE)
+    }
+    Encoding(text) <- "UTF-8"
+    return(text)
+  }
+})
+
+
+
+
 

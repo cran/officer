@@ -1,3 +1,22 @@
+# officer 0.3.7
+
+## New features
+
+* new function `get_reference_value` to read reference template used
+by R Markdown.
+* `fp_par` now have an argument "keep_with_next" that specifies that the paragraph (or at least
+part of it) should be rendered on the same page as the next paragraph when possible.
+* new experimental function `body_add` and associated methods
+
+## Changes
+
+* internals ; drop Rcpp and htmltools dependancies
+
+## Issues
+
+* fix ph_with.external_img #265 (placeholder properties were not used)
+* fix ph_add_text when paragraph was empty and no content was rendered
+
 # officer 0.3.6
 
 ## Enhancement

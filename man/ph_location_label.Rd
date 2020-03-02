@@ -37,17 +37,33 @@ This label can then be reused by other functions such as \code{ph_location_label
 It can be set with argument \code{newlabel}.
 }
 \examples{
+
+# ph_location_label demo ----
+
 doc <- read_pptx()
-doc <- add_slide(doc)
-doc <- ph_with(doc, "Hello world",
+doc <- add_slide(doc, layout = "Title and Content")
+
+# all ph_label can be read here
+layout_properties(doc, layout = "Title and Content")
+
+doc <- ph_with(doc, head(iris),
   location = ph_location_label(ph_label = "Content Placeholder 2") )
-print(doc, target = tempfile(fileext = ".pptx") )
+doc <- ph_with(doc, format(Sys.Date()),
+  location = ph_location_label(ph_label = "Date Placeholder 3") )
+doc <- ph_with(doc, "This is a title",
+  location = ph_location_label(ph_label = "Title 1") )
+
+print(doc, target = tempfile(fileext = ".pptx"))
+
+
 }
 \seealso{
-Other functions for placeholder location: \code{\link{ph_location_fullsize}},
-  \code{\link{ph_location_left}},
-  \code{\link{ph_location_right}},
-  \code{\link{ph_location_template}},
-  \code{\link{ph_location_type}}, \code{\link{ph_location}}
+Other functions for placeholder location: 
+\code{\link{ph_location_fullsize}()},
+\code{\link{ph_location_left}()},
+\code{\link{ph_location_right}()},
+\code{\link{ph_location_template}()},
+\code{\link{ph_location_type}()},
+\code{\link{ph_location}()}
 }
 \concept{functions for placeholder location}
