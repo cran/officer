@@ -177,7 +177,7 @@ block_section <- function(property) {
 
 #' @export
 print.block_section <- function(x, ...) {
-  cat("----- end of secion: ", "\n", sep = "")
+  cat("----- end of section: ", "\n", sep = "")
 }
 
 #' @export
@@ -476,7 +476,7 @@ update.fpar <- function (object, fp_p = NULL, fp_t = NULL, ...){
 
 fortify_fpar <- function(x){
   lapply(x$chunks, function(chk) {
-    if( !inherits(chk, "cot") ){
+    if( !inherits(chk, c("cot", "run")) ){
       chk <- ftext(text = format(chk), prop = x$fp_t )
     }
     chk

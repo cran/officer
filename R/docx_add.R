@@ -54,7 +54,7 @@ body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
   style_id <- get_style_id(data = x$styles, style=style, type = "paragraph")
 
   ext_img <- external_img(new_src, width = width, height = height)
-  xml_elt <- runs_to_p_wml(ext_img, add_ns = TRUE)
+  xml_elt <- runs_to_p_wml(ext_img, add_ns = TRUE, style_id = style_id)
   x <- docx_reference_img(x, new_src)
   xml_elt <- wml_link_images( x, xml_elt )
 
@@ -136,7 +136,15 @@ body_add_gg <- function( x, value, width = 6, height = 5, res = 300, style = "No
 
   if( !requireNamespace("ggplot2") )
     stop("package ggplot2 is required to use this function")
-  body_add(x = x, value = value, width = width, height = height, res = res, style = style, ...)
+
+  stopifnot(inherits(value, "gg") )
+  file <- tempfile(fileext = ".png")
+  options(bitmapType='cairo')
+  png(filename = file, width = width, height = height, units = "in", res = res, ...)
+  print(value)
+  dev.off()
+  on.exit(unlink(file))
+  body_add_img(x, src = file, style = style, width = width, height = height)
 }
 
 
@@ -163,7 +171,17 @@ body_add_gg <- function( x, value, width = 6, height = 5, res = 300, style = "No
 #'   body_add_blocks( blocks = bl ) %>%
 #'   print(target = tempfile(fileext = ".docx"))
 body_add_blocks <- function( x, blocks, pos = "after" ){
-  body_add(x, blocks)
+  stopifnot(inherits(blocks, "block_list"))
+
+  if( length(blocks) > 0 ){
+    pos_vector <- rep("after", length(blocks))
+    pos_vector[1] <- pos
+    for(i in seq_along(blocks) ){
+      x <- body_add_fpar(x, value = blocks[[i]], pos = pos_vector[i])
+    }
+  }
+
+  x
 }
 
 
@@ -351,7 +369,7 @@ body_add_xml2 <- function(x, str){
   xml_elt <- as_xml_document(str)
   last_elt <- xml_find_first(x$doc_obj$get(), "w:body/*[last()]")
   xml_add_sibling(last_elt, xml_elt, .where = "before")
-  x
+  cursor_end(x)
 }
 
 #' @export
