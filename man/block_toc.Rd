@@ -2,7 +2,7 @@
 % Please edit documentation in R/ooxml_block_objects.R
 \name{block_toc}
 \alias{block_toc}
-\title{table of content}
+\title{Table of content}
 \usage{
 block_toc(level = 3, style = NULL, separator = ";")
 }
@@ -24,6 +24,7 @@ block_toc(style = "Table title")
 Other block functions for reporting: 
 \code{\link{block_caption}()},
 \code{\link{block_list}()},
+\code{\link{block_pour_docx}()},
 \code{\link{block_section}()},
 \code{\link{block_table}()},
 \code{\link{fpar}()},

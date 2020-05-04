@@ -4,7 +4,12 @@
 \alias{prop_section}
 \title{section properties}
 \usage{
-prop_section(page_size, page_margins, type)
+prop_section(
+  page_size = NULL,
+  page_margins = NULL,
+  type = NULL,
+  section_columns = NULL
+)
 }
 \arguments{
 \item{page_size}{page dimensions, an object generated with function \link{page_size}.}
@@ -17,11 +22,12 @@ placed relative to the previous section. Available types are "continuous"
 even-numbered page), "nextColumn" (begins on the next column on the page),
 "nextPage" (begins on the following page), "oddPage" (begins on the next
 odd-numbered page).}
+
+\item{section_columns}{section columns, an object generated with function \link{section_columns}.}
 }
 \description{
-A section is a
-grouping of blocks (ie. paragraphs and tables) that have a set of properties
-that define pages on which the text will appear.
+A section is a grouping of blocks (ie. paragraphs and tables)
+that have a set of properties that define pages on which the text will appear.
 
 A Section properties object stores information about page composition,
 such as page size, page orientation, borders and margins.
@@ -34,4 +40,10 @@ prop_section(
 }
 \seealso{
 \link{block_section}
+
+Other functions for section definition: 
+\code{\link{page_mar}()},
+\code{\link{page_size}()},
+\code{\link{section_columns}()}
 }
+\concept{functions for section definition}

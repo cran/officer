@@ -15,7 +15,8 @@
 \alias{body_add.run_columnbreak}
 \alias{body_add.gg}
 \alias{body_add.plot_instr}
-\title{add content into a Word document}
+\alias{body_add.block_pour_docx}
+\title{Add content into a Word document}
 \usage{
 body_add(x, value, ...)
 
@@ -32,12 +33,7 @@ body_add(x, value, ...)
   value,
   style = NULL,
   header = TRUE,
-  first_row = TRUE,
-  first_column = FALSE,
-  last_row = FALSE,
-  last_column = FALSE,
-  no_hband = FALSE,
-  no_vband = TRUE,
+  tcf = table_conditional_formatting(),
   ...
 )
 
@@ -56,6 +52,8 @@ body_add(x, value, ...)
 \method{body_add}{gg}(x, value, width = 6, height = 5, res = 300, style = "Normal", ...)
 
 \method{body_add}{plot_instr}(x, value, width = 6, height = 5, res = 300, style = "Normal", ...)
+
+\method{body_add}{block_pour_docx}(x, value, ...)
 }
 \arguments{
 \item{x}{an rdocx object}
@@ -66,8 +64,8 @@ unordered list of formatted paragraphs,
 pretty tables with package flextable, 'Microsoft' charts with package mschart.}
 
 \item{...}{further arguments passed to or from other methods. When
-adding a \code{ggplot} object or \code{plot_instr}, these arguments will be used
-by png function.}
+adding a \code{ggplot} object or \link{plot_instr}, these arguments will be used
+by png function. See method signatures to see what arguments can be used.}
 
 \item{style}{paragraph style name. These names are available with function \link{styles_info}
 and are the names of the Word styles defined in the base document (see
@@ -77,20 +75,7 @@ argument \code{path} from \link{read_docx}).}
 
 \item{header}{display header if TRUE}
 
-\item{first_row}{Specifies that the first column conditional formatting should be
-applied.}
-
-\item{first_column}{Specifies that the first column conditional formatting should
-be applied.}
-
-\item{last_row}{Specifies that the first column conditional formatting should be applied.}
-
-\item{last_column}{Specifies that the first column conditional formatting should be
-applied.}
-
-\item{no_hband}{Specifies that the first column conditional formatting should be applied.}
-
-\item{no_vband}{Specifies that the first column conditional formatting should be applied.}
+\item{tcf}{conditional formatting settings defined by \code{\link[=table_conditional_formatting]{table_conditional_formatting()}}}
 
 \item{width}{height in inches}
 
@@ -101,6 +86,10 @@ applied.}
 \description{
 This function add objects into a Word document. Values are added
 as new paragraphs or tables.
+
+This function is experimental and will replace the \verb{body_add_*} functions
+later. For now it is only to be used for successive additions and cannot
+be used in conjunction with the \verb{body_add_*} functions.
 }
 \section{Methods (by class)}{
 \itemize{
@@ -113,7 +102,7 @@ as new paragraphs or tables.
 \item \code{fpar}: add a \link{fpar} object. These objects enable
 the creation of formatted paragraphs made of formatted chunks of text.
 
-\item \code{data.frame}: add a data.frame object.
+\item \code{data.frame}: add a data.frame object with \code{\link[=block_table]{block_table()}}.
 
 \item \code{block_caption}: add a \link{block_caption} object. These objects enable
 the creation of set of formatted paragraphs made of formatted chunks of text.
@@ -130,17 +119,20 @@ the creation of set of formatted paragraphs made of formatted chunks of text.
 
 \item \code{gg}: add a ggplot object.
 
-\item \code{plot_instr}: add a base plot
+\item \code{plot_instr}: add a base plot with a \link{plot_instr} object.
+
+\item \code{block_pour_docx}: pour content of an external docx file with with a \link{block_pour_docx} object
 }}
 
 \examples{
-doc <- read_docx()
-doc <- body_add(doc, "A title", style = "heading 1")
-doc <- body_add(doc, head(iris), style = "table_template")
-doc <- body_add(doc, "Another title", style = "heading 1")
-doc <- body_add(doc, letters, style = "Normal")
-doc <- body_add(doc, "Table of content", style = "heading 1")
-doc <- body_add(doc, block_toc())
-print(doc, target = tempfile(fileext = ".docx"))
-# print(doc, target = "test.docx")
+doc_1 <- read_docx()
+doc_1 <- body_add(doc_1, "Table of content", style = "heading 1")
+doc_1 <- body_add(doc_1, block_toc())
+doc_1 <- body_add(doc_1, run_pagebreak())
+doc_1 <- body_add(doc_1, "A title", style = "heading 1")
+doc_1 <- body_add(doc_1, head(iris), style = "table_template")
+doc_1 <- body_add(doc_1, "Another title", style = "heading 1")
+doc_1 <- body_add(doc_1, letters, style = "Normal")
+print(doc_1, target = tempfile(fileext = ".docx"))
+# print(doc_1, target = "test.docx")
 }

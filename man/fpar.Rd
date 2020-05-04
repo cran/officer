@@ -3,7 +3,7 @@
 \name{fpar}
 \alias{fpar}
 \alias{update.fpar}
-\title{concatenate formatted text as a paragraph}
+\title{Concatenate formatted text as a paragraph}
 \usage{
 fpar(..., fp_p = fp_par(), fp_t = fp_text())
 
@@ -57,6 +57,7 @@ img_in_par <- fpar(
 Other block functions for reporting: 
 \code{\link{block_caption}()},
 \code{\link{block_list}()},
+\code{\link{block_pour_docx}()},
 \code{\link{block_section}()},
 \code{\link{block_table}()},
 \code{\link{block_toc}()},

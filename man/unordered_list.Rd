@@ -2,7 +2,7 @@
 % Please edit documentation in R/ooxml_block_objects.R
 \name{unordered_list}
 \alias{unordered_list}
-\title{unordered list}
+\title{Unordered list}
 \usage{
 unordered_list(str_list = character(0), level_list = integer(0), style = NULL)
 }
@@ -40,6 +40,7 @@ style = list(
 Other block functions for reporting: 
 \code{\link{block_caption}()},
 \code{\link{block_list}()},
+\code{\link{block_pour_docx}()},
 \code{\link{block_section}()},
 \code{\link{block_table}()},
 \code{\link{block_toc}()},

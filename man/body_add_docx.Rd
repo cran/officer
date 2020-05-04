@@ -43,3 +43,15 @@ read_docx(path = file1) \%>\%
   body_add_docx(src = file2) \%>\%
   print(target = file3)
 }
+\seealso{
+Other functions for adding content: 
+\code{\link{body_add_blocks}()},
+\code{\link{body_add_break}()},
+\code{\link{body_add_fpar}()},
+\code{\link{body_add_gg}()},
+\code{\link{body_add_img}()},
+\code{\link{body_add_par}()},
+\code{\link{body_add_table}()},
+\code{\link{body_add_toc}()}
+}
+\concept{functions for adding content}

@@ -2,9 +2,9 @@
 % Please edit documentation in R/ooxml_block_objects.R
 \name{block_caption}
 \alias{block_caption}
-\title{caption block}
+\title{Caption block}
 \usage{
-block_caption(label, style, id, autonum = NULL)
+block_caption(label, style, id = NULL, autonum = NULL)
 }
 \arguments{
 \item{label}{a scalar character representing label to display}
@@ -41,6 +41,7 @@ print(doc, target = tempfile(fileext = ".docx") )
 \seealso{
 Other block functions for reporting: 
 \code{\link{block_list}()},
+\code{\link{block_pour_docx}()},
 \code{\link{block_section}()},
 \code{\link{block_table}()},
 \code{\link{block_toc}()},

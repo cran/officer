@@ -45,4 +45,15 @@ read_docx() \%>\% body_add_fpar(img_in_par) \%>\%
 }
 \seealso{
 \code{\link{fpar}}
+
+Other functions for adding content: 
+\code{\link{body_add_blocks}()},
+\code{\link{body_add_break}()},
+\code{\link{body_add_docx}()},
+\code{\link{body_add_gg}()},
+\code{\link{body_add_img}()},
+\code{\link{body_add_par}()},
+\code{\link{body_add_table}()},
+\code{\link{body_add_toc}()}
 }
+\concept{functions for adding content}

@@ -2,53 +2,40 @@
 % Please edit documentation in R/ooxml_block_objects.R
 \name{block_table}
 \alias{block_table}
-\title{table}
+\title{Table block}
 \usage{
-block_table(
-  x,
-  style = NULL,
-  header = TRUE,
-  first_row = TRUE,
-  first_column = FALSE,
-  last_row = FALSE,
-  last_column = FALSE,
-  no_hband = FALSE,
-  no_vband = TRUE
-)
+block_table(x, header = TRUE, properties = prop_table())
 }
 \arguments{
 \item{x}{a data.frame to add as a table}
 
-\item{style}{table style}
-
 \item{header}{display header if TRUE}
 
-\item{first_row}{Specifies that the first column conditional formatting should be
-applied. Details for this and other conditional formatting options can be found
-at http://officeopenxml.com/WPtblLook.php.}
-
-\item{first_column}{Specifies that the first column conditional formatting should
-be applied.}
-
-\item{last_row}{Specifies that the first column conditional formatting should be applied.}
-
-\item{last_column}{Specifies that the first column conditional formatting should be
-applied.}
-
-\item{no_hband}{Specifies that the first column conditional formatting should be applied.}
-
-\item{no_vband}{Specifies that the first column conditional formatting should be applied.}
+\item{properties}{table properties, see \code{\link[=prop_table]{prop_table()}}.
+Table properties are not handled identically between Word and PowerPoint
+output format. They are fully supported with Word but for PowerPoint (which
+does not handle as many things as Word for tables), only conditional
+formatting properties are supported.}
 }
 \description{
 Create a representation of a table
 }
 \examples{
-block_table(x = mtcars)
+block_table(x = head(iris))
+
+block_table(x = mtcars, header = TRUE,
+  properties = prop_table(
+    tcf = table_conditional_formatting(
+      first_row = TRUE, first_column = TRUE)
+  ))
 }
 \seealso{
+\code{\link[=prop_table]{prop_table()}}
+
 Other block functions for reporting: 
 \code{\link{block_caption}()},
 \code{\link{block_list}()},
+\code{\link{block_pour_docx}()},
 \code{\link{block_section}()},
 \code{\link{block_toc}()},
 \code{\link{fpar}()},

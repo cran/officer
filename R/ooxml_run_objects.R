@@ -47,11 +47,12 @@ bookmark <- function(id, str) {
 #' @title seqfield
 #' @description Create a seqfield
 #' @param seqfield seqfield string
+#' @family run functions for reporting
 run_seqfield <- function(seqfield) {
   z <- list(
     seqfield = seqfield
   )
-  class(z) <- c("run_seqfield", "run")
+    class(z) <- c("run_seqfield", "run")
   z
 }
 
@@ -61,19 +62,19 @@ to_wml.run_seqfield <- function(x, add_ns = FALSE, ...) {
   xml_elt_1 <- paste0(
     wr_ns_yes,
     "<w:rPr/>",
-    "<w:fldChar w:fldCharType=\"begin\"/>",
+    "<w:fldChar w:fldCharType=\"begin\" w:dirty=\"true\"/>",
     "</w:r>"
   )
   xml_elt_2 <- paste0(
     wr_ns_yes,
     "<w:rPr/>",
-    sprintf("<w:instrText xml:space=\"preserve\">%s</w:instrText>", x$seqfield),
+    sprintf("<w:instrText xml:space=\"preserve\" w:dirty=\"true\">%s</w:instrText>", x$seqfield),
     "</w:r>"
   )
   xml_elt_3 <- paste0(
     wr_ns_yes,
     "<w:rPr/>",
-    "<w:fldChar w:fldCharType=\"end\"/>",
+    "<w:fldChar w:fldCharType=\"end\" w:dirty=\"true\"/>",
     "</w:r>"
   )
   out <- paste0(xml_elt_1, xml_elt_2, xml_elt_3)
@@ -91,7 +92,8 @@ to_wml.run_seqfield <- function(x, add_ns = FALSE, ...) {
 #' @examples
 #' run_autonum()
 #' run_autonum(seq_id = "fig", pre_label = "fig. ")
-run_autonum <- function(seq_id = "table", pre_label = "TABLE ", post_label = ": ") {
+#' @family run functions for reporting
+run_autonum <- function(seq_id = "table", pre_label = "Table ", post_label = ": ") {
   z <- list(
     seq_id = seq_id,
     pre_label = pre_label,
@@ -106,7 +108,7 @@ run_autonum <- function(seq_id = "table", pre_label = "TABLE ", post_label = ": 
 to_wml.run_autonum <- function(x, add_ns = FALSE, ...) {
   run_str_pre <- sprintf("<w:r><w:t xml:space=\"preserve\">%s</w:t></w:r>", x$pre_label)
   run_str_post <- sprintf("<w:r><w:t xml:space=\"preserve\">%s</w:t></w:r>", x$post_label)
-  sqf <- run_seqfield(seqfield = paste0("SEQ ", x$seq_id, " \u005C* Arabic \u005Cs 1 \u005C* MERGEFORMAT"))
+  sqf <- run_seqfield(seqfield = paste0("SEQ ", x$seq_id, " \u005C* Arabic"))
   sf_str <- to_wml(sqf)
   out <- paste0(run_str_pre, sf_str, run_str_post)
 
@@ -121,6 +123,7 @@ to_wml.run_autonum <- function(x, add_ns = FALSE, ...) {
 #' @param id reference id, a string
 #' @examples
 #' run_reference('a_ref')
+#' @family run functions for reporting
 run_reference <- function(id) {
   z <- paste0(" REF ", id, " \\h ")
 
@@ -166,6 +169,7 @@ to_wml.run_pagebreak <- function(x, add_ns = FALSE, ...) {
 #' @description Create a representation of a column break
 #' @examples
 #' run_columnbreak()
+#' @family run functions for reporting
 run_columnbreak <- function() {
   z <- list()
   class(z) <- c("run_columnbreak", "run")
@@ -212,13 +216,14 @@ inch_to_tweep <- function(x) round(x * 72 * 20, digits = 0)
 #' @param orient page orientation, either 'landscape', either 'portrait'.
 #' @examples
 #' page_size(orient = "landscape")
+#' @family functions for section definition
 page_size <- function(width = 21 / 2.54, height = 29.7 / 2.54, orient = "portrait") {
   if (orient %in% "portrait") {
-    h <- height
-    w <- width
+    h <- max(c(height, width))
+    w <- min(c(height, width))
   } else {
-    w <- height
-    h <- width
+    h <- min(c(height, width))
+    w <- max(c(height, width))
   }
 
   z <- list(width = w, height = h, orient = orient)
@@ -236,6 +241,40 @@ to_wml.page_size <- function(x, add_ns = FALSE, ...) {
 }
 
 #' @export
+#' @title section columns
+#' @description The function creates a representation of the columns of a section.
+#' @param widths columns widths in inches. If 3 values, 3 columns
+#' will be produced.
+#' @param space space in inches between columns.
+#' @param sep if TRUE a line is separating columns.
+#' @examples
+#' section_columns()
+#' @family functions for section definition
+section_columns <- function(widths = c(2.5,2.5), space = .25, sep = FALSE) {
+  if( length(widths) < 2 )
+    stop("length of widths should be at least 2")
+
+  z <- list(widths = widths, space = space, sep = sep)
+  class(z) <- c("section_columns")
+  z
+}
+#' @export
+to_wml.section_columns <- function(x, add_ns = FALSE, ...) {
+  widths <- x$widths * 20 * 72
+  space <- x$space * 20 * 72
+
+  columns_str_all_but_last <- sprintf("<w:col w:w=\"%.0f\" w:space=\"%.0f\"/>",
+                                      widths[-length(widths)], space)
+  columns_str_last <- sprintf("<w:col w:w=\"%.0f\"/>",
+                              widths[length(widths)])
+  columns_str <- c(columns_str_all_but_last, columns_str_last)
+
+  sprintf("<w:cols w:num=\"%.0f\" w:sep=\"%.0f\" w:space=\"%.0f\" w:equalWidth=\"0\">%s</w:cols>",
+                         length(widths), as.integer(x$sep),
+                         space, paste0(columns_str, collapse = "") )
+}
+
+#' @export
 #' @title page margins object
 #' @description The margins for each page of a sectionThe function creates a representation of the dimensions of a page. The
 #' dimensions are defined by length, width and orientation. If the orientation is
@@ -247,6 +286,7 @@ to_wml.page_size <- function(x, add_ns = FALSE, ...) {
 #' @param gutter page gutter (in inches).
 #' @examples
 #' page_mar()
+#' @family functions for section definition
 page_mar <- function(bottom = 1, top = 1, right = 1, left = 1,
                      header = 0.5, footer = 0.5, gutter = 0.5) {
   z <- list(header = header, bottom = bottom, top = top, right = right, left = left, footer = footer, gutter = gutter)
@@ -270,9 +310,8 @@ docx_section_type <- c("continuous", "evenPage", "nextColumn", "nextPage", "oddP
 
 #' @export
 #' @title section properties
-#' @description A section is a
-#' grouping of blocks (ie. paragraphs and tables) that have a set of properties
-#' that define pages on which the text will appear.
+#' @description A section is a grouping of blocks (ie. paragraphs and tables)
+#' that have a set of properties that define pages on which the text will appear.
 #'
 #' A Section properties object stores information about page composition,
 #' such as page size, page orientation, borders and margins.
@@ -284,24 +323,38 @@ docx_section_type <- c("continuous", "evenPage", "nextColumn", "nextPage", "oddP
 #' even-numbered page), "nextColumn" (begins on the next column on the page),
 #' "nextPage" (begins on the following page), "oddPage" (begins on the next
 #' odd-numbered page).
+#' @param section_columns section columns, an object generated with function [section_columns].
 #' @examples
 #' prop_section(
 #'   page_size = page_size(orient = "landscape"),
 #'   page_margins = page_mar(top = 2),
 #'   type = "continuous")
 #' @seealso [block_section]
-prop_section <- function(page_size, page_margins, type) {
-  if (!type %in% docx_section_type) {
+#' @family functions for section definition
+prop_section <- function(page_size = NULL, page_margins = NULL,
+                         type = NULL, section_columns = NULL) {
+  z <- list()
+  if (!is.null(type) && !type %in% docx_section_type) {
     stop("type must be one of ", paste(shQuote(docx_section_type), collapse = ", "))
   }
-  if (!inherits(page_size, "page_size")) {
+  z$type <- type
+
+  if (!is.null(page_size) && !inherits(page_size, "page_size")) {
     stop("page_size must be a page_size object")
   }
-  if (!inherits(page_margins, "page_mar")) {
+  z$page_size <- page_size
+
+  if (!is.null(page_margins) && !inherits(page_margins, "page_mar")) {
     stop("page_margins must be a page_mar object")
   }
+  z$page_margins <- page_margins
 
-  z <- list(page_size = page_size, page_margins = page_margins, type = type)
+  if (!is.null(section_columns) && !inherits(section_columns, "section_columns")) {
+    stop("section_columns must be a section_columns object")
+  }
+  z$section_columns <- section_columns
+
+  z <- Filter(function(x) !is.null(x), z)
   class(z) <- c("prop_section", "prop")
 
   z
@@ -309,13 +362,14 @@ prop_section <- function(page_size, page_margins, type) {
 
 #' @export
 to_wml.prop_section <- function(x, add_ns = FALSE, ...) {
-  out <- sprintf(
-    "<w:sectPr>%s%s<w:type w:val=\"%s\"/></w:sectPr>",
-    to_wml(x$page_margins),
-    to_wml(x$page_size),
-    x$type
+  paste0(
+    "<w:sectPr>",
+    if(!is.null(x$page_margins)) to_wml(x$page_margins),
+    if(!is.null(x$page_size)) to_wml(x$page_size),
+    if(!is.null(x$type)) "<w:type w:val=\"", x$type, "\"/>",
+    if(!is.null(x$section_columns)) to_wml(x$section_columns) else "<w:cols/>",
+    "</w:sectPr>"
   )
-  out
 }
 
 
@@ -384,7 +438,7 @@ pic_pml <- function( left = 0, top = 0, width = 3, height = 3,
     <p:nvPr>%s</p:nvPr>
   </p:nvPicPr>
   %s
-  <p:spPr>%s%s</p:spPr>
+  <p:spPr>%s<a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom>%s</p:spPr>
 </p:pic>
 "
   sprintf(str, label, ph, blipfill, xfrm_str, bg_str )
@@ -451,7 +505,7 @@ to_wml.external_img <- function(x, add_ns = FALSE, ...) {
 #' @family run functions for reporting
 ftext <- function(text, prop) {
   out <- list( value = formatC(text), pr = prop )
-  class(out) <- c("ftext", "cot")
+  class(out) <- c("ftext", "cot", "run")
   out
 }
 
@@ -463,7 +517,7 @@ print.ftext <- function (x, ...) {
 
 #' @export
 to_wml.ftext <- function(x, add_ns = FALSE, ...) {
-  out <- paste0("<w:r>", rpr_wml(x$pr),
+  out <- paste0("<w:r>", if(!is.null(x$pr)) rpr_wml(x$pr),
                 "<w:t xml:space=\"preserve\">",
                 htmlEscapeCopy(x$value), "</w:t></w:r>")
   out

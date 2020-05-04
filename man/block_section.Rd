@@ -2,7 +2,7 @@
 % Please edit documentation in R/ooxml_block_objects.R
 \name{block_section}
 \alias{block_section}
-\title{new section}
+\title{New Word section}
 \usage{
 block_section(property)
 }
@@ -10,19 +10,30 @@ block_section(property)
 \item{property}{section properties defined with function \link{prop_section}}
 }
 \description{
-Create a representation of a section
+Create a representation of a section.
+
+A section affects preceding paragraphs or tables; i.e.
+a section starts at the end of the previous section (or the beginning of
+the document if no preceding section exists), and stops where the
+section is declared.
+
+When a new landscape section is needed, it is recommended to add a block_section
+with \code{type = "continuous"}, to add the content to be appened in the new section
+and finally to add a block_section with \code{page_size = page_size(orient = "landscape")}.
 }
 \examples{
-prop_section(
+ps <- prop_section(
   page_size = page_size(orient = "landscape"),
   page_margins = page_mar(top = 2),
   type = "continuous"
 )
+block_section(ps)
 }
 \seealso{
 Other block functions for reporting: 
 \code{\link{block_caption}()},
 \code{\link{block_list}()},
+\code{\link{block_pour_docx}()},
 \code{\link{block_table}()},
 \code{\link{block_toc}()},
 \code{\link{fpar}()},

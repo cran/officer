@@ -8,6 +8,7 @@
 #' library(magrittr)
 #' doc <- read_docx() %>% body_add_break()
 #' print(doc, target = tempfile(fileext = ".docx"))
+#' @family functions for adding content
 body_add_break <- function( x, pos = "after"){
   str <- runs_to_p_wml(run_pagebreak(), add_ns = TRUE)
   body_add_xml(x = x, str = str, pos = pos)
@@ -30,6 +31,7 @@ body_add_break <- function( x, pos = "after"){
 #' }
 #'
 #' print(doc, target = tempfile(fileext = ".docx"))
+#' @family functions for adding content
 body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 
   if( is.null(style) )
@@ -91,6 +93,7 @@ body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 #'   body_add_docx(src = file2) %>%
 #'   print(target = file3)
 #' @export
+#' @family functions for adding content
 body_add_docx <- function( x, src, pos = "after" ){
   src <- unique( src )
   rel <- x$doc_obj$relationship()
@@ -132,6 +135,7 @@ body_add_docx <- function( x, src, pos = "after" ){
 #'
 #'   print(doc, target = tempfile(fileext = ".docx") )
 #' }
+#' @family functions for adding content
 body_add_gg <- function( x, value, width = 6, height = 5, res = 300, style = "Normal", ... ){
 
   if( !requireNamespace("ggplot2") )
@@ -170,6 +174,7 @@ body_add_gg <- function( x, value, width = 6, height = 5, res = 300, style = "No
 #' x <- read_docx() %>%
 #'   body_add_blocks( blocks = bl ) %>%
 #'   print(target = tempfile(fileext = ".docx"))
+#' @family functions for adding content
 body_add_blocks <- function( x, blocks, pos = "after" ){
   stopifnot(inherits(blocks, "block_list"))
 
@@ -204,6 +209,7 @@ body_add_blocks <- function( x, blocks, pos = "after" ){
 #'   body_add_par("centered text", style = "centered")
 #'
 #' print(doc, target = tempfile(fileext = ".docx") )
+#' @family functions for adding content
 body_add_par <- function( x, value, style = NULL, pos = "after" ){
 
   if( is.null(style) )
@@ -249,6 +255,7 @@ body_add_par <- function( x, value, style = NULL, pos = "after" ){
 #'   print(target = tempfile(fileext = ".docx") )
 #'
 #' @seealso \code{\link{fpar}}
+#' @family functions for adding content
 body_add_fpar <- function( x, value, style = NULL, pos = "after" ){
 
   img_src <- sapply(value$chunks, function(x){
@@ -295,16 +302,22 @@ body_add_fpar <- function( x, value, style = NULL, pos = "after" ){
 #'   body_add_table(iris, style = "table_template")
 #'
 #' print(doc, target = tempfile(fileext = ".docx") )
+#' @family functions for adding content
 body_add_table <- function( x, value, style = NULL, pos = "after", header = TRUE,
                             first_row = TRUE, first_column = FALSE,
                             last_row = FALSE, last_column = FALSE,
                             no_hband = FALSE, no_vband = TRUE ){
 
-  bt <- block_table(x = value, style = style, header = header, first_row = first_row,
-              first_column = first_column, last_row = last_row,
-              last_column = last_column, no_hband = no_hband, no_vband = no_vband)
-  xml_elt <- to_wml(bt, add_ns = TRUE, base_document = x)
+  pt <- prop_table(
+    style = style, layout = table_layout(),
+    width = table_width(),
+    tcf = table_conditional_formatting(
+      first_row = first_row, first_column = first_column,
+      last_row = last_row, last_column = last_column,
+      no_hband = no_hband, no_vband = no_vband))
 
+  bt <- block_table(x = value, header = header, properties = pt)
+  xml_elt <- to_wml(bt, add_ns = TRUE, base_document = x)
   body_add_xml(x = x, str = xml_elt, pos = pos)
 }
 
@@ -324,6 +337,7 @@ body_add_table <- function( x, value, style = NULL, pos = "after", header = TRUE
 #' doc <- read_docx() %>% body_add_toc()
 #'
 #' print(doc, target = tempfile(fileext = ".docx") )
+#' @family functions for adding content
 body_add_toc <- function( x, level = 3, pos = "after", style = NULL, separator = ";"){
   bt <- block_toc(level = level, style = style, separator = separator)
   out <- to_wml(bt, add_ns = TRUE)
@@ -450,27 +464,32 @@ body_remove <- function(x){
 
 # body_add and methods -----
 #' @export
-#' @title add content into a Word document
+#' @title Add content into a Word document
 #' @description This function add objects into a Word document. Values are added
 #' as new paragraphs or tables.
+#'
+#' This function is experimental and will replace the `body_add_*` functions
+#' later. For now it is only to be used for successive additions and cannot
+#' be used in conjunction with the `body_add_*` functions.
 #' @param x an rdocx object
 #' @param value object to add in the document. Supported objects
 #' are vectors, data.frame, graphics, block of formatted paragraphs,
 #' unordered list of formatted paragraphs,
 #' pretty tables with package flextable, 'Microsoft' charts with package mschart.
 #' @param ... further arguments passed to or from other methods. When
-#' adding a `ggplot` object or `plot_instr`, these arguments will be used
-#' by png function.
+#' adding a `ggplot` object or [plot_instr], these arguments will be used
+#' by png function. See method signatures to see what arguments can be used.
 #' @examples
-#' doc <- read_docx()
-#' doc <- body_add(doc, "A title", style = "heading 1")
-#' doc <- body_add(doc, head(iris), style = "table_template")
-#' doc <- body_add(doc, "Another title", style = "heading 1")
-#' doc <- body_add(doc, letters, style = "Normal")
-#' doc <- body_add(doc, "Table of content", style = "heading 1")
-#' doc <- body_add(doc, block_toc())
-#' print(doc, target = tempfile(fileext = ".docx"))
-#' # print(doc, target = "test.docx")
+#' doc_1 <- read_docx()
+#' doc_1 <- body_add(doc_1, "Table of content", style = "heading 1")
+#' doc_1 <- body_add(doc_1, block_toc())
+#' doc_1 <- body_add(doc_1, run_pagebreak())
+#' doc_1 <- body_add(doc_1, "A title", style = "heading 1")
+#' doc_1 <- body_add(doc_1, head(iris), style = "table_template")
+#' doc_1 <- body_add(doc_1, "Another title", style = "heading 1")
+#' doc_1 <- body_add(doc_1, letters, style = "Normal")
+#' print(doc_1, target = tempfile(fileext = ".docx"))
+#' # print(doc_1, target = "test.docx")
 body_add <- function(x, value, ...){
   UseMethod("body_add", value)
 }
@@ -537,24 +556,18 @@ body_add.fpar <- function( x, value, style = NULL, ... ){
 
 #' @export
 #' @param header display header if TRUE
-#' @param first_row Specifies that the first column conditional formatting should be
-#' applied.
-#' @param last_row Specifies that the first column conditional formatting should be applied.
-#' @param first_column Specifies that the first column conditional formatting should
-#' be applied.
-#' @param last_column Specifies that the first column conditional formatting should be
-#' applied.
-#' @param no_hband Specifies that the first column conditional formatting should be applied.
-#' @param no_vband Specifies that the first column conditional formatting should be applied.
-#' @describeIn body_add add a data.frame object.
+#' @param tcf conditional formatting settings defined by [table_conditional_formatting()]
+#' @describeIn body_add add a data.frame object with [block_table()].
 body_add.data.frame <- function( x, value, style = NULL, header = TRUE,
-                                 first_row = TRUE, first_column = FALSE,
-                                 last_row = FALSE, last_column = FALSE,
-                                 no_hband = FALSE, no_vband = TRUE, ... ){
+                                 tcf = table_conditional_formatting(),
+                                 ... ){
 
-  bt <- block_table(x = value, style = style, header = header, first_row = first_row,
-                    first_column = first_column, last_row = last_row,
-                    last_column = last_column, no_hband = no_hband, no_vband = no_vband)
+  pt <- prop_table(
+    style = style, layout = table_layout(),
+    width = table_width(),
+    tcf = tcf)
+
+  bt <- block_table(x = value, header = header, properties = pt)
   xml_elt <- to_wml(bt, add_ns = TRUE, base_document = x)
 
   body_add_xml2(x = x, str = xml_elt)
@@ -687,7 +700,7 @@ body_add.gg <- function( x, value, width = 6, height = 5, res = 300, style = "No
 }
 
 #' @export
-#' @describeIn body_add add a base plot
+#' @describeIn body_add add a base plot with a [plot_instr] object.
 body_add.plot_instr <- function( x, value, width = 6, height = 5, res = 300, style = "Normal", ... ){
 
   file <- tempfile(fileext = ".png")
@@ -704,5 +717,13 @@ body_add.plot_instr <- function( x, value, width = 6, height = 5, res = 300, sty
   value <- external_img(src = file, width = width, height = height)
 
   body_add(x, value, style = style)
+}
+
+
+#' @export
+#' @describeIn body_add pour content of an external docx file with with a [block_pour_docx] object
+body_add.block_pour_docx <- function( x, value, ... ){
+  xml_elt <- to_wml(value, add_ns = TRUE, base_document = x)
+  body_add_xml2(x = x, str = xml_elt)
 }
 

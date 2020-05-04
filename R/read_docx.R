@@ -1,14 +1,29 @@
 #' @export
-#' @title open a connection to a 'Word' file
+#' @title Create a 'Word' document object
 #' @description read and import a docx file as an R object
-#' representing the document.
+#' representing the document. When no file is specified, it
+#' uses a default empty file.
+#'
+#' Use then this object to add content to it and create Word files
+#' from R.
 #' @param x an rdocx object
 #' @param path path to the docx file to use as base document.
+#' @section styles:
+#'
+#' `read_docx()` uses a Word file as the initial document.
+#' This is the original Word document from which the document
+#' layout, paragraph styles, or table styles come.
+#'
+#' You will be able to add formatted text, change the paragraph
+#' style with the R api, but it will always be easier to use
+#' the styles from the original document.
+#'
+#' See `body_add_*` functions to add content.
 #' @examples
 #' # create an rdocx object with default template ---
 #' read_docx()
 #'
-#' @seealso [print.rdocx], [body_add]
+#' @seealso [print.rdocx], [body_add_par], [body_add]
 read_docx <- function( path = NULL ){
 
   if( !is.null(path) && !file.exists(path))
@@ -111,38 +126,16 @@ print.rdocx <- function(x, target = NULL, ...){
   int_id <- 1 # unique id identifier
 
   # make all id unique for document
-  all_uid <- xml_find_all(x$doc_obj$get(), "//*[@id]")
-  for(z in seq_along(all_uid) ){
-    xml_attr(all_uid[[z]], "id") <- int_id
-    int_id <- int_id + 1
-  }
+  int_id <- correct_id(x$doc_obj$get(), int_id)
   # make all id unique for footnote
-  all_uid <- xml_find_all(x$footnotes$get(), "//*[@id]")
-  for(z in seq_along(all_uid) ){
-    xml_attr(all_uid[[z]], "id") <- int_id
-    int_id <- int_id + 1
-  }
+  int_id <- correct_id(x$footnotes$get(), int_id)
   # make all id unique for headers
   for(docpart in x[["headers"]]){
-    all_uid <- xml_find_all(docpart$get(), "//*[@id]")
-    for(z in seq_along(all_uid) ){
-      xml_attr(all_uid[[z]], "id") <- int_id
-      int_id <- int_id + 1
-    }
+    int_id <- correct_id(docpart$get(), int_id)
   }
   # make all id unique for footers
   for(docpart in x[["footers"]]){
-    all_uid <- xml_find_all(docpart$get(), "//*[@id]")
-    for(z in seq_along(all_uid) ){
-      xml_attr(all_uid[[z]], "id") <- int_id
-      int_id <- int_id + 1
-    }
-  }
-
-  all_uid <- xml_find_all(x$footnotes$get(), "//*[@id]")
-  for(z in seq_along(all_uid) ){
-    xml_attr(all_uid[[z]], "id") <- int_id
-    int_id <- int_id + 1
+    int_id <- correct_id(docpart$get(), int_id)
   }
 
   body <- xml_find_first(x$doc_obj$get(), "w:body")
@@ -194,12 +187,18 @@ length.rdocx <- function( x ){
 #' @description read Word styles and get results in
 #' a tidy data.frame.
 #' @param x an rdocx object
+#' @param type,is_default subsets for types (i.e. paragraph) and
+#' default style (when `is_default` is TRUE or FALSE)
 #' @examples
 #' x <- read_docx()
 #' styles_info(x)
+#' styles_info(x, type = "paragraph", is_default = TRUE)
 #' @family functions for Word document informations
-styles_info <- function( x ){
-  x$styles
+styles_info <- function( x, type = c("paragraph", "character", "table", "numbering"),
+                         is_default = c(TRUE, FALSE) ){
+  styles <- x$styles
+  styles <- styles[styles$style_type %in% type & styles$is_default %in% is_default,]
+  styles
 }
 
 #' @export
