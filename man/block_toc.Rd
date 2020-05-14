@@ -4,12 +4,17 @@
 \alias{block_toc}
 \title{Table of content}
 \usage{
-block_toc(level = 3, style = NULL, separator = ";")
+block_toc(level = 3, style = NULL, seq_id = NULL, separator = ";")
 }
 \arguments{
 \item{level}{max title level of the table}
 
-\item{style}{optional. style in the document that will be used to build entries of the TOC.}
+\item{style}{optional. If not NULL, its value is used as style in the
+document that will be used to build entries of the TOC.}
+
+\item{seq_id}{optional. If not NULL, its value is used as sequence
+identifier in the document that will be used to build entries of the
+TOC. See also \code{\link[=run_autonum]{run_autonum()}} to specify a sequence identifier.}
 
 \item{separator}{optional. Some configurations need "," (i.e. from Canada) separator instead of ";"}
 }
@@ -18,7 +23,7 @@ Create a representation of a table of content.
 }
 \examples{
 block_toc(level = 2)
-block_toc(style = "Table title")
+block_toc(style = "Table Caption")
 }
 \seealso{
 Other block functions for reporting: 

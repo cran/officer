@@ -27,7 +27,7 @@ ph_with(x, value, location, ...)
 
 \method{ph_with}{logical}(x, value, location, format_fun = format, ...)
 
-\method{ph_with}{block_list}(x, value, location, is_list = FALSE, ...)
+\method{ph_with}{block_list}(x, value, location, level_list = integer(0), ...)
 
 \method{ph_with}{unordered_list}(x, value, location, ...)
 
@@ -37,6 +37,7 @@ ph_with(x, value, location, ...)
   location,
   header = TRUE,
   tcf = table_conditional_formatting(),
+  alignment = NULL,
   ...
 )
 
@@ -72,13 +73,16 @@ by png function.}
 
 \item{format_fun}{format function for non character vectors}
 
-\item{is_list}{experimental paramater to make
-block_list formated as an unordered list. This
-should evolve in the next versions.}
+\item{level_list}{The list of levels for hierarchy structure as integer values.
+If used the object is formated as an unordered list. If 1 and 2,
+item 1 level will be 1, item 2 level will be 2.}
 
 \item{header}{display header if TRUE}
 
 \item{tcf}{conditional formatting settings defined by \code{\link[=table_conditional_formatting]{table_conditional_formatting()}}}
+
+\item{alignment}{alignment for each columns, 'l' for left, 'r' for right
+and 'c' for center. Default to NULL.}
 
 \item{res}{resolution of the png image in ppi}
 
@@ -138,6 +142,12 @@ on the current slide.
 \item \code{xml_document}: add an xml_document object to a new shape on the
 current slide. This function is to be used to add custom openxml code.
 }}
+
+\section{Illustrations}{
+
+
+\if{html}{\figure{ph_with_doc_1.png}{options: width=60\%}}
+}
 
 \examples{
 # this name will be used to print the file

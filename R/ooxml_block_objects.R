@@ -3,20 +3,17 @@
 #' @export
 #' @title Caption block
 #' @description Create a representation of a
-#' caption that can be used for cross reference. The caption
-#' can also be an auto numbered paragraph.
+#' caption that can be used for cross reference.
 #' @param label a scalar character representing label to display
 #' @param style paragraph style name
-#' @param id cross reference identifier
 #' @param autonum an object generated with function [run_autonum]
 #' @examples
 #'
 #' @example examples/block_caption.R
 #' @family block functions for reporting
-block_caption <- function(label, style, id = NULL, autonum = NULL) {
+block_caption <- function(label, style, autonum = NULL) {
   z <- list(
     label = label,
-    id = id,
     autonum = autonum,
     style = style
   )
@@ -35,9 +32,7 @@ print.block_caption <- function(x, ...) {
   cat("caption ", auton, ": ", x$label, "\n", sep = "")
 }
 
-
-#' @export
-to_wml.block_caption <- function(x, add_ns = FALSE, base_document = NULL, ...) {
+to_wml_block_caption_officer <- function(x, add_ns = FALSE, base_document = NULL){
   if (is.null(base_document)) {
     base_document <- get_reference_value("docx")
   }
@@ -59,7 +54,6 @@ to_wml.block_caption <- function(x, add_ns = FALSE, base_document = NULL, ...) {
     style <- x$style
   }
   style_id <- get_style_id(data = base_document$styles, style = style, type = "paragraph")
-
   autonum <- ""
   if (!is.null(x$autonum)) {
     autonum <- to_wml(x$autonum)
@@ -67,9 +61,6 @@ to_wml.block_caption <- function(x, add_ns = FALSE, base_document = NULL, ...) {
 
   run_str <- sprintf("<w:r><w:t xml:space=\"preserve\">%s</w:t></w:r>", htmlEscapeCopy(x$label))
   run_str <- paste0(autonum, run_str)
-  if(!is.null(x$id)){
-    run_str <- bookmark(x$id, run_str)
-  }
 
   out <- sprintf(
     "%s<w:pPr><w:pStyle w:val=\"%s\"/></w:pPr>%s</w:p>",
@@ -77,6 +68,36 @@ to_wml.block_caption <- function(x, add_ns = FALSE, base_document = NULL, ...) {
   )
 
   out
+}
+to_wml_block_caption_pandoc <- function(x, bookdown_id = NULL){
+
+  if(is.null(x$label)) return("")
+
+  autonum <- ""
+  if (!is.null(x$autonum)) {
+    autonum <- paste("`", to_wml(x$autonum), "`{=openxml}", sep = "")
+  }
+
+  run_str <- paste0(autonum, htmlEscapeCopy(x$label))
+
+  paste0(
+    if (!is.null(x$style)) paste0("\n\n::: {custom-style=\"", x$style, "\"}"),
+    "\n\n",
+    # "<caption>\n\n",
+    if (!is.null(bookdown_id)) bookdown_id,
+    run_str,
+    # "\n\n</caption>",
+    if (!is.null(x$style)) paste0("\n:::\n"),
+    "\n\n"
+  )
+}
+
+#' @export
+to_wml.block_caption <- function(x, add_ns = FALSE, base_document = NULL, knitting = FALSE, ...) {
+  if(knitting)
+    to_wml_block_caption_pandoc(x, bookdown_id = list(...)$bookdown_id)
+  else
+    to_wml_block_caption_officer(x, add_ns = add_ns, base_document = base_document)
 }
 
 
@@ -86,15 +107,19 @@ to_wml.block_caption <- function(x, add_ns = FALSE, base_document = NULL, ...) {
 #' @title Table of content
 #' @description Create a representation of a table of content.
 #' @param level max title level of the table
-#' @param style optional. style in the document that will be used to build entries of the TOC.
+#' @param style optional. If not NULL, its value is used as style in the
+#' document that will be used to build entries of the TOC.
+#' @param seq_id optional. If not NULL, its value is used as sequence
+#' identifier in the document that will be used to build entries of the
+#' TOC. See also [run_autonum()] to specify a sequence identifier.
 #' @param separator optional. Some configurations need "," (i.e. from Canada) separator instead of ";"
 #' @examples
 #' block_toc(level = 2)
-#' block_toc(style = "Table title")
+#' block_toc(style = "Table Caption")
 #' @family block functions for reporting
-block_toc <- function(level = 3, style = NULL, separator = ";") {
+block_toc <- function(level = 3, style = NULL, seq_id = NULL, separator = ";") {
   z <- list(
-    level = level, style = style, separator = separator
+    level = level, style = style, seq_id = seq_id, separator = separator
   )
   class(z) <- c("block_toc", "block")
 
@@ -103,10 +128,12 @@ block_toc <- function(level = 3, style = NULL, separator = ";") {
 
 #' @export
 print.block_toc <- function(x, ...) {
-  if (is.null(x$style)) {
+  if (is.null(x$style) && is.null(x$seq_id)) {
     cat("TOC - max level: ", x$level, "\n", sep = "")
-  } else {
+  } else if (!is.null(x$style)) {
     cat("TOC for style: ", x$style, "\n", sep = "")
+  } else if (!is.null(x$seq_id)) {
+    cat("TOC for seq identifier: ", x$seq_id, "\n", sep = "")
   }
 }
 
@@ -119,30 +146,41 @@ to_wml.block_toc <- function(x, add_ns = FALSE, ...) {
   }
 
 
-  if (is.null(x$style)) {
+  if(is.null(x$style) && is.null(x$seq_id)) {
     out <- paste0(
       open_tag,
       "<w:pPr/>",
       to_wml(
         run_seqfield(
           seqfield = sprintf(
-            "TOC \u005Co &quot;1-%.0f&quot; \u005Ch \u005Cz \u005Cu",
+            "TOC \\o \"1-%.0f\" \\h \\z \\u",
             x$level
           )
         )
       ),
       "</w:p>"
     )
-  } else {
+  } else if(!is.null(x$style)) {
     out <- paste0(
       open_tag,
       "<w:pPr/>",
       to_wml(
         run_seqfield(
           seqfield = sprintf(
-            "TOC \u005Ch \u005Cz \u005Ct \"%s%s1\"",
+            "TOC \\h \\z \\t \"%s%s1\"",
             x$style, x$separator
           )
+        )
+      ),
+      "</w:p>"
+    )
+  } else if(!is.null(x$seq_id)) {
+    out <- paste0(
+      open_tag,
+      "<w:pPr/>",
+      to_wml(
+        run_seqfield(
+          seqfield = sprintf("TOC \\h \\z \\c \"%s\"", x$seq_id)
         )
       ),
       "</w:p>"
@@ -165,7 +203,7 @@ to_wml.block_toc <- function(x, add_ns = FALSE, ...) {
 #' library(officer)
 #' docx <- tempfile(fileext = ".docx")
 #' doc <- read_docx()
-#' doc <- body_add(doc, iris, style = "table_template")
+#' doc <- body_add(doc, iris[1:20,], style = "table_template")
 #' print(doc, target = docx)
 #'
 #' target <- tempfile(fileext = ".docx")
@@ -403,7 +441,7 @@ table_colwidths <- function(widths = NULL){
 #' @export
 to_wml.table_colwidths <- function(x, add_ns = FALSE, ...) {
   if(length(x$widths) < 1) return("")
-  grid_col_str <- sprintf("<w:w:gridCol w:w=\"%.0f\"/>", x$widths * 1440)
+  grid_col_str <- sprintf("<w:gridCol w:w=\"%.0f\"/>", x$widths * 1440)
   grid_col_str <- paste(grid_col_str, collapse = "")
   paste0("<w:tblGrid>", grid_col_str, "</w:tblGrid>")
 }
@@ -416,14 +454,16 @@ to_wml.table_colwidths <- function(x, add_ns = FALSE, ...) {
 #' @param layout layout defined by [table_layout()],
 #' @param width table width in the document defined by [table_width()]
 #' @param colwidths column widths defined by [table_colwidths()]
+#' @param align table alignment (one of left, center or right)
 #' @param tcf conditional formatting settings defined by [table_conditional_formatting()]
 #' @examples
 #' prop_table()
 #' @family functions for table definition
-prop_table <- function(style = "table_template", layout = table_layout(),
+prop_table <- function(style = NA_character_, layout = table_layout(),
                          width = table_width(),
                          colwidths = table_colwidths(),
-                         tcf = table_conditional_formatting()){
+                         tcf = table_conditional_formatting(),
+                       align = "center"){
 
 
   z <- list(
@@ -431,7 +471,7 @@ prop_table <- function(style = "table_template", layout = table_layout(),
     layout = layout,
     width = width,
     colsizes = colwidths,
-    tcf = tcf
+    tcf = tcf, align = align
   )
   class(z) <- c("prop_table")
   z
@@ -449,23 +489,27 @@ to_wml.prop_table <- function(x, add_ns = FALSE, base_document = NULL, ...) {
     stop("base_document can only be the path to a docx file or an rdocx document.")
   }
 
-  if (is.null(x$style)) {
-    style <- base_document$default_styles$table
-  } else {
-    style <- x$style
+  style_id <- NA_character_
+  if(!is.null(x$style) && !is.na(x$style)){
+    if (is.null(x$style)) {
+      style <- base_document$default_styles$table
+    } else {
+      style <- x$style
+    }
+    style_id <- get_style_id(data = base_document$styles, style = style, type = "table")
   }
-  style_id <- get_style_id(data = base_document$styles, style = style, type = "table")
 
   tbl_layout <- to_wml(x$layout, add_ns= add_ns, base_document = base_document)
   width <- to_wml(x$width, add_ns= add_ns, base_document = base_document)
   colwidths <- to_wml(x$colsizes, add_ns= add_ns, base_document = base_document)
   tcf <- to_wml(x$tcf, add_ns= add_ns, base_document = base_document)
-
   paste0("<w:tblPr>",
-         "<w:tblStyle w:val=\"", style_id, "\"/>",
-         tbl_layout, width, tcf, colwidths,
+         if(!is.na(style_id)) "<w:tblStyle w:val=\"", style_id, "\"/>",
+         tbl_layout,
+         sprintf( "<w:jc w:val=\"%s\"/>", x$align ),
+         width, tcf,
          "</w:tblPr>",
-         colwidths
+         if(x$layout$type %in% "fixed") colwidths
          )
 
 }
@@ -473,7 +517,7 @@ to_wml.prop_table <- function(x, add_ns = FALSE, base_document = NULL, ...) {
 
 # table ----
 table_docx <- function(x, header, style_id,
-                       properties, add_ns = FALSE,
+                       properties, alignment = NULL, add_ns = FALSE,
                        base_document = base_document) {
   open_tag <- tbl_ns_no
   if (add_ns) {
@@ -485,11 +529,19 @@ table_docx <- function(x, header, style_id,
     to_wml(properties, add_ns = add_ns, base_document = base_document)
   )
 
+  if(is.null(alignment)){
+    alignment <- rep("right", ncol(x))
+  } else{
+    alignment <- match.arg(alignment, c("left", "right", "center"), several.ok = TRUE )
+  }
+
   header_str <- character(length = 0L)
   if (header) {
     header_str <- paste0(
       "<w:tr><w:trPr><w:tblHeader/></w:trPr>",
-      paste0("<w:tc><w:trPr/><w:p><w:r><w:t>",
+      paste0("<w:tc><w:p>",
+             sprintf("<w:pPr><w:jc w:val=\"%s\"/></w:pPr>", alignment),
+             "<w:r><w:t>",
         htmlEscapeCopy(enc2utf8(colnames(x))),
         "</w:t></w:r></w:p></w:tc>",
         collapse = ""
@@ -497,16 +549,17 @@ table_docx <- function(x, header, style_id,
       "</w:tr>"
     )
   }
-
-  as_tc <- function(x) {
+  as_tc <- function(x, align) {
     paste0(
-      "<w:tc><w:trPr/><w:p><w:r><w:t>",
+      "<w:tc><w:p>",
+      sprintf("<w:pPr><w:jc w:val=\"%s\"/></w:pPr>", align),
+      "<w:r><w:t>",
       htmlEscapeCopy(enc2utf8(x)),
       "</w:t></w:r></w:p></w:tc>"
     )
   }
 
-  z <- lapply(x, as_tc)
+  z <- mapply(as_tc, x, alignment, SIMPLIFY = FALSE)
   z <- do.call(paste0, z)
   z <- paste0("<w:tr>", z, "</w:tr>", collapse = "")
 
@@ -514,7 +567,7 @@ table_docx <- function(x, header, style_id,
 }
 
 table_pptx <- function(x, style_id, col_width, row_height,
-                       tcf, header = TRUE ){
+                       tcf, header = TRUE, alignment = NULL ){
   str <- paste0("<a:tbl>",
                 sprintf("<a:tblPr %s>", to_pml(tcf)),
                 sprintf("<a:tableStyleId>%s</a:tableStyleId>", style_id),
@@ -525,22 +578,31 @@ table_pptx <- function(x, style_id, col_width, row_height,
                        collapse = ""),
                 "</a:tblGrid>")
 
-  as_tc <- function(x) {
-    paste0("<a:tc><a:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:t>",
+  as_tc <- function(x, align) {
+    paste0("<a:tc><a:txBody><a:bodyPr/><a:lstStyle/><a:p>",
+           "<a:pPr algn=\"", align, "\"/>",
+           "<a:r><a:t>",
            htmlEscapeCopy(enc2utf8(x)),
            "</a:t></a:r></a:p></a:txBody></a:tc>"
     )
   }
+
+  if(is.null(alignment)){
+    alignment <- rep("r", ncol(x))
+  } else{
+    alignment <- match.arg(alignment, c("l", "r", "ctr"), several.ok = TRUE )
+  }
+
   header_str <- character(length = 0L)
   if( header ){
     header_str  <- paste0(
       sprintf("<a:tr h=\"%.0f\">", row_height),
-      paste0(as_tc(colnames(x)), collapse = ""),
+      paste0(as_tc(colnames(x), align = alignment), collapse = ""),
       "</a:tr>"
     )
   }
 
-  z <- lapply(x, as_tc)
+  z <- mapply(as_tc, x, alignment, SIMPLIFY = FALSE)
   z <- do.call(paste0, z)
   z <- paste0(sprintf("<a:tr h=\"%.0f\">", row_height), z, "</a:tr>", collapse = "")
 
@@ -562,6 +624,8 @@ table_pptx <- function(x, style_id, col_width, row_height,
 #' output format. They are fully supported with Word but for PowerPoint (which
 #' does not handle as many things as Word for tables), only conditional
 #' formatting properties are supported.
+#' @param alignment alignment for each columns, 'l' for left, 'r' for right
+#' and 'c' for center. Default to NULL.
 #' @examples
 #' block_table(x = head(iris))
 #'
@@ -572,7 +636,7 @@ table_pptx <- function(x, style_id, col_width, row_height,
 #'   ))
 #' @family block functions for reporting
 #' @seealso [prop_table()]
-block_table <- function(x, header = TRUE, properties = prop_table()) {
+block_table <- function(x, header = TRUE, properties = prop_table(), alignment = NULL) {
 
   stopifnot(is.data.frame(x))
   if(inherits(x, "tbl_df"))
@@ -582,7 +646,8 @@ block_table <- function(x, header = TRUE, properties = prop_table()) {
   z <- list(
     x = x,
     header = header,
-    properties = properties
+    properties = properties,
+    alignment = alignment
   )
   class(z) <- c("block_table", "block")
 
@@ -612,6 +677,7 @@ to_wml.block_table <- function(x, add_ns = FALSE, base_document = NULL, ...) {
   out <- table_docx(
     x = value, header = x$header,
     properties = x$properties,
+    alignment = x$alignment,
     base_document = base_document,
     add_ns = add_ns
   )
@@ -635,6 +701,7 @@ to_pml.block_table <- function(x, add_ns = FALSE,
   }
   value <- characterise_df(x$x)
   value_str <- table_pptx(value, style_id = x$properties$style,
+                          alignment = x$alignment,
                         col_width = as.integer((width/ncol(x$x))*914400),
                         row_height = as.integer((height/nrow(x$x))*914400),
                         tcf = x$properties$tcf,

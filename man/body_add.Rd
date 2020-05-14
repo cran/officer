@@ -34,6 +34,7 @@ body_add(x, value, ...)
   style = NULL,
   header = TRUE,
   tcf = table_conditional_formatting(),
+  alignment = NULL,
   ...
 )
 
@@ -76,6 +77,9 @@ argument \code{path} from \link{read_docx}).}
 \item{header}{display header if TRUE}
 
 \item{tcf}{conditional formatting settings defined by \code{\link[=table_conditional_formatting]{table_conditional_formatting()}}}
+
+\item{alignment}{columns alignement, argument length must match with columns length,
+values must be "l" (left), "r" (right) or "c" (center).}
 
 \item{width}{height in inches}
 
@@ -123,6 +127,12 @@ the creation of set of formatted paragraphs made of formatted chunks of text.
 
 \item \code{block_pour_docx}: pour content of an external docx file with with a \link{block_pour_docx} object
 }}
+
+\section{Illustrations}{
+
+
+\if{html}{\figure{body_add_doc_1.png}{options: width=60\%}}
+}
 
 \examples{
 doc_1 <- read_docx()

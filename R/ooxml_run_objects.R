@@ -7,6 +7,7 @@
 #' @param x object
 #' @param add_ns should namespace be added to the top tag
 #' @param ... Arguments to be passed to methods
+#' @family functions for officer extensions
 to_wml <- function(x, add_ns = FALSE, ...) {
   UseMethod("to_wml")
 }
@@ -18,6 +19,7 @@ to_wml <- function(x, add_ns = FALSE, ...) {
 #' @param x object
 #' @param add_ns should namespace be added to the top tag
 #' @param ... Arguments to be passed to methods
+#' @family functions for officer extensions
 to_pml <- function(x, add_ns = FALSE, ...) {
   UseMethod("to_pml")
 }
@@ -86,18 +88,44 @@ to_wml.run_seqfield <- function(x, add_ns = FALSE, ...) {
 
 #' @export
 #' @title auto number
-#' @description Create a string representation of a number
+#' @description Create an autonumbered chunk, i.e. a string
+#' representation of a sequence, each item will be numbered.
+#' These runs can also be bookmarked and be used later for
+#' cross references.
 #' @param seq_id sequence identifier
 #' @param pre_label,post_label text to add before and after number
+#' @param bkm bookmark id to associate with autonumber run. If NULL, no bookmark
+#' is added. Value can only be made of alpha numeric characters, '-' and '_'.
+#' @param bkm_all if TRUE, the bookmark will be set on the while string, if
+#' FALSE, the bookmark will be set on the number only. Default to FALSE.
+#' As an effect when a reference to this bookmark is used, the text can
+#' be like "Table 1" or "1" (pre_label is not included in the referenced
+#' text).
 #' @examples
 #' run_autonum()
 #' run_autonum(seq_id = "fig", pre_label = "fig. ")
+#' run_autonum(seq_id = "tab", pre_label = "Table ", bkm = "anytable")
 #' @family run functions for reporting
-run_autonum <- function(seq_id = "table", pre_label = "Table ", post_label = ": ") {
+run_autonum <- function(seq_id = "table", pre_label = "Table ", post_label = ": ",
+                        bkm = NULL, bkm_all = FALSE) {
+
+  if(!is.null(bkm)){
+    invalid_bkm <- is.character(bkm) &&
+      length(bkm) == 1 &&
+      nchar(bkm) > 0 &&
+      grepl("[^[:alnum:]_-]+", bkm)
+    if(invalid_bkm){
+      stop("bkm [", bkm, "] should only contain alphanumeric characters, '-' and '_'.", call. = FALSE)
+    }
+  }
+
+
   z <- list(
     seq_id = seq_id,
     pre_label = pre_label,
-    post_label = post_label
+    post_label = post_label,
+    bookmark = bkm,
+    bookmark_all = bkm_all
   )
   class(z) <- c("run_autonum", "run")
 
@@ -106,11 +134,25 @@ run_autonum <- function(seq_id = "table", pre_label = "Table ", post_label = ": 
 
 #' @export
 to_wml.run_autonum <- function(x, add_ns = FALSE, ...) {
+  if(is.null(x$seq_id)) return("")
+
   run_str_pre <- sprintf("<w:r><w:t xml:space=\"preserve\">%s</w:t></w:r>", x$pre_label)
   run_str_post <- sprintf("<w:r><w:t xml:space=\"preserve\">%s</w:t></w:r>", x$post_label)
   sqf <- run_seqfield(seqfield = paste0("SEQ ", x$seq_id, " \u005C* Arabic"))
   sf_str <- to_wml(sqf)
-  out <- paste0(run_str_pre, sf_str, run_str_post)
+  if(!is.null(x$bookmark)){
+    if(x$bookmark_all){
+      out <- paste0(
+        bookmark(id = x$bookmark,
+                 str = paste0(run_str_pre, sf_str)),
+        run_str_post)
+    } else {
+      sf_str <- bookmark(id = x$bookmark, sf_str)
+      out <- paste0(run_str_pre, sf_str, run_str_post)
+    }
+  } else {
+    out <- paste0(run_str_pre, sf_str, run_str_post)
+  }
 
   out
 }
@@ -137,7 +179,7 @@ run_reference <- function(id) {
 
 #' @export
 to_wml.run_reference <- function(x, add_ns = FALSE, ...) {
-  out <- to_wml(run_seqfield(seqfield = x$id))
+  out <- to_wml(run_seqfield(seqfield = paste0(" REF ", x$id, " \\h ")))
   out
 }
 

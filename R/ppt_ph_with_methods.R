@@ -118,6 +118,9 @@
 #' @seealso [ph_location_type], [ph_location], [ph_location_label],
 #' [ph_location_left], [ph_location_right], [ph_location_fullsize],
 #' [ph_location_template]
+#' @section Illustrations:
+#'
+#' \if{html}{\figure{ph_with_doc_1.png}{options: width=60\%}}
 ph_with <- function(x, value, location, ...){
   UseMethod("ph_with", value)
 }
@@ -203,19 +206,33 @@ ph_with.factor <- function(x, value, location, ...){
 ph_with.logical <- ph_with.numeric
 
 #' @export
-#' @param is_list experimental paramater to make
-#' block_list formated as an unordered list. This
-#' should evolve in the next versions.
+#' @param level_list The list of levels for hierarchy structure as integer values.
+#' If used the object is formated as an unordered list. If 1 and 2,
+#' item 1 level will be 1, item 2 level will be 2.
 #' @describeIn ph_with add a \code{\link{block_list}} made
 #' of \code{\link{fpar}} to a new shape on the current slide.
-ph_with.block_list <- function(x, value, location, is_list = FALSE, ...){
+ph_with.block_list <- function(x, value, location, level_list = integer(0), ...){
   slide <- x$slide$get_slide(x$cursor)
 
   location <- fortify_location(location, doc = x)
 
   pars <- sapply(value, to_pml)
-  if( is_list ){
+
+  if( length(level_list)>0 ){
     pars <- gsub("<a:buNone/>", "", pars, fixed = TRUE)
+
+    level_values <- rep(1L, length(pars))
+    level_values[] <- level_list
+    level_values <- level_values - 1L
+
+    lvl <- sprintf(" lvl=\"%.0f\"", level_values)
+    lvl <- paste0("<a:pPr", ifelse(level_values > 0, lvl, ""), "/>")
+
+    pars <- mapply(function(par, lvl){
+      paste0(par[1], lvl, par[2])
+    }, strsplit(pars, split = "<a:pPr(.*)</a:pPr>"), lvl,
+    SIMPLIFY = FALSE)
+    pars <- unlist(pars)
   }
 
   pars <- paste0(pars, collapse = "")
@@ -265,11 +282,14 @@ ph_with.unordered_list <- function(x, value, location, ...){
 #' @export
 #' @param header display header if TRUE
 #' @param tcf conditional formatting settings defined by [table_conditional_formatting()]
+#' @param alignment alignment for each columns, 'l' for left, 'r' for right
+#' and 'c' for center. Default to NULL.
 #' @describeIn ph_with add a data.frame to a new shape on the current slide with
 #' function [block_table()]. Use package \code{flextable} instead for more
 #' advanced formattings.
 ph_with.data.frame <- function(x, value, location, header = TRUE,
                                tcf = table_conditional_formatting(),
+                               alignment = NULL,
                                ...){
   location <- fortify_location(location, doc = x)
 
@@ -281,7 +301,7 @@ ph_with.data.frame <- function(x, value, location, header = TRUE,
     width = table_width(),
     tcf = tcf)
 
-  bt <- block_table(x = value, header = header, properties = pt)
+  bt <- block_table(x = value, header = header, properties = pt, alignment = alignment)
 
   xml_elt <- to_pml(
     bt, left = location$left, top = location$top,
