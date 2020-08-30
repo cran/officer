@@ -1,3 +1,22 @@
+# officer 0.3.13
+
+## Issues
+
+* fix sections issue with page margin (it effected also officedown).
+* fix issue #320 (with URL encoding in .rel files).
+* fix encoding issue with ftext
+* explicit coding of bold, italic and uunderline attributes
+* ftext with a name for chunk style is fixed
+
+## New features
+
+* change_styles - support for run/character, paragraph and table styles.
+* new function `table_stylenames()` to define columns stylenames to be used in
+tables, it benefits to `block_table` and `body_add_table`.
+* line spacing is now a feature of `fp_par`
+* run_autonum, run_seqfield and run_reference can now be formatted with
+an object of class `fp_text`.
+
 # officer 0.3.12
 
 ## New features
