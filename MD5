@@ -1,10 +1,9 @@
-14fe98c5775624aca5bc799e6199fa19 *DESCRIPTION
-393393fefea1e0447d7018093692f6c7 *NAMESPACE
-0c5f5dc8a75243d7fef76f0ccc45bc12 *NEWS
+811eab63fa5e890e9399a3c2a99c20fc *DESCRIPTION
+5b90b84a9b755c6a3a1489b973b68f5f *NAMESPACE
+b92cb23d712e4fb61f1bd576392ed1d5 *NEWS
 57ebfc69363ac027fe6083afa8aa522c *R/core_properties.R
-3059981bd5695fdf41ca67708422a671 *R/defunct.R
-3db37a776b8027377975b02a40672125 *R/deprecated.R
-87bd6cf523ba5ea21e1559bd3cf3f43d *R/docx_add.R
+3e1d7ac303d7a2f6b4edd07855d12e05 *R/defunct.R
+e5a6b3a5ace9235b0759caf7927c2fe3 *R/docx_add.R
 381c7788e27fa64988aa6982c7645258 *R/docx_add_chunk.R
 769ad2015cc084084bc5579b5f4a9d24 *R/docx_cursor.R
 d513ae862bdfd7a5ec098c01405f1f29 *R/docx_footnotes.R
@@ -19,11 +18,11 @@ ff186d5264e2e49e9bf2f91ba0b50de7 *R/fortify_pptx.R
 716e6c8c66e4d6db00fe714534bb40f1 *R/knitr_utils.R
 ecc7c1c398a629d378fcf3034d616307 *R/officer.R
 462ea383a8a14bbd4539e80694bdee6b *R/ooxml.R
-08fe80e6a2ae0f03c6db12a691ebf253 *R/ooxml_block_objects.R
-a43f3ace0ddad037e88b253b5024fbc5 *R/ooxml_run_objects.R
+f7a180b16845f0c66b2a4818fdd51761 *R/ooxml_block_objects.R
+3712dcaa71a99eda4753e24bad281f44 *R/ooxml_run_objects.R
 30081068bdee6c6130086842c82454bb *R/openxml_content_type.R
 0f7bbf0d3ed5b3d9652069638f36caae *R/openxml_document.R
-3a4d659c5c20cc99307ba1ef48daac2e *R/pack_folder.R
+0b5398ed30377d108e370169da209a45 *R/pack_folder.R
 4b035e39e484a544ce491f7bba51d008 *R/ph_location.R
 d2ec4c6eba030f5253773f821169d286 *R/ppt_class_dir_collection.R
 19be9df4ef9b1b83d7cec04cc4d58a22 *R/ppt_classes.R
@@ -38,7 +37,7 @@ fa3d92338d6566a7026a679ca21c5291 *R/read_pptx.R
 1d80bfcd2b3007b05c6dfc9228def01e *R/relationship.R
 22a8cc6223aedbe99b2f21c9b16e009e *R/shorcuts.R
 dedcc9d50e03dd64f1753a97fd26a517 *R/utils.R
-f4fdce9cae56747a41fdfb213c8316d2 *README.md
+5f8e4632bf2b051fafc8ea703ec308c1 *README.md
 3e73f609dcdf2e7a25e626524d52eabb *build/vignette.rds
 b15d694ebb6195198de3b441a562bbd9 *inst/doc/overview.Rmd
 4a71caa27cd35ff350ca286f59d3e25b *inst/doc/overview.html
@@ -57,7 +56,7 @@ d66a2b3c93d8eb7fa7c885d5d1de028a *man/add_sheet.Rd
 4da1152cf27d3de7072c3c2cf2c60701 *man/add_slide.Rd
 4ccc389386a94839f710a8ed32edbed6 *man/annotate_base.Rd
 1db951a88e857c87be18d8d344d37d12 *man/block_caption.Rd
-f1faae07516b5a689db8ac962ac1ea7e *man/block_list.Rd
+fd02abcbf54a760d020d795504a095b2 *man/block_list.Rd
 033ec7e3c59f42232ff63989e6542c15 *man/block_pour_docx.Rd
 11797f54f9778ff5b173d78194b2b957 *man/block_section.Rd
 861a2e9ad313c29b141307621942e318 *man/block_table.Rd
@@ -67,8 +66,8 @@ c214caa8cf416ab98518e973d2b6cd35 *man/body_add.Rd
 cba9cf362c9a3933000f306f4aeea216 *man/body_add_break.Rd
 852cda66d1159498683f18a384e7467c *man/body_add_docx.Rd
 1e928e900f85b43fc6b9102300df82bf *man/body_add_fpar.Rd
-01b8a8a00efcd4422b0145f378e1fc15 *man/body_add_gg.Rd
-8dda3dccd2b668f8a33764bcabdf4cde *man/body_add_img.Rd
+f255e6f18227f214e2b5cd86237f968d *man/body_add_gg.Rd
+45e29b2b0fac83ff3c16a292f6b55870 *man/body_add_img.Rd
 53870b5d98dc7126cb918c1ab686049f *man/body_add_par.Rd
 296e3a0248a1b2ad4f3f4915826a1345 *man/body_add_table.Rd
 4756a867485eabdabcc540a02d728ff2 *man/body_add_toc.Rd
@@ -98,6 +97,7 @@ c9904aa793c81c7b04ec449f8bca23d9 *man/docx_body_xml.Rd
 6b17a39f63f768f2bd14018a5feffcfa *man/external_img.Rd
 1f38fc95b8b0989d29f5971a075d4db3 *man/figures/body_add_doc_1.png
 52843375a1fd2b416f29cb653529c4d7 *man/figures/body_end_block_section_doc_1.png
+b7206a32354102dea59b79d7126e837f *man/figures/logo.png
 ca071c0d128523a7c344a5dc3f58dc86 *man/figures/ph_with_doc_1.png
 5234c311148022b62c9da2c95e06ead0 *man/figures/prop_section_doc_1.png
 f7c43e16fce6927c482a97e73eea416b *man/fortify_location.Rd
@@ -105,7 +105,7 @@ f7c43e16fce6927c482a97e73eea416b *man/fortify_location.Rd
 08f6f9791dda4c50d9bbeb158bc1e06c *man/fp_cell.Rd
 ac4acedee667b80dc6f989d38bbfc510 *man/fp_par.Rd
 8c9650b42983888788ee9a1d6d716865 *man/fp_text.Rd
-28e708aff414b1d13a91d3a0552ac07e *man/fpar.Rd
+b74a6f426bc71a4f78899455efd9e6f1 *man/fpar.Rd
 68801d12113501ff9973c577dd0a0cad *man/ftext.Rd
 75b53e9efbbe874272bdbf1340a6a025 *man/get_reference_value.Rd
 6704bbc3fe87cdd7b64e7229558f0b16 *man/layout_properties.Rd
@@ -114,7 +114,7 @@ b071c2583fec061717794b0d90518171 *man/length.rdocx.Rd
 73ea59f80f030c5d3146c41b5df78234 *man/length.rpptx.Rd
 adbf368baec1adc3c8e77f7e0839ad8c *man/media_extract.Rd
 5e6d9ea48b3d2f1bb26cef2abefdb8c4 *man/move_slide.Rd
-87585a51fe5f3cff0c3686dbb207cc6f *man/officer-defunct.Rd
+059c38c9fb61cd524475b05ef3c9ff31 *man/officer-defunct.Rd
 96af3d6307c9ead6f9f7e8b2f764367d *man/officer.Rd
 46053ac9d7e4fd73b4e6ce91ccc80c28 *man/on_slide.Rd
 936d6c16b3d79716385d86a8425e53ab *man/opts_current_table.Rd
@@ -124,7 +124,6 @@ fc5d30c76c57889726b6aab18fee0b28 *man/pack_folder.Rd
 b14e46fa7a8bc4e99c2d2c7d4e74e3ad *man/ph_add_fpar.Rd
 0797ee09ce7a18cbcbfa03e6316e1f8c *man/ph_add_par.Rd
 8e2eab4e33099384fc575c08a4f1185f *man/ph_add_text.Rd
-6647806e5317e51cba7846bc19d4c9b3 *man/ph_empty.Rd
 b99814d00df13d79462c377e6f2e019c *man/ph_hyperlink.Rd
 4c6f888fe1038c735e88e205ec1f9b37 *man/ph_location.Rd
 bae0b3c30b8163e8861750019e76e555 *man/ph_location_fullsize.Rd
@@ -136,9 +135,6 @@ cff3814d1721e6fa930fd9c60969abfa *man/ph_location_template.Rd
 71553d3bca6676083ef1c1a7b99f8786 *man/ph_remove.Rd
 185c0adb9386661efa0a1629e6b6e9b6 *man/ph_slidelink.Rd
 e79250ddb1b01249bba1a7d8e97cd878 *man/ph_with.Rd
-ad5dd71375d630f0aa70f564832c72df *man/ph_with_gg_at.Rd
-d10d37e422c538326a579d6fa4a70cc6 *man/ph_with_img_at.Rd
-decdbf1ed1505b68473e1b516116d8ac *man/ph_with_text.Rd
 86ea03ce26626e169c8d7f17b82b6e14 *man/plot_instr.Rd
 89d5fc57302c62e66bae6c04ed1d019e *man/plot_layout_properties.Rd
 2120df3c29c05cba4a417d5b6614ec9a *man/pptx_summary.Rd

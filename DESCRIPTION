@@ -1,7 +1,7 @@
 Package: officer
 Type: Package
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.3.13
+Version: 0.3.14
 Authors@R: c(
     person("David", "Gohel", role = c("aut", "cre"),
     email = "david.gohel@ardata.fr"),
@@ -28,10 +28,11 @@ URL: https://davidgohel.github.io/officer/
 Encoding: UTF-8
 BugReports: https://github.com/davidgohel/officer/issues
 RoxygenNote: 7.1.1
-Suggests: testthat, devEMF,tibble,ggplot2, rmarkdown, knitr, rsvg
+Suggests: testthat, devEMF,tibble,ggplot2, rmarkdown, base64enc, knitr,
+        rsvg
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2020-08-28 14:56:39 UTC; davidgohel
+Packaged: 2020-09-06 14:40:10 UTC; davidgohel
 Author: David Gohel [aut, cre],
   Frank Hangler [ctb] (function body_replace_all_text),
   Liz Sander [ctb] (several documentation fixes),
@@ -41,4 +42,4 @@ Author: David Gohel [aut, cre],
   John Muschelli [ctb] (google doc compatibility)
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2020-08-30 01:00:11 UTC
+Date/Publication: 2020-09-07 12:30:10 UTC
