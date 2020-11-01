@@ -4,20 +4,26 @@
 \alias{ftext}
 \title{formatted chunk of text}
 \usage{
-ftext(text, prop)
+ftext(text, prop = NULL)
 }
 \arguments{
-\item{text}{text value, a string.}
+\item{text}{text value, a single character value}
 
-\item{prop}{formatting text properties returned by \link{fp_text}.}
+\item{prop}{formatting text properties returned by \link{fp_text}. It also can be NULL in
+which case, no formatting is defined (the default is applied).}
 }
 \description{
 Format a chunk of text with text formatting properties (bold, color, ...).
-
-The function allows you to create pieces of text formatted in a certain way.
-You should use this function in conjunction with \link{fpar} to create paragraphs
-consisting of differently formatted text parts.
+The function allows you to create pieces of text formatted the way you want.
 }
+\section{usage}{
+
+You can use this function in conjunction with \link{fpar} to create paragraphs
+consisting of differently formatted text parts. You can also use this
+function as an \emph{r chunk} in an R Markdown document made with package
+officedown.
+}
+
 \examples{
 ftext("hello", fp_text())
 
@@ -37,10 +43,11 @@ print(x, target = tempfile(fileext = ".docx"))
 Other run functions for reporting: 
 \code{\link{external_img}()},
 \code{\link{run_autonum}()},
+\code{\link{run_bookmark}()},
 \code{\link{run_columnbreak}()},
 \code{\link{run_linebreak}()},
 \code{\link{run_pagebreak}()},
 \code{\link{run_reference}()},
-\code{\link{run_seqfield}()}
+\code{\link{run_word_field}()}
 }
 \concept{run functions for reporting}

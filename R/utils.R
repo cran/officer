@@ -133,9 +133,9 @@ read_theme_colors <- function(doc, theme){
 characterise_df <- function(x){
   names(x) <- htmlEscapeCopy(names(x))
   x <- lapply(x, function( x ) {
-    if( is.character(x) ) htmlEscapeCopy(x)
-    else if( is.factor(x) ) htmlEscapeCopy(as.character(x))
-    else gsub("(^ | $)+", "", htmlEscapeCopy(format(x)))
+    if( is.character(x) ) x
+    else if( is.factor(x) ) as.character(x)
+    else gsub("(^ | $)+", "", format(x))
   })
   data.frame(x, stringsAsFactors = FALSE, check.names = FALSE)
 }
@@ -178,7 +178,7 @@ set_row_span <- function( row_details ){
   row_details <- mapply(function(dat){
     rowspan_values_at_breaks <- rle(cumsum(dat$first))$lengths
     rowspan_pos_at_breaks <- which(dat$first)
-    dat$row_span <- 0
+    dat$row_span <- 0L
     dat$row_span[rowspan_pos_at_breaks] <- rowspan_values_at_breaks
     dat
   }, row_details, SIMPLIFY = FALSE)
@@ -252,6 +252,17 @@ htmlEscapeCopy <- local({
 })
 
 
-
+check_bookmark_id <- function(bkm){
+  if(!is.null(bkm)){
+    invalid_bkm <- is.character(bkm) &&
+      length(bkm) == 1 &&
+      nchar(bkm) > 0 &&
+      grepl("[^[:alnum:]_-]+", bkm)
+    if(invalid_bkm){
+      stop("bkm [", bkm, "] should only contain alphanumeric characters, '-' and '_'.", call. = FALSE)
+    }
+  }
+  bkm
+}
 
 

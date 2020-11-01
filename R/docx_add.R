@@ -160,20 +160,22 @@ body_add_gg <- function( x, value, width = 6, height = 5, res = 300, style = "No
 #' @param blocks set of blocks to be used as footnote content returned by
 #'   function \code{\link{block_list}}.
 #' @examples
-#' library(magrittr)
+#' library(officer)
 #'
 #' img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
+#'
 #' bl <- block_list(
-#'   fpar(ftext("hello", shortcuts$fp_bold())),
+#'   fpar(ftext("hello", shortcuts$fp_bold(color="red"))),
 #'   fpar(
 #'     ftext("hello world", shortcuts$fp_bold()),
-#'     external_img(src = img.file, height = 1.06, width = 1.39)
+#'     external_img(src = img.file, height = 1.06, width = 1.39),
+#'     fp_p = fp_par(text.align = "center")
 #'   )
 #' )
 #'
-#' x <- read_docx() %>%
-#'   body_add_blocks( blocks = bl ) %>%
-#'   print(target = tempfile(fileext = ".docx"))
+#' doc_1 <- read_docx()
+#' doc_1 <- body_add_blocks(doc_1, blocks = bl)
+#' print(doc_1, target = tempfile(fileext = ".docx"))
 #' @family functions for adding content
 body_add_blocks <- function( x, blocks, pos = "after" ){
   stopifnot(inherits(blocks, "block_list"))
@@ -349,6 +351,78 @@ body_add_toc <- function( x, level = 3, pos = "after", style = NULL, separator =
   body_add_xml(x = x, str = out, pos = pos)
 }
 
+
+
+
+#' @export
+#' @title add plot
+#' @description add a plot as a png image into an rdocx object
+#' @inheritParams body_add_break
+#' @param value plot instructions, see [plot_instr()].
+#' @param style paragraph style
+#' @param width height in inches
+#' @param height height in inches
+#' @param res resolution of the png image in ppi
+#' @param ... Arguments to be passed to png function.
+#' @importFrom grDevices png dev.off
+#' @examples
+#' doc <- read_docx()
+#'
+#' if( capabilities(what = "png") )
+#'   doc <- body_add_plot(doc,
+#'     value = plot_instr(
+#'       code = {barplot(1:5, col = 2:6)}),
+#'       style = "centered" )
+#'
+#' print(doc, target = tempfile(fileext = ".docx") )
+#' @family functions for adding content
+body_add_plot <- function( x, value, width = 6, height = 5, res = 300, style = "Normal", ... ){
+
+  file <- tempfile(fileext = ".png")
+  options(bitmapType='cairo')
+  png(filename = file, width = width, height = height, units = "in", res = res, ...)
+  tryCatch({
+    eval(value$code)
+  },
+  finally = {
+    dev.off()
+  } )
+  on.exit(unlink(file))
+  body_add_img(x, src = file, style = style, width = width, height = height)
+}
+
+
+#' @export
+#' @title add Word caption
+#' @description add a Word caption into an rdocx object.
+#' @param x an rdocx object
+#' @param value an object returned by [block_caption()]
+#' @param pos where to add the new element relative to the cursor,
+#' one of "after", "before", "on".
+#' @family functions for adding content
+#' @examples
+#' doc <- read_docx()
+#'
+#' if( capabilities(what = "png") )
+#'   doc <- body_add_plot(doc,
+#'     value = plot_instr(
+#'       code = {barplot(1:5, col = 2:6)}),
+#'       style = "centered" )
+#' run_num <- run_autonum(seq_id = "fig", pre_label = "Figure ",
+#'   bkm = "barplot")
+#' caption <- block_caption("a barplot", style = "Normal",
+#'   autonum = run_num )
+#' doc <- body_add_caption(doc, caption)
+#' print(doc, target = tempfile(fileext = ".docx") )
+body_add_caption <- function( x, value, pos = "after"){
+  stopifnot(inherits(value, "block_caption"))
+  out <- to_wml(value, add_ns = TRUE, base_document = x)
+  body_add_xml(x = x, str = out, pos = pos)
+}
+
+
+
+
 #' @export
 #' @title add an xml string as document element
 #' @description Add an xml string as document element in the document. This function
@@ -357,6 +431,7 @@ body_add_toc <- function( x, level = 3, pos = "after", style = NULL, separator =
 #' @param str a wml string
 #' @param pos where to add the new element relative to the cursor,
 #' one of "after", "before", "on".
+#' @keywords internal
 body_add_xml <- function(x, str, pos){
   xml_elt <- as_xml_document(str)
   pos_list <- c("after", "before", "on")
@@ -410,6 +485,7 @@ body_bookmark <- function(x, id){
   cursor_elt <- x$doc_obj$get_at_cursor()
   ns_ <- "xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\""
   new_id <- UUIDgenerate()
+  id <- check_bookmark_id(id)
 
   bm_start_str <- sprintf("<w:bookmarkStart w:id=\"%s\" w:name=\"%s\" %s/>", new_id, id, ns_ )
   bm_start_end <- sprintf("<w:bookmarkEnd %s w:id=\"%s\"/>", ns_, new_id )
@@ -504,7 +580,7 @@ body_remove <- function(x){
 #' # print(doc_1, target = "test.docx")
 #' @section Illustrations:
 #'
-#' \if{html}{\figure{body_add_doc_1.png}{options: width=60\%}}
+#' \if{html}{\figure{body_add_doc_1.png}{options: width=70\%}}
 body_add <- function(x, value, ...){
   UseMethod("body_add", value)
 }

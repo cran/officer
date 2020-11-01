@@ -20,29 +20,33 @@ add a list of blocks produced by \code{block_list} into
 into an rdocx object
 }
 \examples{
-library(magrittr)
+library(officer)
 
 img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
+
 bl <- block_list(
-  fpar(ftext("hello", shortcuts$fp_bold())),
+  fpar(ftext("hello", shortcuts$fp_bold(color="red"))),
   fpar(
     ftext("hello world", shortcuts$fp_bold()),
-    external_img(src = img.file, height = 1.06, width = 1.39)
+    external_img(src = img.file, height = 1.06, width = 1.39),
+    fp_p = fp_par(text.align = "center")
   )
 )
 
-x <- read_docx() \%>\%
-  body_add_blocks( blocks = bl ) \%>\%
-  print(target = tempfile(fileext = ".docx"))
+doc_1 <- read_docx()
+doc_1 <- body_add_blocks(doc_1, blocks = bl)
+print(doc_1, target = tempfile(fileext = ".docx"))
 }
 \seealso{
 Other functions for adding content: 
 \code{\link{body_add_break}()},
+\code{\link{body_add_caption}()},
 \code{\link{body_add_docx}()},
 \code{\link{body_add_fpar}()},
 \code{\link{body_add_gg}()},
 \code{\link{body_add_img}()},
 \code{\link{body_add_par}()},
+\code{\link{body_add_plot}()},
 \code{\link{body_add_table}()},
 \code{\link{body_add_toc}()}
 }

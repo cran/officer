@@ -8,6 +8,7 @@
 #' @param add_ns should namespace be added to the top tag
 #' @param ... Arguments to be passed to methods
 #' @family functions for officer extensions
+#' @keywords internal
 to_wml <- function(x, add_ns = FALSE, ...) {
   UseMethod("to_wml")
 }
@@ -20,6 +21,7 @@ to_wml <- function(x, add_ns = FALSE, ...) {
 #' @param add_ns should namespace be added to the top tag
 #' @param ... Arguments to be passed to methods
 #' @family functions for officer extensions
+#' @keywords internal
 to_pml <- function(x, add_ns = FALSE, ...) {
   UseMethod("to_pml")
 }
@@ -30,6 +32,7 @@ to_pml <- function(x, add_ns = FALSE, ...) {
 #' to HTML. The result is a string.
 #' @param x object
 #' @param ... Arguments to be passed to methods
+#' @keywords internal
 to_html <- function(x, ...) {
   UseMethod("to_html")
 }
@@ -44,14 +47,92 @@ bookmark <- function(id, str) {
   paste0(bm_start_str, str, bm_start_end)
 }
 
-# seqfield ----
+# ftext -----
+#' @export
+#' @title formatted chunk of text
+#' @description Format a chunk of text with text formatting properties (bold, color, ...).
+#' The function allows you to create pieces of text formatted the way you want.
+#' @param text text value, a single character value
+#' @param prop formatting text properties returned by [fp_text]. It also can be NULL in
+#' which case, no formatting is defined (the default is applied).
+#' @section usage:
+#' You can use this function in conjunction with [fpar] to create paragraphs
+#' consisting of differently formatted text parts. You can also use this
+#' function as an *r chunk* in an R Markdown document made with package
+#' officedown.
+#' @examples
+#' ftext("hello", fp_text())
+#'
+#' properties1 <- fp_text(color = "red")
+#' properties2 <- fp_text(bold = TRUE, shading.color = "yellow")
+#' ftext1 <- ftext("hello", properties1)
+#' ftext2 <- ftext("World", properties2)
+#' paragraph <- fpar(ftext1, " ", ftext2)
+#'
+#' x <- read_docx()
+#' x <- body_add(x, paragraph)
+#' print(x, target = tempfile(fileext = ".docx"))
+#' @seealso [fp_text]
+#' @family run functions for reporting
+ftext <- function(text, prop = NULL) {
+  if(is.character(text)) {
+    value <- enc2utf8(text)
+  } else {
+    value <- formatC(text)
+  }
+
+  out <- list( value = value, pr = prop )
+  class(out) <- c("ftext", "cot", "run")
+  out
+}
+
+#' @export
+print.ftext <- function (x, ...) {
+  cat("text: ", x$value, "\nformat:\n", sep = "")
+  print(x$pr)
+}
+
+#' @export
+to_wml.ftext <- function(x, add_ns = FALSE, ...) {
+  out <- paste0("<w:r>", if(!is.null(x$pr)) rpr_wml(x$pr),
+                "<w:t xml:space=\"preserve\">",
+                htmlEscapeCopy(x$value), "</w:t></w:r>")
+  out
+}
+
+#' @export
+to_pml.ftext <- function(x, add_ns = FALSE, ...) {
+  open_tag <- ar_ns_no
+  if (add_ns) {
+    open_tag <- ar_ns_yes
+  }
+  paste0(open_tag, if(!is.null(x$pr)) rpr_pml(x$pr),
+         "<a:t>", htmlEscapeCopy(x$value), "</a:t></a:r>")
+}
+
+#' @export
+to_html.ftext <- function(x, ...) {
+  sprintf("<span style=\"%s\">%s</span>", if(!is.null(x$pr)) rpr_css(x$pr) else "", htmlEscapeCopy(x$value))
+}
+
+
+# Word computed field ----
 #' @export
 #' @title seqfield
-#' @description Create a seqfield
-#' @param seqfield seqfield string
+#' @description Create a Word computed field.
+#' @note
+#' In the previous version, this function was called `run_seqfield`
+#' but the name was wrong and should have been `run_word_field`.
+#' @inheritSection ftext usage
+#' @param field,seqfield computed field string (`seqfield` will be
+#' totally superseded by `field` in the futur).
 #' @param prop formatting text properties returned by [fp_text].
+#' @examples
+#' run_word_field(field = "PAGE  \\* MERGEFORMAT")
+#' run_word_field(field = "Date \\@ \"MMMM d yyyy\"")
 #' @family run functions for reporting
-run_seqfield <- function(seqfield, prop = NULL) {
+#' @family Word computed fields
+run_word_field <- function(field, prop = NULL, seqfield = field) {
   z <- list(
     seqfield = seqfield, pr = prop
   )
@@ -59,6 +140,9 @@ run_seqfield <- function(seqfield, prop = NULL) {
   z
 }
 
+#' @export
+#' @rdname run_word_field
+run_seqfield <- run_word_field
 
 #' @export
 to_wml.run_seqfield <- function(x, add_ns = FALSE, ...) {
@@ -96,6 +180,7 @@ to_wml.run_seqfield <- function(x, add_ns = FALSE, ...) {
 #' representation of a sequence, each item will be numbered.
 #' These runs can also be bookmarked and be used later for
 #' cross references.
+#' @inheritSection ftext usage
 #' @param seq_id sequence identifier
 #' @param pre_label,post_label text to add before and after number
 #' @param bkm bookmark id to associate with autonumber run. If NULL, no bookmark
@@ -111,20 +196,10 @@ to_wml.run_seqfield <- function(x, add_ns = FALSE, ...) {
 #' run_autonum(seq_id = "fig", pre_label = "fig. ")
 #' run_autonum(seq_id = "tab", pre_label = "Table ", bkm = "anytable")
 #' @family run functions for reporting
+#' @family Word computed fields
 run_autonum <- function(seq_id = "table", pre_label = "Table ", post_label = ": ",
                         bkm = NULL, bkm_all = FALSE, prop = NULL) {
-
-  if(!is.null(bkm)){
-    invalid_bkm <- is.character(bkm) &&
-      length(bkm) == 1 &&
-      nchar(bkm) > 0 &&
-      grepl("[^[:alnum:]_-]+", bkm)
-    if(invalid_bkm){
-      stop("bkm [", bkm, "] should only contain alphanumeric characters, '-' and '_'.", call. = FALSE)
-    }
-  }
-
-
+  bkm <- check_bookmark_id(bkm)
   z <- list(
     seq_id = seq_id,
     pre_label = pre_label,
@@ -172,9 +247,11 @@ to_wml.run_autonum <- function(x, add_ns = FALSE, ...) {
 #' @description Create a representation of a reference
 #' @param id reference id, a string
 #' @param prop formatting text properties returned by [fp_text].
+#' @inheritSection ftext usage
 #' @examples
 #' run_reference('a_ref')
 #' @family run functions for reporting
+#' @family Word computed fields
 run_reference <- function(id, prop = NULL) {
   z <- paste0(" REF ", id, " \\h ")
 
@@ -192,12 +269,56 @@ to_wml.run_reference <- function(x, add_ns = FALSE, ...) {
   out
 }
 
+# bookmark ----
+
+#' @export
+#' @title bookmark for Word
+#' @description Add a bookmark on a run object.
+#' @param bkm bookmark id to associate with run. Value can only be
+#' made of alpha numeric characters, '-' and '_'.
+#' @param run a run object, made with a call to one of
+#' the "run functions for reporting".
+#' @inheritSection ftext usage
+#' @examples
+#' ft <- fp_text(font.size = 12, bold = TRUE)
+#' run_bookmark("par1", ftext("some text", ft))
+#' @family run functions for reporting
+run_bookmark <- function(bkm, run) {
+
+  all_run <- FALSE
+
+  if(inherits(run, "run")){
+    run <- list(run)
+  }
+
+  if(is.list(run) && !inherits(run, "run")){
+    all_run <- all(vapply(run, inherits, FUN.VALUE = FALSE, what = "run" ))
+  }
+
+
+  if(!all_run)
+    stop("`run` must be a run object (ftext for example) or a list of run objects.")
+
+  bkm <- check_bookmark_id(bkm)
+
+  z <- list(id = bkm, run = run)
+  class(z) <- c("run_bookmark", "run")
+  z
+}
+
+#' @export
+to_wml.run_bookmark <- function(x, add_ns = FALSE, ...) {
+  runs <- lapply(x$run, to_wml, add_ns = add_ns, ...)
+  runs <- do.call(paste0, runs)
+  bookmark(id = x$id, str = runs)
+}
+
 # breaks ----
 
 #' @export
 #' @title page break for Word
-#' @description Object representing a page break for a Word document. The
-#' result must be used within a call to [fpar].
+#' @description Object representing a page break for a Word document.
+#' @inheritSection ftext usage
 #' @examples
 #'
 #' @example examples/run_pagebreak.R
@@ -205,7 +326,6 @@ to_wml.run_reference <- function(x, add_ns = FALSE, ...) {
 run_pagebreak <- function() {
   z <- list()
   class(z) <- c("run_pagebreak", "run")
-
   z
 }
 
@@ -218,6 +338,7 @@ to_wml.run_pagebreak <- function(x, add_ns = FALSE, ...) {
 #' @export
 #' @title column break
 #' @description Create a representation of a column break
+#' @inheritSection ftext usage
 #' @examples
 #' run_columnbreak()
 #' @family run functions for reporting
@@ -238,6 +359,7 @@ to_wml.run_columnbreak <- function(x, add_ns = FALSE, ...) {
 #' @title page break for Word
 #' @description Object representing a line break for a Word document. The
 #' result must be used within a call to [fpar].
+#' @inheritSection ftext usage
 #' @examples
 #'
 #' @example examples/run_linebreak.R
@@ -343,7 +465,6 @@ page_mar <- function(bottom = 1, top = 1, right = 1, left = 1,
   z <- list(header = header, bottom = bottom, top = top, right = right, left = left, footer = footer, gutter = gutter)
   class(z) <- c("page_mar")
   z
-  # <w:pgMar w:header="720" w:bottom="1440" w:top="1440" w:right="2880" w:left="2880" w:footer="720" w:gutter="720"/>
 }
 #' @export
 to_wml.page_mar <- function(x, add_ns = FALSE, ...) {
@@ -366,6 +487,8 @@ docx_section_type <- c("continuous", "evenPage", "nextColumn", "nextPage", "oddP
 #'
 #' A Section properties object stores information about page composition,
 #' such as page size, page orientation, borders and margins.
+#' @note
+#' There is no support yet for header and footer contents definition.
 #' @param page_size page dimensions, an object generated with function [page_size].
 #' @param page_margins page margins, an object generated with function [page_mar].
 #' @param type Section type. It defines how the contents of the section will be
@@ -441,8 +564,11 @@ prop_section <- function(page_size = NULL, page_margins = NULL,
 
 #' @export
 to_wml.prop_section <- function(x, add_ns = FALSE, ...) {
+
   paste0(
-    "<w:sectPr>",
+    "<w:sectPr",
+    if (add_ns) " xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"",
+    ">",
     if(!is.null(x$page_margins)) to_wml(x$page_margins),
     if(!is.null(x$page_size)) to_wml(x$page_size),
     if(!is.null(x$type)) "<w:type w:val=\"", x$type, "\"/>",
@@ -464,6 +590,7 @@ to_wml.prop_section <- function(x, add_ns = FALSE, ...) {
 #' @param src image file path
 #' @param width height in inches.
 #' @param height height in inches
+#' @inheritSection ftext usage
 #' @examples
 #'
 #' @example examples/external_img.R
@@ -476,7 +603,7 @@ external_img <- function(src, width = .5, height = .2) {
     stop("src must be a string starting with 'rId' or an image filename")
   }
 
-  class(src) <- c("external_img", "cot")
+  class(src) <- c("external_img", "cot", "run")
   attr(src, "dims") <- list(width = width, height = height)
   src
 }
@@ -587,72 +714,6 @@ to_html.external_img <- function(x, ...) {
   x <- base64enc::dataURI(file = as.character(x), mime = mime )
   sprintf("<img style=\"vertical-align:middle;width:%.0fpx;height:%.0fpx;\" src=\"%s\" />", width*72, height*72, x)
 
-}
-
-
-# ftext -----
-#' @export
-#' @title formatted chunk of text
-#' @description Format a chunk of text with text formatting properties (bold, color, ...).
-#'
-#' The function allows you to create pieces of text formatted in a certain way.
-#' You should use this function in conjunction with [fpar] to create paragraphs
-#' consisting of differently formatted text parts.
-#' @param text text value, a string.
-#' @param prop formatting text properties returned by [fp_text].
-#' @examples
-#' ftext("hello", fp_text())
-#'
-#' properties1 <- fp_text(color = "red")
-#' properties2 <- fp_text(bold = TRUE, shading.color = "yellow")
-#' ftext1 <- ftext("hello", properties1)
-#' ftext2 <- ftext("World", properties2)
-#' paragraph <- fpar(ftext1, " ", ftext2)
-#'
-#' x <- read_docx()
-#' x <- body_add(x, paragraph)
-#' print(x, target = tempfile(fileext = ".docx"))
-#' @seealso [fp_text]
-#' @family run functions for reporting
-ftext <- function(text, prop) {
-  if(is.character(text)) {
-    value <- enc2utf8(text)
-  } else {
-    value <- formatC(text)
-  }
-
-  out <- list( value = value, pr = prop )
-  class(out) <- c("ftext", "cot", "run")
-  out
-}
-
-#' @export
-print.ftext <- function (x, ...) {
-  cat("text: ", x$value, "\nformat:\n", sep = "")
-  print(x$pr)
-}
-
-#' @export
-to_wml.ftext <- function(x, add_ns = FALSE, ...) {
-  out <- paste0("<w:r>", if(!is.null(x$pr)) rpr_wml(x$pr),
-                "<w:t xml:space=\"preserve\">",
-                htmlEscapeCopy(x$value), "</w:t></w:r>")
-  out
-}
-
-#' @export
-to_pml.ftext <- function(x, add_ns = FALSE, ...) {
-  open_tag <- ar_ns_no
-  if (add_ns) {
-    open_tag <- ar_ns_yes
-  }
-  paste0(open_tag, rpr_pml(x$pr),
-         "<a:t>", htmlEscapeCopy(x$value), "</a:t></a:r>")
-}
-
-#' @export
-to_html.ftext <- function(x, ...) {
-  sprintf("<span style=\"%s\">%s</span>", rpr_css(x$pr), htmlEscapeCopy(x$value))
 }
 
 

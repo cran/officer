@@ -32,7 +32,7 @@ unfold_row_wml <- function(node, row_id){
 
   out_add_ <- mapply(function(row_id, is_header, cell_id, text, col_span, row_merge, first, row_span){
     reps_ <- col_span - 1
-    row_id_ <- rep( row_id, reps_)
+    row_num_ <- rep( row_id, reps_)
     is_header_ <- rep( is_header, reps_)
     cell_id_ <- rep( cell_id, reps_)
     text_ <- rep( NA, reps_)
@@ -40,7 +40,7 @@ unfold_row_wml <- function(node, row_id){
     row_merge_ <- rep( row_merge, reps_)
     first_ <- rep( first, reps_)
     row_span_ <- rep( row_span, reps_)
-    out <- data.frame(row_id = row_id_, is_header = is_header_, cell_id = cell_id_,
+    out <- data.frame(row_id = row_num_, is_header = is_header_, cell_id = cell_id_,
                       text = text_, col_span = col_span_, row_merge = row_merge_,
                       first = first_, row_span = row_span_,
                       stringsAsFactors = FALSE)
@@ -109,7 +109,7 @@ node_content <- function(node, x){
 
 #' @title get Word content in a data.frame
 #' @description read content of a Word document and
-#' return a tidy dataset representing the document.
+#' return a data.frame representing the document.
 #' @note
 #' Documents included with \code{body_add_docx()} will
 #' not be accessible in the results.

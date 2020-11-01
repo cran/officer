@@ -1,3 +1,25 @@
+# officer 0.3.15
+
+## New features
+
+* new function `body_add_plot()` and `body_add_caption()`
+* new function `run_bookmark()` to create a run with a bookmark.
+* new function `body_set_default_section()` that changes default section properties
+of a Word document.
+
+## Issues
+
+* fix #333: issue with &, <, > in `to_wml.block_table`.
+* fix https://github.com/davidgohel/officedown/issues/41: when a space was in the path, pandoc send the short path format
+instead of the real path name, it needed to be transformed with `normalizePath`.
+
+## Change
+
+* The documentation has been rewritten and can now be found
+at the following URL: https://ardata-fr.github.io/officeverse/.
+* `run_word_field` will supersed `run_seqfield`.
+* argument `prop` of `ftext()` now default to NULL
+
 # officer 0.3.14
 
 ## Issues

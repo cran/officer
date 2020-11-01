@@ -18,7 +18,6 @@ block_caption <- function(label, style, autonum = NULL) {
     style = style
   )
   class(z) <- c("block_caption", "block")
-
   z
 }
 
@@ -326,6 +325,9 @@ to_wml.block_section <- function(x, add_ns = FALSE, ...) {
 #' @param first_column,last_column apply or remove formatting from the first or last column in the table.
 #' @param no_hband,no_vband don't display odd and even rows or columns with
 #' alternating shading for ease of reading.
+#' @note
+#' You must define a format for first_row, first_column and other properties
+#' if you need to use them. The format is defined in a docx template.
 #' @examples
 #' table_conditional_formatting(first_row = TRUE, first_column = TRUE)
 #' @family functions for table definition
@@ -595,7 +597,12 @@ to_wml.prop_table <- function(x, add_ns = FALSE, base_document = NULL, ...) {
   }
 
   tbl_layout <- to_wml(x$layout, add_ns= add_ns, base_document = base_document)
-  width <- to_wml(x$width, add_ns= add_ns, base_document = base_document)
+
+
+  width <- ""
+  if(!is.null(x$width) && "autofit" %in% x$type)
+    width <- to_wml(x$width, add_ns= add_ns, base_document = base_document)
+
   colwidths <- to_wml(x$colsizes, add_ns= add_ns, base_document = base_document)
   tcf <- to_wml(x$tcf, add_ns= add_ns, base_document = base_document)
   paste0("<w:tblPr>",
@@ -965,14 +972,14 @@ to_html.fpar <- function(x, add_ns = FALSE, ...) {
 #' @export
 #' @title Create paragraph blocks
 #' @description a list of blocks can be used to gather
-#' several blocks (paragraphs or tables) into a single
+#' several blocks of paragraphs into a single
 #' object. The function is to be used when adding
 #' formatted paragraphs into a Word document or a
 #' PowerPoint presentation.
-#' @param ... a list of [fpar()] or
-#' \code{flextable}. When output is only for Word, objects
-#' of class \code{\link{external_img}} can also be used in
-#' fpar construction to mix text and images in a single paragraph.
+#' @param ... a list of [fpar()]. When output is only for
+#' Word, objects of class \code{\link{external_img}} can
+#' also be used in fpar construction to mix text and images
+#' in a single paragraph.
 #' @examples
 #'
 #' @example examples/block_list.R
@@ -982,10 +989,12 @@ block_list <- function(...){
   x <- list(...)
   z <- list()
   for(i in x){
-    if(inherits(i, "fpar")) z <- append(z, list(i))
-    else if(is.character(i)) z <- append(z, lapply(i, fpar))
+    if(inherits(i, c("fpar"))) {
+      z <- append(z, list(i))
+    } else if(is.character(i)){
+      z <- append(z, lapply(i, fpar))
+    }
   }
-
   class(z) <- "block_list"
   z
 }
@@ -1074,7 +1083,8 @@ to_pml.unordered_list <- function(x, add_ns = FALSE, ...) {
 #' @title Wrap plot instructions for png plotting in Powerpoint or Word
 #' @description A simple wrapper to capture
 #' plot instructions that will be executed and copied in a document. It produces
-#' an object of class 'plot_instr' with a corresponding method [ph_with()].
+#' an object of class 'plot_instr' with a corresponding method [ph_with()] and
+#' [body_add_plot()].
 #'
 #' The function enable usage of any R plot with argument `code`. Wrap your code
 #' between curly bracket if more than a single expression.
@@ -1085,7 +1095,7 @@ to_pml.unordered_list <- function(x, add_ns = FALSE, ...) {
 #' @example examples/plot_instr.R
 #' @export
 #' @import graphics
-#' @seealso [ph_with()], [body_add()]
+#' @seealso [ph_with()], [body_add_plot()]
 #' @family block functions for reporting
 plot_instr <- function(code) {
   out <- list()
