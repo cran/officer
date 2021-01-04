@@ -1,3 +1,18 @@
+# officer 0.3.16
+
+## New features
+
+* new chunk function `hyperlink_ftext()`.
+
+## Change
+
+* drop cairo usage and let user settings do the job
+
+## Issues
+
+* fix annotate_base that was not presenting the correct informatons (thanks to John Harrold).
+
+
 # officer 0.3.15
 
 ## New features

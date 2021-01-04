@@ -5,8 +5,8 @@
 #' @param pos where to add the new element relative to the cursor,
 #' one of "after", "before", "on".
 #' @examples
-#' library(magrittr)
-#' doc <- read_docx() %>% body_add_break()
+#' doc <- read_docx()
+#' doc <- body_add_break(doc)
 #' print(doc, target = tempfile(fileext = ".docx"))
 #' @family functions for adding content
 body_add_break <- function( x, pos = "after"){
@@ -76,22 +76,21 @@ body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 #' @inheritParams body_add_break
 #' @param src docx filename
 #' @examples
-#'
-#' library(magrittr)
 #' file1 <- tempfile(fileext = ".docx")
 #' file2 <- tempfile(fileext = ".docx")
 #' file3 <- tempfile(fileext = ".docx")
-#' read_docx() %>%
-#'   body_add_par("hello world 1", style = "Normal") %>%
-#'   print(target = file1)
-#' read_docx() %>%
-#'   body_add_par("hello world 2", style = "Normal") %>%
-#'   print(target = file2)
+#' x <- read_docx()
+#' x <- body_add_par(x, "hello world 1", style = "Normal")
+#' print(x, target = file1)
 #'
-#' read_docx(path = file1) %>%
-#'   body_add_break() %>%
-#'   body_add_docx(src = file2) %>%
-#'   print(target = file3)
+#' x <- read_docx()
+#' x <- body_add_par(x, "hello world 2", style = "Normal")
+#' print(x, target = file2)
+#'
+#' x <- read_docx(path = file1)
+#' x <- body_add_break(x)
+#' x <- body_add_docx(x, src = file2)
+#' print(x, target = file3)
 #' @export
 #' @family functions for adding content
 body_add_docx <- function( x, src, pos = "after" ){
@@ -143,7 +142,6 @@ body_add_gg <- function( x, value, width = 6, height = 5, res = 300, style = "No
 
   stopifnot(inherits(value, "gg") )
   file <- tempfile(fileext = ".png")
-  options(bitmapType='cairo')
   png(filename = file, width = width, height = height, units = "in", res = res, ...)
   print(value)
   dev.off()
@@ -203,12 +201,10 @@ body_add_blocks <- function( x, blocks, pos = "after" ){
 #' @param pos where to add the new element relative to the cursor,
 #' one of "after", "before", "on".
 #' @examples
-#' library(magrittr)
-#'
-#' doc <- read_docx() %>%
-#'   body_add_par("A title", style = "heading 1") %>%
-#'   body_add_par("Hello world!", style = "Normal") %>%
-#'   body_add_par("centered text", style = "centered")
+#' doc <- read_docx()
+#' doc <- body_add_par(doc, "A title", style = "heading 1")
+#' doc <- body_add_par(doc, "Hello world!", style = "Normal")
+#' doc <- body_add_par(doc, "centered text", style = "centered")
 #'
 #' print(doc, target = tempfile(fileext = ".docx") )
 #' @family functions for adding content
@@ -237,13 +233,13 @@ body_add_par <- function( x, value, style = NULL, pos = "after" ){
 #' @param pos where to add the new element relative to the cursor,
 #' one of "after", "before", "on".
 #' @examples
-#' library(magrittr)
 #' bold_face <- shortcuts$fp_bold(font.size = 30)
 #' bold_redface <- update(bold_face, color = "red")
 #' fpar_ <- fpar(ftext("Hello ", prop = bold_face),
 #'               ftext("World", prop = bold_redface ),
 #'               ftext(", how are you?", prop = bold_face ) )
-#' doc <- read_docx() %>% body_add_fpar(fpar_)
+#' doc <- read_docx()
+#' doc <- body_add_fpar(doc, fpar_)
 #'
 #' print(doc, target = tempfile(fileext = ".docx"))
 #'
@@ -251,10 +247,14 @@ body_add_par <- function( x, value, style = NULL, pos = "after" ){
 #' rlogo <- file.path( R.home("doc"), "html", "logo.jpg" )
 #' img_in_par <- fpar(
 #'   external_img(src = rlogo, height = 1.06/2, width = 1.39/2),
+#'   hyperlink_ftext(
+#'     href = "https://cran.r-project.org/index.html",
+#'     text = "cran", prop = bold_redface),
 #'   fp_p = fp_par(text.align = "center") )
 #'
-#' read_docx() %>% body_add_fpar(img_in_par) %>%
-#'   print(target = tempfile(fileext = ".docx") )
+#' doc <- read_docx()
+#' doc <- body_add_fpar(doc, img_in_par)
+#' print(doc, target = tempfile(fileext = ".docx") )
 #'
 #' @seealso \code{\link{fpar}}
 #' @family functions for adding content
@@ -267,6 +267,13 @@ body_add_fpar <- function( x, value, style = NULL, pos = "after" ){
   })
   img_src <- unique(img_src[!is.na(img_src)])
 
+  hrefs <- sapply(value$chunks, function(x){
+    if( inherits(x, "hyperlink_ftext"))
+      as.character(x$href)
+    else NA_character_
+  })
+  hrefs <- unique(hrefs[!is.na(hrefs)])
+
   if( !is.null(style) ){
     style_id <- get_style_id(data = x$styles, style=style, type = "paragraph")
   } else style_id <- NULL
@@ -274,6 +281,8 @@ body_add_fpar <- function( x, value, style = NULL, pos = "after" ){
   xml_elt <- to_wml(value, add_ns = TRUE, style_id = style_id)
   x <- docx_reference_img(x, img_src)
   xml_elt <- wml_link_images( x, xml_elt )
+  x <- docx_reference_hyperlink(x, hrefs)
+  xml_elt <- wml_link_hyperlink( x, xml_elt )
 
   body_add_xml(x = x, str = xml_elt, pos = pos)
 }
@@ -301,10 +310,8 @@ body_add_fpar <- function( x, value, style = NULL, pos = "after" ){
 #' @param no_hband Specifies that the first column conditional formatting should be applied.
 #' @param no_vband Specifies that the first column conditional formatting should be applied.
 #' @examples
-#' library(magrittr)
-#'
-#' doc <- read_docx() %>%
-#'   body_add_table(iris, style = "table_template")
+#' doc <- read_docx()
+#' doc <- body_add_table(doc, iris, style = "table_template")
 #'
 #' print(doc, target = tempfile(fileext = ".docx") )
 #' @family functions for adding content
@@ -340,8 +347,8 @@ body_add_table <- function( x, value, style = NULL, pos = "after", header = TRUE
 #' @param style optional. style in the document that will be used to build entries of the TOC.
 #' @param separator optional. Some configurations need "," (i.e. from Canada) separator instead of ";"
 #' @examples
-#' library(magrittr)
-#' doc <- read_docx() %>% body_add_toc()
+#' doc <- read_docx()
+#' doc <- body_add_toc(doc)
 #'
 #' print(doc, target = tempfile(fileext = ".docx") )
 #' @family functions for adding content
@@ -379,7 +386,6 @@ body_add_toc <- function( x, level = 3, pos = "after", style = NULL, separator =
 body_add_plot <- function( x, value, width = 6, height = 5, res = 300, style = "Normal", ... ){
 
   file <- tempfile(fileext = ".png")
-  options(bitmapType='cairo')
   png(filename = file, width = width, height = height, units = "in", res = res, ...)
   tryCatch({
     eval(value$code)
@@ -476,11 +482,10 @@ body_add_xml2 <- function(x, str){
 #' @examples
 #'
 #' # cursor_bookmark ----
-#' library(magrittr)
 #'
-#' doc <- read_docx() %>%
-#'   body_add_par("centered text", style = "centered") %>%
-#'   body_bookmark("text_to_replace")
+#' doc <- read_docx()
+#' doc <- body_add_par(doc, "centered text", style = "centered")
+#' doc <- body_bookmark(doc, "text_to_replace")
 body_bookmark <- function(x, id){
   cursor_elt <- x$doc_obj$get_at_cursor()
   ns_ <- "xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\""
@@ -505,25 +510,26 @@ body_bookmark <- function(x, id){
 #' @param x an rdocx object
 #' @examples
 #' library(officer)
-#' library(magrittr)
 #'
-#' str1 <- "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " %>%
-#'   rep(20) %>% paste(collapse = "")
+#' str1 <- rep("Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", 20)
+#' str1 <- paste(str1, collapse = "")
+#'
 #' str2 <- "Drop that text"
-#' str3 <- "Aenean venenatis varius elit et fermentum vivamus vehicula. " %>%
-#'   rep(20) %>% paste(collapse = "")
 #'
-#' my_doc <- read_docx()  %>%
-#'   body_add_par(value = str1, style = "Normal") %>%
-#'   body_add_par(value = str2, style = "centered") %>%
-#'   body_add_par(value = str3, style = "Normal")
+#' str3 <- rep("Aenean venenatis varius elit et fermentum vivamus vehicula. ", 20)
+#' str3 <- paste(str3, collapse = "")
+#'
+#' my_doc <- read_docx()
+#' my_doc <- body_add_par(my_doc, value = str1, style = "Normal")
+#' my_doc <- body_add_par(my_doc, value = str2, style = "centered")
+#' my_doc <- body_add_par(my_doc, value = str3, style = "Normal")
 #'
 #' new_doc_file <- print(my_doc,
 #'   target = tempfile(fileext = ".docx"))
 #'
-#' my_doc <- read_docx(path = new_doc_file)  %>%
-#'   cursor_reach(keyword = "that text") %>%
-#'   body_remove()
+#' my_doc <- read_docx(path = new_doc_file)
+#' my_doc <- cursor_reach(my_doc, keyword = "that text")
+#' my_doc <- body_remove(my_doc)
 #'
 #' print(my_doc, target = tempfile(fileext = ".docx"))
 body_remove <- function(x){
@@ -634,6 +640,12 @@ body_add.fpar <- function( x, value, style = NULL, ... ){
     else NA_character_
   })
   img_src <- unique(img_src[!is.na(img_src)])
+  hrefs <- sapply(value$chunks, function(x){
+    if( inherits(x, "hyperlink_ftext"))
+      as.character(x$href)
+    else NA_character_
+  })
+  hrefs <- unique(hrefs[!is.na(hrefs)])
 
   if( !is.null(style) ){
     style_id <- get_style_id(data = x$styles, style=style, type = "paragraph")
@@ -642,6 +654,9 @@ body_add.fpar <- function( x, value, style = NULL, ... ){
   xml_elt <- to_wml(value, add_ns = TRUE, style_id = style_id)
   x <- docx_reference_img(x, img_src)
   xml_elt <- wml_link_images( x, xml_elt )
+  x <- docx_reference_hyperlink(x, hrefs)
+  xml_elt <- wml_link_hyperlink( x, xml_elt )
+
   body_add_xml2(x = x, str = xml_elt)
 }
 
@@ -783,7 +798,6 @@ body_add.gg <- function( x, value, width = 6, height = 5, res = 300, style = "No
     stop("package ggplot2 is required to use this function")
 
   file <- tempfile(fileext = ".png")
-  options(bitmapType='cairo')
   png(filename = file, width = width, height = height, units = "in", res = res, ...)
   print(value)
   dev.off()
@@ -798,7 +812,6 @@ body_add.gg <- function( x, value, width = 6, height = 5, res = 300, style = "No
 body_add.plot_instr <- function( x, value, width = 6, height = 5, res = 300, style = "Normal", ... ){
 
   file <- tempfile(fileext = ".png")
-  options(bitmapType='cairo')
   png(filename = file, width = width, height = height, units = "in", res = res, ...)
   tryCatch({
     eval(value$code)

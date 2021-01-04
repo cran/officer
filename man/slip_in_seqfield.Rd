@@ -22,25 +22,29 @@ This feature is only available when document are edited with Word,
 when edited with Libre Office or another program, seq field will not
 be calculated and not displayed.
 }
+\note{
+This function will be deprecated in a next release because it is not
+efficient and make users write complex code. Use instead \code{\link[=fpar]{fpar()}} to build
+formatted paragraphs.
+}
 \examples{
-library(magrittr)
-x <- read_docx() \%>\%
-  body_add_par("Time is: ", style = "Normal") \%>\%
-  slip_in_seqfield(
+x <- read_docx()
+x <- body_add_par(x, "Time is: ", style = "Normal")
+x <- slip_in_seqfield(x,
     str = "TIME \u005C@ \"HH:mm:ss\" \u005C* MERGEFORMAT",
-    style = 'strong') \%>\%
+    style = 'strong')
 
-  body_add_par(" - This is a figure title", style = "centered") \%>\%
-  slip_in_seqfield(str = "SEQ Figure \u005C* roman",
-    style = 'Default Paragraph Font', pos = "before") \%>\%
-  slip_in_text("Figure: ", style = "strong", pos = "before") \%>\%
+x <- body_add_par(x, " - This is a figure title", style = "centered")
+x <- slip_in_seqfield(x, str = "SEQ Figure \u005C* roman",
+    style = 'Default Paragraph Font', pos = "before")
+x <- slip_in_text(x, "Figure: ", style = "strong", pos = "before")
 
-  body_add_par(" - This is another figure title", style = "centered") \%>\%
-  slip_in_seqfield(str = "SEQ Figure \u005C* roman",
-    style = 'strong', pos = "before")  \%>\%
-  slip_in_text("Figure: ", style = "strong", pos = "before") \%>\%
-  body_add_par("This is a symbol: ", style = "Normal") \%>\%
-  slip_in_seqfield(str = "SYMBOL 100 \u005Cf Wingdings",
+x <- body_add_par(x, " - This is another figure title", style = "centered")
+x <- slip_in_seqfield(x, str = "SEQ Figure \u005C* roman",
+    style = 'strong', pos = "before")
+x <- slip_in_text(x, "Figure: ", style = "strong", pos = "before")
+x <- body_add_par(x, "This is a symbol: ", style = "Normal")
+x <- slip_in_text(x, str = "SYMBOL 100 \u005Cf Wingdings",
     style = 'strong')
 
 print(x, target = tempfile(fileext = ".docx"))

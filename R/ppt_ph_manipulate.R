@@ -156,6 +156,9 @@ ph_hyperlink <- function( x, type = "body", id = 1, id_chr = NULL, ph_label = NU
 #' @description append text in a placeholder.
 #' The function let you add text to an existing
 #' content in an exiisting shape, existing text will be preserved.
+#' @note This function will be deprecated in a next release because it is not
+#' efficient and make users write complex code. Use instead [fpar()] to build
+#' formatted paragraphs.
 #' @section Usage:
 #' If your goal is to add formatted text in a new shape, use \code{\link{ph_with}}
 #' with a \code{\link{block_list}} instead of this function.
@@ -257,22 +260,23 @@ ph_add_text <- function( x, str, type = "body", id = 1, id_chr = NULL, ph_label 
 #' @description append a new empty paragraph in a placeholder.
 #' The function let you add a new empty paragraph to an existing
 #' content in an exiisting shape, existing paragraphs will be preserved.
+#' @note This function will be deprecated in a next release because it is not
+#' efficient and make users write complex code. Use instead [fpar()] to build
+#' formatted paragraphs.
 #' @inheritParams ph_remove
 #' @param level paragraph level
 #' @inheritSection ph_add_text Usage
 #' @examples
-#' library(magrittr)
-#'
 #' fileout <- tempfile(fileext = ".pptx")
 #' default_text <- fp_text(font.size = 0, bold = TRUE, color = "red")
 #'
-#' doc <- read_pptx() %>%
-#'   add_slide(layout = "Title and Content", master = "Office Theme") %>%
-#'   ph_with("A text", location = ph_location_type(type = "body")) %>%
-#'   ph_add_par(level = 2) %>%
-#'   ph_add_text(str = "and another, ", style = default_text ) %>%
-#'   ph_add_par(level = 3) %>%
-#'   ph_add_text(str = "and another!",
+#' doc <- read_pptx()
+#' doc <- add_slide(doc, layout = "Title and Content", master = "Office Theme")
+#' doc <- ph_with(doc, "A text", location = ph_location_type(type = "body"))
+#' doc <- ph_add_par(doc, level = 2)
+#' doc <- ph_add_text(doc, str = "and another, ", style = default_text )
+#' doc <- ph_add_par(doc, level = 3)
+#' doc <- ph_add_text(doc, str = "and another!",
 #'               style = update(default_text, color = "blue"))
 #'
 #' print(doc, target = fileout)
@@ -316,6 +320,9 @@ ph_add_par <- function( x, type = "body", id = 1, id_chr = NULL, level = 1, ph_l
 #' The function let you add a new formatted paragraph (\code{\link{fpar}})
 #' to an existing content in an exiisting shape, existing paragraphs
 #' will be preserved.
+#' @note This function will be deprecated in a next release because it is not
+#' efficient and make users write complex code. Use instead [fpar()] to build
+#' formatted paragraphs.
 #' @inheritParams ph_remove
 #' @param value fpar object
 #' @param level paragraph level
@@ -323,8 +330,6 @@ ph_add_par <- function( x, type = "body", id = 1, id_chr = NULL, level = 1, ph_l
 #' should be used.
 #' @inheritSection ph_add_text Usage
 #' @examples
-#' library(magrittr)
-#'
 #' bold_face <- shortcuts$fp_bold(font.size = 30)
 #' bold_redface <- update(bold_face, color = "red")
 #'
@@ -332,10 +337,10 @@ ph_add_par <- function( x, type = "body", id = 1, id_chr = NULL, level = 1, ph_l
 #'               ftext("World", prop = bold_redface ),
 #'               ftext(", how are you?", prop = bold_face ) )
 #'
-#' doc <- read_pptx() %>%
-#'   add_slide(layout = "Title and Content", master = "Office Theme") %>%
-#'   ph_with("", location = ph_location(bg = "wheat", newlabel = "myph")) %>%
-#'   ph_add_fpar(value = fpar_, ph_label = "myph", level = 2)
+#' doc <- read_pptx()
+#' doc <- add_slide(doc, layout = "Title and Content", master = "Office Theme")
+#' doc <- ph_with(doc, "", location = ph_location(bg = "wheat", newlabel = "myph"))
+#' doc <- ph_add_fpar(doc, value = fpar_, ph_label = "myph", level = 2)
 #'
 #' print(doc, target = tempfile(fileext = ".pptx"))
 #' @seealso \code{\link{fpar}}

@@ -28,6 +28,11 @@ append a new empty paragraph in a placeholder.
 The function let you add a new empty paragraph to an existing
 content in an exiisting shape, existing paragraphs will be preserved.
 }
+\note{
+This function will be deprecated in a next release because it is not
+efficient and make users write complex code. Use instead \code{\link[=fpar]{fpar()}} to build
+formatted paragraphs.
+}
 \section{Usage}{
 
 If your goal is to add formatted text in a new shape, use \code{\link{ph_with}}
@@ -35,18 +40,16 @@ with a \code{\link{block_list}} instead of this function.
 }
 
 \examples{
-library(magrittr)
-
 fileout <- tempfile(fileext = ".pptx")
 default_text <- fp_text(font.size = 0, bold = TRUE, color = "red")
 
-doc <- read_pptx() \%>\%
-  add_slide(layout = "Title and Content", master = "Office Theme") \%>\%
-  ph_with("A text", location = ph_location_type(type = "body")) \%>\%
-  ph_add_par(level = 2) \%>\%
-  ph_add_text(str = "and another, ", style = default_text ) \%>\%
-  ph_add_par(level = 3) \%>\%
-  ph_add_text(str = "and another!",
+doc <- read_pptx()
+doc <- add_slide(doc, layout = "Title and Content", master = "Office Theme")
+doc <- ph_with(doc, "A text", location = ph_location_type(type = "body"))
+doc <- ph_add_par(doc, level = 2)
+doc <- ph_add_text(doc, str = "and another, ", style = default_text )
+doc <- ph_add_par(doc, level = 3)
+doc <- ph_add_text(doc, str = "and another!",
               style = update(default_text, color = "blue"))
 
 print(doc, target = fileout)

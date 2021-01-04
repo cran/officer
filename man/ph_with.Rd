@@ -41,11 +41,11 @@ ph_with(x, value, location, ...)
   ...
 )
 
-\method{ph_with}{gg}(x, value, location, res = 300, ...)
+\method{ph_with}{gg}(x, value, location, res = 300, alt_text, ...)
 
 \method{ph_with}{plot_instr}(x, value, location, res = 300, ...)
 
-\method{ph_with}{external_img}(x, value, location, use_loc_size = TRUE, ...)
+\method{ph_with}{external_img}(x, value, location, use_loc_size = TRUE, alt_text, ...)
 
 \method{ph_with}{fpar}(x, value, location, ...)
 
@@ -86,14 +86,15 @@ and 'c' for center. Default to NULL.}
 
 \item{res}{resolution of the png image in ppi}
 
+\item{alt_text}{Alt-text for screen-readers}
+
 \item{use_loc_size}{if set to FALSE, external_img width and height will
 be used.}
 }
 \description{
 add object into a new shape in the current slide. This
-function is able to add all supported outputs to a presentation
-and should replace calls to older functions starting with
-\code{ph_with_*}.
+function is able to add all supported outputs to a presentation. See
+section \strong{Methods (by class)} to see supported outputs.
 }
 \section{Methods (by class)}{
 \itemize{
@@ -231,9 +232,14 @@ doc_1 <- ph_with(x = doc_1, value = bl,
 
 
 # fpar ------
-hw <- fpar(ftext("hello world",
-  fp_text(bold = TRUE, font.family = "Bradley Hand",
-    font.size = 150, color = "#F5595B")))
+fpt <- fp_text(bold = TRUE, font.family = "Bradley Hand",
+      font.size = 150, color = "#F5595B")
+hw <- fpar(
+  ftext("hello ", fpt),
+  hyperlink_ftext(
+    href = "https://cran.r-project.org/index.html",
+    text = "cran", prop = fpt)
+)
 doc_1 <- add_slide(doc_1)
 doc_1 <- ph_with(x = doc_1, value = hw,
                  location = ph_location_type(type="body") )

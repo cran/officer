@@ -1,9 +1,8 @@
 #' @export
 #' @title add objects into a new shape on the current slide
 #' @description add object into a new shape in the current slide. This
-#' function is able to add all supported outputs to a presentation
-#' and should replace calls to older functions starting with
-#' \code{ph_with_*}.
+#' function is able to add all supported outputs to a presentation. See
+#' section **Methods (by class)** to see supported outputs.
 #' @param x an rpptx object
 #' @param value object to add as a new shape. Supported objects
 #' are vectors, data.frame, graphics, block of formatted paragraphs,
@@ -99,9 +98,14 @@
 #'
 #'
 #' # fpar ------
-#' hw <- fpar(ftext("hello world",
-#'   fp_text(bold = TRUE, font.family = "Bradley Hand",
-#'     font.size = 150, color = "#F5595B")))
+#' fpt <- fp_text(bold = TRUE, font.family = "Bradley Hand",
+#'       font.size = 150, color = "#F5595B")
+#' hw <- fpar(
+#'   ftext("hello ", fpt),
+#'   hyperlink_ftext(
+#'     href = "https://cran.r-project.org/index.html",
+#'     text = "cran", prop = fpt)
+#' )
 #' doc_1 <- add_slide(doc_1)
 #' doc_1 <- ph_with(x = doc_1, value = hw,
 #'                  location = ph_location_type(type="body") )
@@ -216,6 +220,19 @@ ph_with.block_list <- function(x, value, location, level_list = integer(0), ...)
 
   location <- fortify_location(location, doc = x)
 
+  for(v in seq_along(value)){
+    for(iter in seq_along(value[[v]]$chunks)){
+      curr_chk <- value[[v]]$chunks[[iter]]
+      if( inherits(curr_chk, "hyperlink_ftext")){
+        slide$reference_hyperlink(curr_chk$href)
+        rel_df <- slide$rel_df()
+        id <- rel_df$id[match(curr_chk$href, rel_df$target)]
+        curr_chk$href <- id
+        value[[v]]$chunks[[iter]] <- curr_chk
+      }
+    }
+  }
+
   pars <- sapply(value, to_pml)
 
   if( length(level_list)>0 ){
@@ -320,7 +337,8 @@ ph_with.data.frame <- function(x, value, location, header = TRUE,
 #' @describeIn ph_with add a ggplot object to a new shape on the
 #' current slide. Use package \code{rvg} for more advanced graphical features.
 #' @param res resolution of the png image in ppi
-ph_with.gg <- function(x, value, location, res = 300, ...){
+#' @param alt_text Alt-text for screen-readers
+ph_with.gg <- function(x, value, location, res = 300, alt_text, ...){
   location_ <- fortify_location(location, doc = x)
   slide <- x$slide$get_slide(x$cursor)
   if( !requireNamespace("ggplot2") )
@@ -332,14 +350,13 @@ ph_with.gg <- function(x, value, location, res = 300, ...){
 
   stopifnot(inherits(value, "gg") )
   file <- tempfile(fileext = ".png")
-  options(bitmapType='cairo')
   png(filename = file, width = width, height = height, units = "in", res = res, ...)
   print(value)
   dev.off()
   on.exit(unlink(file))
 
   ext_img <- external_img(file, width = width, height = height)
-  ph_with(x, ext_img, location = location )
+  ph_with(x, ext_img, location = location, alt_text = alt_text )
 }
 
 #' @export
@@ -353,7 +370,6 @@ ph_with.plot_instr <- function(x, value, location, res = 300, ...){
   height <- location_$height
 
   file <- tempfile(fileext = ".png")
-  options(bitmapType='cairo')
 
   dirname <- tempfile( )
   dir.create( dirname )
@@ -381,6 +397,7 @@ ph_with.plot_instr <- function(x, value, location, res = 300, ...){
 #' @export
 #' @param use_loc_size if set to FALSE, external_img width and height will
 #' be used.
+#' @param alt_text Alt-text for screen-readers
 #' @describeIn ph_with add a \code{\link{external_img}} to a new shape
 #' on the current slide.
 #'
@@ -389,7 +406,7 @@ ph_with.plot_instr <- function(x, value, location, res = 300, ...){
 #' specified in call to \code{external_img} will be
 #' ignored, their values will be those of the location,
 #' unless use_loc_size is set to FALSE.
-ph_with.external_img <- function(x, value, location, use_loc_size = TRUE, ...){
+ph_with.external_img <- function(x, value, location, use_loc_size = TRUE, alt_text, ...){
   location <- fortify_location(location, doc = x)
 
   slide <- x$slide$get_slide(x$cursor)
@@ -413,14 +430,13 @@ ph_with.external_img <- function(x, value, location, use_loc_size = TRUE, ...){
     value[1] <- file
     file_type <- ".png"
   }
-
   new_src <- tempfile( fileext = gsub("(.*)(\\.[a-zA-Z0-0]+)$", "\\2", as.character(value)) )
   file.copy( as.character(value), to = new_src )
 
   xml_str <- pic_pml(left = location$left, top = location$top,
                        width = width, height = height,
                        label = location$ph_label, ph = location$ph,
-                       rot = location$rotation, bg = location$bg, src = new_src)
+                       rot = location$rotation, bg = location$bg, src = new_src, alt_text = alt_text)
 
   slide$reference_img(src = new_src, dir_name = file.path(x$package_dir, "ppt/media"))
   xml_elt <- fortify_pml_images(x, xml_str)

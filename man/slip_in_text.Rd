@@ -21,13 +21,17 @@ slip_in_text(x, str, style = NULL, pos = "after", hyperlink = NULL)
 \description{
 append text into a paragraph of an rdocx object
 }
+\note{
+This function will be deprecated in a next release because it is not
+efficient and make users write complex code. Use instead \code{\link[=fpar]{fpar()}} to build
+formatted paragraphs.
+}
 \examples{
-library(magrittr)
-x <- read_docx() \%>\%
-  body_add_par("Hello ", style = "Normal") \%>\%
-  slip_in_text("world", style = "strong") \%>\%
-  slip_in_text("Message is", style = "strong", pos = "before") \%>\%
-  slip_in_text("with a link", style = "strong",
+x <- read_docx()
+x <- body_add_par(x, "Hello ", style = "Normal")
+x <- slip_in_text(x, "world", style = "strong")
+x <- slip_in_text(x, "Message is", style = "strong", pos = "before")
+x <- slip_in_text(x, "with a link", style = "strong",
     pos = "after", hyperlink = "https://davidgohel.github.io/officer/")
 
 print(x, target = tempfile(fileext = ".docx"))
