@@ -1,3 +1,17 @@
+# officer 0.3.17
+
+## New features
+
+* alt-text for images
+* On Windows, the file will not be overwritten if it is edited.
+* `fp_text` gained arguments to specify different fonts when mixing 
+  CJK and latin characters: `cs.family`, `eastasia.family`, `hansi.family`.
+
+## Issues
+
+* fix issue with document properties where values have to be html-escaped
+
+
 # officer 0.3.16
 
 ## New features

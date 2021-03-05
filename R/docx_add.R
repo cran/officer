@@ -153,10 +153,10 @@ body_add_gg <- function( x, value, width = 6, height = 5, res = 300, style = "No
 #' @export
 #' @title add a list of blocks into a document
 #' @description add a list of blocks produced by \code{block_list} into
-#' into an rdocx object
+#' into an rdocx object.
 #' @inheritParams body_add_break
 #' @param blocks set of blocks to be used as footnote content returned by
-#'   function \code{\link{block_list}}.
+#'   function [block_list()].
 #' @examples
 #' library(officer)
 #'
@@ -182,7 +182,8 @@ body_add_blocks <- function( x, blocks, pos = "after" ){
     pos_vector <- rep("after", length(blocks))
     pos_vector[1] <- pos
     for(i in seq_along(blocks) ){
-      x <- body_add_fpar(x, value = blocks[[i]], pos = pos_vector[i])
+      x <- body_add_xml(x, str = to_wml(blocks[[i]], add_ns = TRUE),
+                        pos = pos_vector[i])
     }
   }
 
@@ -298,6 +299,7 @@ body_add_fpar <- function( x, value, style = NULL, pos = "after" ){
 #' @param header display header if TRUE
 #' @param alignment columns alignement, argument length must match with columns length,
 #' values must be "l" (left), "r" (right) or "c" (center).
+#' @param align_table table alignment within document, value must be "left", "center" or "right"
 #' @param stylenames columns styles defined by [table_stylenames()]
 #' @param first_row Specifies that the first column conditional formatting should be
 #' applied. Details for this and other conditional formatting options can be found
@@ -317,6 +319,7 @@ body_add_fpar <- function( x, value, style = NULL, pos = "after" ){
 #' @family functions for adding content
 body_add_table <- function( x, value, style = NULL, pos = "after", header = TRUE,
                             alignment = NULL,
+                            align_table = "center",
                             stylenames = table_stylenames(),
                             first_row = TRUE, first_column = FALSE,
                             last_row = FALSE, last_column = FALSE,
@@ -328,7 +331,8 @@ body_add_table <- function( x, value, style = NULL, pos = "after", header = TRUE
     tcf = table_conditional_formatting(
       first_row = first_row, first_column = first_column,
       last_row = last_row, last_column = last_column,
-      no_hband = no_hband, no_vband = no_vband))
+      no_hband = no_hband, no_vband = no_vband),
+      align = align_table)
 
   bt <- block_table(x = value, header = header, properties = pt, alignment = alignment)
   xml_elt <- to_wml(bt, add_ns = TRUE, base_document = x)
