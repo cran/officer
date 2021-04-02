@@ -1,6 +1,6 @@
-b5a4b8d6b8ebba524fab1804a2c30b40 *DESCRIPTION
+5b188a7415b8b89b2c2555eddbc61bbe *DESCRIPTION
 fec73cde9365195666315cdcaf036837 *NAMESPACE
-dbee926dc312245405392428ff6e53f7 *NEWS.md
+84ffbfcea9788c2467dd9a1fb03cb433 *NEWS.md
 71a827cfeb59388efaae46aff8e78db0 *R/core_properties.R
 af94d5cee0a90783c76e8f9e379f7209 *R/defunct.R
 16a95a9cb83cd9a911c18fad3335412b *R/docx_add.R
@@ -10,7 +10,7 @@ b0d1b462ec24475c6443ab5647cc8e7c *R/docx_footnotes.R
 2e2d8516e27d152dff8b5161c2fa255a *R/docx_img.R
 5d7c7a77c1c5d4e3182cbf2ae9924aab *R/docx_part.R
 0dc197f4dee2acb61d6f727e2438ece5 *R/docx_replace.R
-3d6ac8d40af095c72dd3bae2675e3365 *R/docx_section.R
+ebafe0d7ee4082c2f1ddeb9d3e92e02d *R/docx_section.R
 522cff161568a293af7342a6e2d9f0bd *R/empty_content.R
 fab9efc9660e4130ce33fd15618815d9 *R/formatting_properties.R
 f4b58dc4f74b257622beba309086eb4a *R/fortify_docx.R
@@ -19,7 +19,7 @@ caaa62e8d3f722b03f008a7368039e37 *R/knitr_utils.R
 ecc7c1c398a629d378fcf3034d616307 *R/officer.R
 866dae9d05c3ccd4b70017358a32f508 *R/ooxml.R
 06bfcee7cebbdf628ac06e4a0a8a78dc *R/ooxml_block_objects.R
-099953d53a64c6d1733eabcec1ae6fe7 *R/ooxml_run_objects.R
+d4c2ac1b054cf5671ec992f58b302510 *R/ooxml_run_objects.R
 30081068bdee6c6130086842c82454bb *R/openxml_content_type.R
 0f7bbf0d3ed5b3d9652069638f36caae *R/openxml_document.R
 aeee4cd90c11c6dd8138ea053711045a *R/pack_folder.R
@@ -36,7 +36,7 @@ b033b7d94afe10f27c4f7c4a62502e4c *R/read_pptx.R
 c1e3033f1828465cecdb9dc6324fe6d3 *R/read_xlsx.R
 1d80bfcd2b3007b05c6dfc9228def01e *R/relationship.R
 22a8cc6223aedbe99b2f21c9b16e009e *R/shorcuts.R
-be85a82e7235bf6371593395cea8d727 *R/utils.R
+ff1260dbdb1e4e8f4b082bc355d18f52 *R/utils.R
 d6ca113a3487a33e0d05468aef4824b4 *README.md
 3e73f609dcdf2e7a25e626524d52eabb *build/vignette.rds
 7b3eace1d90e0131752670719a2dcb17 *inst/doc/overview.Rmd
@@ -153,7 +153,7 @@ b238799e83fa9d757d5bc1a51c46c46d *man/read_docx.Rd
 38cf03b04f20ad261b4d28cf80b93c22 *man/read_pptx.Rd
 536c915598d423662d583b64b933e962 *man/read_xlsx.Rd
 bfd3e8e014d738c9d6991d68283301f7 *man/remove_slide.Rd
-581ae241bc0d71aa171e45ffc3b04295 *man/run_autonum.Rd
+c30dad887de83e754e2b3892819602a1 *man/run_autonum.Rd
 29ea76b99db4ec548077fb3cb01aa8d5 *man/run_bookmark.Rd
 7634a8b5a6d3f7dd0642eaf7bbbaa5c9 *man/run_columnbreak.Rd
 57086279e4f0b712b0c120b372f7a48d *man/run_linebreak.Rd

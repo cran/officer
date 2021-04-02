@@ -1,7 +1,7 @@
 Package: officer
 Type: Package
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.3.17
+Version: 0.3.18
 Authors@R: c(
     person("David", "Gohel", role = c("aut", "cre"),
     email = "david.gohel@ardata.fr"),
@@ -19,7 +19,6 @@ Description: Access and manipulate 'Microsoft Word' and 'Microsoft PowerPoint' d
   The package does not require any installation of Microsoft products to be able to write Microsoft 
   files.
 License: GPL-3
-LazyData: TRUE
 Imports: R6, grDevices, stats, graphics, utils, zip (>= 2.1.0), uuid
         (>= 0.1-4), xml2 (>= 1.1.0)
 URL: https://ardata-fr.github.io/officeverse/,
@@ -30,7 +29,7 @@ RoxygenNote: 7.1.1
 Suggests: testthat, devEMF, ggplot2, rmarkdown, base64enc, knitr, rsvg
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2021-03-04 23:40:26 UTC; davidgohel
+Packaged: 2021-04-02 14:23:33 UTC; davidgohel
 Author: David Gohel [aut, cre],
   Frank Hangler [ctb] (function body_replace_all_text),
   Liz Sander [ctb] (several documentation fixes),
@@ -40,4 +39,4 @@ Author: David Gohel [aut, cre],
   John Muschelli [ctb] (google doc compatibility)
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2021-03-05 06:40:11 UTC
+Date/Publication: 2021-04-02 15:10:02 UTC
