@@ -125,7 +125,7 @@ to_html.ftext <- function(x, ...) {
 #' but the name was wrong and should have been `run_word_field`.
 #' @inheritSection ftext usage
 #' @param field,seqfield computed field string (`seqfield` will be
-#' totally superseded by `field` in the futur).
+#' totally superseded by `field` in the future).
 #' @param prop formatting text properties returned by [fp_text].
 #' @examples
 #' run_word_field(field = "PAGE  \\* MERGEFORMAT")
@@ -191,6 +191,9 @@ to_wml.run_seqfield <- function(x, add_ns = FALSE, ...) {
 #' be like "Table 1" or "1" (pre_label is not included in the referenced
 #' text).
 #' @param prop formatting text properties returned by [fp_text].
+#' @param start_at If not NULL, it must be a positive integer, it
+#' specifies the new number to use, at which number the auto
+#' numbering will restart.
 #' @examples
 #' run_autonum()
 #' run_autonum(seq_id = "fig", pre_label = "fig. ")
@@ -198,7 +201,8 @@ to_wml.run_seqfield <- function(x, add_ns = FALSE, ...) {
 #' @family run functions for reporting
 #' @family Word computed fields
 run_autonum <- function(seq_id = "table", pre_label = "Table ", post_label = ": ",
-                        bkm = NULL, bkm_all = FALSE, prop = NULL) {
+                        bkm = NULL, bkm_all = FALSE, prop = NULL,
+                        start_at = NULL) {
   bkm <- check_bookmark_id(bkm)
   z <- list(
     seq_id = seq_id,
@@ -206,7 +210,8 @@ run_autonum <- function(seq_id = "table", pre_label = "Table ", post_label = ": 
     post_label = post_label,
     bookmark = bkm,
     bookmark_all = bkm_all,
-    pr = prop
+    pr = prop,
+    start_at = start_at
   )
   class(z) <- c("run_autonum", "run")
 
@@ -221,7 +226,13 @@ to_wml.run_autonum <- function(x, add_ns = FALSE, ...) {
 
   run_str_pre <- sprintf("<w:r>%s<w:t xml:space=\"preserve\">%s</w:t></w:r>", pr, x$pre_label)
   run_str_post <- sprintf("<w:r>%s<w:t xml:space=\"preserve\">%s</w:t></w:r>", pr, x$post_label)
-  sqf <- run_seqfield(seqfield = paste0("SEQ ", x$seq_id, " \u005C* Arabic"), prop = x$pr)
+
+  seq_str <- paste0("SEQ ", x$seq_id, " \u005C* Arabic")
+  if(!is.null(x$start_at) && is.numeric(x$start_at)){
+    seq_str <- paste(seq_str, "\\r", as.integer(x$start_at))
+  }
+
+  sqf <- run_word_field(seqfield = seq_str, prop = x$pr)
   sf_str <- to_wml(sqf)
   if(!is.null(x$bookmark)){
     if(x$bookmark_all){
@@ -301,10 +312,11 @@ hyperlink_ftext <- function(text, prop = NULL, href) {
 #' @export
 to_wml.hyperlink_ftext <- function(x, add_ns = FALSE, ...) {
 
+  url_val <- urlEncodePath(x$href)
   out <- paste0("<w:r>", if(!is.null(x$pr)) rpr_wml(x$pr),
                 "<w:t xml:space=\"preserve\">",
                 htmlEscapeCopy(x$value), "</w:t></w:r>")
-  paste0("<w:hyperlink r:id=\"", htmlEscapeCopy(x$href), "\">", out, "</w:hyperlink>")
+  paste0("<w:hyperlink r:id=\"", url_val, "\">", out, "</w:hyperlink>")
 }
 
 #' @export
@@ -313,7 +325,7 @@ to_pml.hyperlink_ftext <- function(x, add_ns = FALSE, ...) {
   if (add_ns) {
     open_tag <- ar_ns_yes
   }
-  str_ <- sprintf("<a:hlinkClick r:id=\"%s\"/>", x$href)
+  str_ <- sprintf("<a:hlinkClick r:id=\"%s\"/>", urlEncodePath(x$href))
 
   if(!is.null(x$pr)) {
     rpr_pml_ <- rpr_pml(x$pr)
@@ -670,7 +682,7 @@ external_img <- function(src, width = .5, height = .2, alt = "") {
   # note: should it be vectorized
   check_src <- all(grepl("^rId", src)) || all(file.exists(src))
   if( !check_src ){
-    stop("src must be a string starting with 'rId' or an image filename")
+    stop("src must be a string starting with 'rId' or an existing image filename")
   }
 
   class(src) <- c("external_img", "cot", "run")
@@ -738,9 +750,11 @@ to_wml.external_img <- function(x, add_ns = FALSE, ...) {
   width <- dims$width
   height <- dims$height
 
+  filecp <- tempfile(fileext = gsub("(.*)(\\.[[:alnum:]]+)$", "\\2", as.character(x) ))
+  file.copy(as.character(x), filecp)
 
   paste0(open_tag,
-         "<w:rPr/><w:drawing><wp:inline distT=\"0\" distB=\"0\" distL=\"0\" distR=\"0\">",
+         "<w:rPr/><w:drawing xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\"><wp:inline distT=\"0\" distB=\"0\" distL=\"0\" distR=\"0\">",
          sprintf("<wp:extent cx=\"%.0f\" cy=\"%.0f\"/>", width * 12700*72, height * 12700*72),
          "<wp:docPr id=\"\" name=\"\" descr=\"", attr(x, "alt"),"\"/>",
          "<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" noChangeAspect=\"1\"/></wp:cNvGraphicFramePr>",
@@ -750,7 +764,7 @@ to_wml.external_img <- function(x, add_ns = FALSE, ...) {
          "<pic:cNvPicPr><a:picLocks noChangeAspect=\"1\" noChangeArrowheads=\"1\"/>",
          "</pic:cNvPicPr></pic:nvPicPr>",
          "<pic:blipFill>",
-         sprintf("<a:blip r:embed=\"%s\"/>", as.character(x)),
+         sprintf("<a:blip r:embed=\"%s\"/>", filecp),
          "<a:srcRect/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>",
          "<pic:spPr bwMode=\"auto\"><a:xfrm><a:off x=\"0\" y=\"0\"/>",
          sprintf("<a:ext cx=\"%.0f\" cy=\"%.0f\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom><a:noFill/></pic:spPr>", width * 12700, height * 12700),

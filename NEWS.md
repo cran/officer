@@ -1,3 +1,21 @@
+# officer 0.3.19
+
+## New features
+
+* On Windows, the pptx file will not be overwritten if it is edited.
+* `run_autonum` gained new argument start_at.
+* `tab.topcaption` is now supported by `opts_current_table()`
+
+## Issues
+
+* fix issue with document properties that are null
+* angle was not always preserved in PowerPoint
+* fix pptx scrapping for grouped object containing a table
+* fix invalid hyperlinks in docx and pptx
+* fix issue with duplicated images basenames
+* internal `get_reference_value` - fix - if reference_data is not an existing file, 
+it is appened to `opts_knit$get("output.dir")`.
+
 # officer 0.3.18
 
 ## Change
@@ -12,7 +30,7 @@ breaks should disappear.
 ## New features
 
 * alt-text for images
-* On Windows, the file will not be overwritten if it is edited.
+* On Windows, the docx file will not be overwritten if it is edited.
 * `fp_text` gained arguments to specify different fonts when mixing 
   CJK and latin characters: `cs.family`, `eastasia.family`, `hansi.family`.
 

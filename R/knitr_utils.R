@@ -69,11 +69,18 @@ get_reference_value <- function(format = NULL) {
     stop("format must be have value 'docx', 'pptx' or 'html'.")
   }
 
+  output.dir <- knitr::opts_knit$get("output.dir")
+  if(is.null(output.dir)){
+    output.dir <- getwd()
+  }
+
   pandoc_args <- knitr::opts_knit$get("rmarkdown.pandoc.args")
 
   rd <- grep("--reference-doc", pandoc_args)
   if (length(rd)) {
     reference_data <- pandoc_args[rd + 1]
+    if(!file.exists(reference_data))
+      reference_data <- file.path(output.dir, reference_data)
   } else {
     reference_data <- get_default_pandoc_data_file(format = format)
   }
@@ -104,6 +111,7 @@ knitr_opts_current <- function(x, default = FALSE){
 #' * cap.sep (default: ":")
 #' * id (default: NULL)
 #' * cap (default: NULL)
+#' * topcaption (default: TRUE)
 #' * style (default: NULL)
 #' * tab.lp (default: "tab:")
 #' * table_layout (default: "autofit")
@@ -121,6 +129,7 @@ opts_current_table <- function() {
   tab.cap.pre <- knitr_opts_current("tab.cap.pre", default = "Table ")
   tab.cap.sep <- knitr_opts_current("tab.cap.sep", default = ":")
   tab.cap <- knitr_opts_current("tab.cap", default = NULL)
+  tab.topcaption <- knitr_opts_current("tab.topcaption", default = TRUE)
   tab.id <- knitr_opts_current("tab.id", default = NULL)
   tab.lp <- knitr_opts_current("tab.lp", default = "tab:")
   tab.style <- knitr_opts_current("tab.style", default = NULL)
@@ -139,6 +148,7 @@ opts_current_table <- function() {
     cap.pre = tab.cap.pre,
     cap.sep = tab.cap.sep,
     id = tab.id,
+    topcaption = tab.topcaption,
     cap = tab.cap,
     style = tab.style,
     tab.lp = tab.lp,

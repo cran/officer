@@ -147,6 +147,13 @@ print.rdocx <- function(x, target = NULL, ...){
     stop(target , " is already edited.",
          " You must close the document in order to be able to write the file.")
 
+  process_links(x$doc_obj)
+  for(header in x$headers) process_links(header)
+  for(footer in x$footers) process_links(footer)
+  process_images(x$doc_obj, x$package_dir)
+  for(header in x$headers) process_images(header, x$package_dir)
+  for(footer in x$footers) process_images(footer, x$package_dir)
+
   int_id <- 1 # unique id identifier
 
   # make all id unique for document
@@ -185,11 +192,55 @@ print.rdocx <- function(x, target = NULL, ...){
   x$footnotes$save()
 
   # save doc properties
-  x$doc_properties['modified','value'] <- format( Sys.time(), "%Y-%m-%dT%H:%M:%SZ")
-  x$doc_properties['lastModifiedBy','value'] <- Sys.getenv("USER")
-  write_core_properties(x$doc_properties, x$package_dir)
+  if(nrow(x$doc_properties$data) >0 ){
+    x$doc_properties['modified','value'] <- format( Sys.time(), "%Y-%m-%dT%H:%M:%SZ")
+    x$doc_properties['lastModifiedBy','value'] <- Sys.getenv("USER")
+    write_core_properties(x$doc_properties, x$package_dir)
+  }
   invisible(pack_folder(folder = x$package_dir, target = target ))
 }
+
+process_links <- function( doc_obj ){
+  rel <- doc_obj$relationship()
+  hl_nodes <- xml_find_all(doc_obj$get(), "//w:hyperlink[@r:id]")
+  which_to_add <- hl_nodes[!grepl( "^rId[0-9]+$", xml_attr(hl_nodes, "id") )]
+  hl_ref <- unique(xml_attr(which_to_add, "id"))
+  for(i in seq_along(hl_ref) ){
+    rid <- sprintf("rId%.0f", rel$get_next_id() )
+
+    rel$add(
+      id = rid, type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
+      target = htmlEscapeCopy(hl_ref[i]), target_mode = "External" )
+
+    which_match_id <- grepl( hl_ref[i], xml_attr(which_to_add, "id"), fixed = TRUE )
+    xml_attr(which_to_add[which_match_id], "r:id") <- rep(rid, sum(which_match_id))
+  }
+}
+process_images <- function( doc_obj, package_dir ){
+  rel <- doc_obj$relationship()
+
+  hl_nodes <- xml_find_all(
+    doc_obj$get(), "//a:blip[@r:embed]",
+    ns = c("a"="http://schemas.openxmlformats.org/drawingml/2006/main",
+           r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"))
+  which_to_add <- hl_nodes[!grepl( "^rId[0-9]+$", xml_attr(hl_nodes, "embed") )]
+  hl_ref <- unique(xml_attr(which_to_add, "embed"))
+  for(i in seq_along(hl_ref) ){
+    rid <- sprintf("rId%.0f", rel$get_next_id() )
+
+    img_path <- file.path(package_dir, "word", "media")
+    dir.create(img_path, recursive = TRUE, showWarnings = FALSE)
+    file.copy(from = hl_ref[i], to = file.path(package_dir, "word", "media", basename(hl_ref[i])))
+
+    rel$add(
+      id = rid, type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
+      target = file.path("media", basename(hl_ref[i])))
+
+    which_match_id <- grepl( hl_ref[i], xml_attr(which_to_add, "embed"), fixed = TRUE )
+    xml_attr(which_to_add[which_match_id], "r:embed") <- rep(rid, sum(which_match_id))
+  }
+}
+
 
 #' @export
 #' @title number of blocks inside an rdocx object
