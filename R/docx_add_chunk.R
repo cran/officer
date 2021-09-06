@@ -1,10 +1,28 @@
 #' @export
+#' @title add a column break
+#' @description add a column break into a Word document. A column break
+#' is used to add a break in a multi columns section in a Word
+#' Document.
+#'
+#' This function will be deprecated in the next release because it is not
+#' efficient and make users write complex code, use [run_columnbreak()] instead.
+#' @param x an rdocx object
+#' @param pos where to add the new element relative to the cursor,
+#' "after" or "before".
+slip_in_column_break <- function( x, pos = "before" ){
+  xml_elt <- paste0( wr_ns_yes, "<w:br w:type=\"column\"/>", "</w:r>")
+  slip_in_xml(x = x, str = xml_elt, pos = pos)
+}
+
+
+#' @export
 #' @title append seq field
 #' @description append seq field into a paragraph of an rdocx object.
 #' This feature is only available when document are edited with Word,
 #' when edited with Libre Office or another program, seq field will not
 #' be calculated and not displayed.
-#' @note This function will be deprecated in a next release because it is not
+#'
+#' This function will be deprecated in the next release because it is not
 #' efficient and make users write complex code. Use instead [fpar()] to build
 #' formatted paragraphs.
 #' @param x an rdocx object
@@ -12,27 +30,6 @@
 #' @param style text style
 #' @param pos where to add the new element relative to the cursor,
 #' "after" or "before".
-#' @examples
-#' x <- read_docx()
-#' x <- body_add_par(x, "Time is: ", style = "Normal")
-#' x <- slip_in_seqfield(x,
-#'     str = "TIME \u005C@ \"HH:mm:ss\" \u005C* MERGEFORMAT",
-#'     style = 'strong')
-#'
-#' x <- body_add_par(x, " - This is a figure title", style = "centered")
-#' x <- slip_in_seqfield(x, str = "SEQ Figure \u005C* roman",
-#'     style = 'Default Paragraph Font', pos = "before")
-#' x <- slip_in_text(x, "Figure: ", style = "strong", pos = "before")
-#'
-#' x <- body_add_par(x, " - This is another figure title", style = "centered")
-#' x <- slip_in_seqfield(x, str = "SEQ Figure \u005C* roman",
-#'     style = 'strong', pos = "before")
-#' x <- slip_in_text(x, "Figure: ", style = "strong", pos = "before")
-#' x <- body_add_par(x, "This is a symbol: ", style = "Normal")
-#' x <- slip_in_text(x, str = "SYMBOL 100 \u005Cf Wingdings",
-#'     style = 'strong')
-#'
-#' print(x, target = tempfile(fileext = ".docx"))
 slip_in_seqfield <- function( x, str, style = NULL, pos = "after" ){
 
   if( is.null(style) )
@@ -66,25 +63,17 @@ slip_in_seqfield <- function( x, str, style = NULL, pos = "after" ){
 
 #' @export
 #' @title append text
-#' @description append text into a paragraph of an rdocx object
+#' @description append text into a paragraph of an rdocx object.
+#'
+#' This function will be deprecated in the next release because it is not
+#' efficient and make users write complex code. Use instead [fpar()] to build
+#' formatted paragraphs.
 #' @param x an rdocx object
 #' @param str text
 #' @param style text style
 #' @param pos where to add the new element relative to the cursor,
 #' "after" or "before".
 #' @param hyperlink turn the text into an external hyperlink
-#' @note This function will be deprecated in a next release because it is not
-#' efficient and make users write complex code. Use instead [fpar()] to build
-#' formatted paragraphs.
-#' @examples
-#' x <- read_docx()
-#' x <- body_add_par(x, "Hello ", style = "Normal")
-#' x <- slip_in_text(x, "world", style = "strong")
-#' x <- slip_in_text(x, "Message is", style = "strong", pos = "before")
-#' x <- slip_in_text(x, "with a link", style = "strong",
-#'     pos = "after", hyperlink = "https://davidgohel.github.io/officer/")
-#'
-#' print(x, target = tempfile(fileext = ".docx"))
 slip_in_text <- function( x, str, style = NULL, pos = "after", hyperlink = NULL ){
 
   if( is.null(style) )
@@ -119,7 +108,11 @@ slip_in_text <- function( x, str, style = NULL, pos = "after", hyperlink = NULL 
 
 #' @export
 #' @title append an image
-#' @description append an image into a paragraph of an rdocx object
+#' @description append an image into a paragraph of an rdocx object.
+#'
+#' This function will be deprecated in the next release because it is not
+#' efficient and make users write complex code. Use instead [fpar()] to build
+#' formatted paragraphs.
 #' @param x an rdocx object
 #' @param src image filename, the basename of the file must not contain any blank.
 #' @param style text style
@@ -127,16 +120,6 @@ slip_in_text <- function( x, str, style = NULL, pos = "after", hyperlink = NULL 
 #' @param height height in inches
 #' @param pos where to add the new element relative to the cursor,
 #' "after" or "before".
-#' @note This function will be deprecated in a next release because it is not
-#' efficient and make users write complex code. Use instead [fpar()] to build
-#' formatted paragraphs.
-#' @examples
-#' img.file <- file.path( R.home("doc"), "html", "logo.jpg" )
-#' x <- read_docx()
-#' x <- body_add_par(x, "R logo: ", style = "Normal")
-#' x <- slip_in_img(x, src = img.file, style = "strong", width = .3, height = .3)
-#'
-#' print(x, target = tempfile(fileext = ".docx"))
 slip_in_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 
   if( is.null(style) )
@@ -164,12 +147,17 @@ slip_in_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 #' @title add a wml string into a Word document
 #' @description The function add a wml string into
 #' the document after, before or on a cursor location.
+#'
+#' This function will be deprecated in the next release because it is not
+#' efficient and make users write complex code. Use instead [fpar()] to build
+#' formatted paragraphs.
 #' @param x an rdocx object
 #' @param str a wml string
 #' @param pos where to add the new element relative to the cursor,
 #' "after" or "before".
 #' @keywords internal
 slip_in_xml <- function(x, str, pos){
+
   xml_elt <- as_xml_document(str)
   pos_list <- c("after", "before")
 

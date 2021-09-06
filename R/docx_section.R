@@ -1,19 +1,4 @@
 #' @export
-#' @title add a column break
-#' @description add a column break into a Word document. A column break
-#' is used to add a break in a multi columns section in a Word
-#' Document.
-#' @param x an rdocx object
-#' @param pos where to add the new element relative to the cursor,
-#' "after" or "before".
-slip_in_column_break <- function( x, pos = "before" ){
-  xml_elt <- paste0( wr_ns_yes, "<w:br w:type=\"column\"/>", "</w:r>")
-  slip_in_xml(x = x, str = xml_elt, pos = pos)
-}
-
-
-
-#' @export
 #' @title add continuous section
 #' @description Section break starts the new section on the same page. This
 #' type of section break is often used to change the number of columns
@@ -129,7 +114,6 @@ body_end_section_columns <- function(x, widths = c(2.5,2.5), space = .25, sep = 
 #'
 #' doc_1 <- read_docx()
 #' doc_1 <- body_add_par(doc_1, value = str1, style = "Normal")
-#' doc_1 <- slip_in_column_break(doc_1, pos = "after")
 #' doc_1 <- body_add_par(doc_1, value = str1, style = "Normal")
 #' doc_1 <- body_end_section_columns_landscape(doc_1, widths = c(6, 2))
 #' doc_1 <- body_add_par(doc_1, value = str1, style = "Normal")

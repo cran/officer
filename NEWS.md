@@ -1,3 +1,19 @@
+# officer 0.4.0
+
+## New features
+
+* new function `fp_text_lite()` that do not force to provide a value 
+for each properties - if a value is not provided, its attribute will 
+not be written and as a result, the default properties will be applied. 
+Function `fp_text()` has also been adapted, it now supports NA meaning 
+to not write the attributes as in `fp_text_lite()`.
+* new function `run_footnote` to add footnotes in a Word document (it 
+also makes possible to deprecate totally slip_in* functions).
+
+## Issues
+
+* fix a bug when creating the XML of table properties for Word documents
+
 # officer 0.3.19
 
 ## New features
