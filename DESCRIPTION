@@ -1,7 +1,7 @@
 Package: officer
 Type: Package
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.4.1
+Version: 0.4.2
 Authors@R: c(
     person("David", "Gohel", role = c("aut", "cre"),
     email = "david.gohel@ardata.fr"),
@@ -10,7 +10,9 @@ Authors@R: c(
     person("Anton", "Victorson", role = "ctb", email = 'anton@victorson.se',comment = "fixes xml structures"),
     person("Jon", "Calder", role = "ctb", email = 'jonmcalder@gmail.com', comment = "update vignettes"),
     person("John", "Harrold", role = "ctb", email = 'john.m.harrold@gmail.com', comment = "function annotate_base"),
-    person("John", "Muschelli", role = "ctb", email = 'muschellij2@gmail.com', comment = "google doc compatibility")
+    person("John", "Muschelli", role = "ctb", email = 'muschellij2@gmail.com', comment = "google doc compatibility"),
+    person("Bill", "Denney", email="wdenney@humanpredictions.com", role="ctb", comment=c(ORCID="0000-0002-5759-428X", "function as.matrix.rpptx")),
+    person("Nikolai", "Beck", role = "ctb", email = 'beck.nikolai@gmail.com', comment = "set speaker notes for .pptx documents")
     )
 Description: Access and manipulate 'Microsoft Word' and 'Microsoft PowerPoint' documents from R. 
   The package focuses on tabular and graphical reporting from R; it also provides two functions
@@ -24,19 +26,21 @@ Imports: R6, grDevices, stats, graphics, utils, zip (>= 2.1.0), uuid
 URL: https://ardata-fr.github.io/officeverse/,
         https://davidgohel.github.io/officer/
 Encoding: UTF-8
-BugReports: https://github.com/davidgohel/officer/issues
+BugReports: https://github.com/davidgohel/officer/discussions
 RoxygenNote: 7.1.2
 Suggests: testthat, devEMF, ggplot2, rmarkdown, base64enc, knitr, rsvg
-VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2021-11-14 17:38:14 UTC; davidgohel
+Packaged: 2022-03-22 21:59:46 UTC; davidgohel
 Author: David Gohel [aut, cre],
   Frank Hangler [ctb] (function body_replace_all_text),
   Liz Sander [ctb] (several documentation fixes),
   Anton Victorson [ctb] (fixes xml structures),
   Jon Calder [ctb] (update vignettes),
   John Harrold [ctb] (function annotate_base),
-  John Muschelli [ctb] (google doc compatibility)
+  John Muschelli [ctb] (google doc compatibility),
+  Bill Denney [ctb] (<https://orcid.org/0000-0002-5759-428X>, function
+    as.matrix.rpptx),
+  Nikolai Beck [ctb] (set speaker notes for .pptx documents)
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2021-11-14 18:00:02 UTC
+Date/Publication: 2022-03-23 10:00:05 UTC

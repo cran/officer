@@ -1,3 +1,17 @@
+# officer 0.4.2
+
+## New features
+
+* new as.matrix method for pptx to automatically extract one or all matrices
+from the file.
+* simple ([character()] and [block_list()]) speaker notes can 
+now be added to a pptx presentation
+
+## Changes
+
+* deprecate slip_in_column_break and slip_in_text
+* doc: use 'title case' for the titles of function manuals
+* closing issues tab, opening discussion 
 # officer 0.4.1
 
 ## Issues

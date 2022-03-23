@@ -2,7 +2,7 @@
 % Please edit documentation in R/pptx_slide_manip.R
 \name{move_slide}
 \alias{move_slide}
-\title{move a slide}
+\title{Move a slide}
 \usage{
 move_slide(x, index, to)
 }
@@ -14,7 +14,7 @@ move_slide(x, index, to)
 \item{to}{new slide index.}
 }
 \description{
-move a slide in a pptx presentation
+Move a slide in a pptx presentation.
 }
 \note{
 cursor is set on the last slide.
@@ -33,6 +33,7 @@ x <- move_slide(x, index = 1, to = 2)
 Other functions slide manipulation: 
 \code{\link{add_slide}()},
 \code{\link{on_slide}()},
-\code{\link{remove_slide}()}
+\code{\link{remove_slide}()},
+\code{\link{set_notes}()}
 }
 \concept{functions slide manipulation}

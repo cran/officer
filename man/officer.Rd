@@ -4,25 +4,29 @@
 \name{officer}
 \alias{officer}
 \alias{officer-package}
-\title{officer: Manipulate Microsoft Word and PowerPoint Documents}
+\title{Manipulate Microsoft Word and PowerPoint Documents with 'officer'}
 \description{
 The officer package facilitates access to and manipulation of
 'Microsoft Word' and 'Microsoft PowerPoint' documents from R.
-}
-\details{
-Examples of manipulations are:
 
+Examples of usage are:
 \itemize{
-\item read Word and PowerPoint files into data objects
-\item add/edit/remove image, table and text content from documents and slides
-\item write updated content back to Word and PowerPoint files
+\item Create Word documents with tables, titles, TOC and graphics
+\item Importation of Word and PowerPoint files into data objects
+\item Write updated content back to a PowerPoint presentation
+\item Clinical reporting automation
+\item Production of reports from a shiny application
 }
 
-To learn more about officer, start with the vignettes:
-\code{browseVignettes(package = "officer")}
+To start with officer, read about \code{\link[=read_docx]{read_docx()}} and \code{\link[=read_pptx]{read_pptx()}}.
+
+The package is also providing several objects that can be printed
+in 'R Markdown' documents for advanced Word or PowerPoint
+reporting as \code{\link[=run_autonum]{run_autonum()}} and \code{\link[=block_caption]{block_caption()}}.
 }
 \seealso{
-\url{https://davidgohel.github.io/officer/}
+The user documentation: \url{https://ardata-fr.github.io/officeverse/} and
+manuals \url{https://davidgohel.github.io/officer/}
 }
 \author{
 \strong{Maintainer}: David Gohel \email{david.gohel@ardata.fr}
@@ -35,6 +39,8 @@ Other contributors:
   \item Jon Calder \email{jonmcalder@gmail.com} (update vignettes) [contributor]
   \item John Harrold \email{john.m.harrold@gmail.com} (function annotate_base) [contributor]
   \item John Muschelli \email{muschellij2@gmail.com} (google doc compatibility) [contributor]
+  \item Bill Denney \email{wdenney@humanpredictions.com} (\href{https://orcid.org/0000-0002-5759-428X}{ORCID}) (function as.matrix.rpptx) [contributor]
+  \item Nikolai Beck \email{beck.nikolai@gmail.com} (set speaker notes for .pptx documents) [contributor]
 }
 
 }

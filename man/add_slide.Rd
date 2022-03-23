@@ -2,7 +2,7 @@
 % Please edit documentation in R/pptx_slide_manip.R
 \name{add_slide}
 \alias{add_slide}
-\title{add a slide}
+\title{Add a slide}
 \usage{
 add_slide(x, layout = "Title and Content", master = "Office Theme")
 }
@@ -14,7 +14,7 @@ add_slide(x, layout = "Title and Content", master = "Office Theme")
 \item{master}{master layout name where \code{layout} is located}
 }
 \description{
-add a slide into a pptx presentation
+Add a slide into a pptx presentation.
 }
 \examples{
 my_pres <- read_pptx()
@@ -28,6 +28,7 @@ my_pres <- add_slide(my_pres,
 Other functions slide manipulation: 
 \code{\link{move_slide}()},
 \code{\link{on_slide}()},
-\code{\link{remove_slide}()}
+\code{\link{remove_slide}()},
+\code{\link{set_notes}()}
 }
 \concept{functions slide manipulation}
