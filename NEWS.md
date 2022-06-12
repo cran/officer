@@ -1,3 +1,26 @@
+# officer 0.4.3
+
+## New features
+
+* `set_doc_properties()` now supports any character property. 
+It provides an easy way to insert arbitrary fields. Given the challenges 
+that can be encountered with find-and-replace in word with officer, the 
+use of document fields and quick text fields provides a much more robust 
+approach to automatic document generation from R.
+* Adding support for fields (e.g. auto slide number) in Powerpoint (#429), 
+see `empty_content()`.
+* add functionality to set shape geometry and outline, 
+see `ph_location(geam=...)`.
+
+## Changes
+
+- drop shortcuts$slip_in_tableref() and shortcuts$slip_in_plotref()
+- defunct slip_in_column_break() and slip_in_xml()
+- defunct slip_in_text()
+- remove defunct functions `slip_in_img()`, `ph_add_fpar()`, 
+`ph_add_par()` and `ph_add_text()`
+
+
 # officer 0.4.2
 
 ## New features

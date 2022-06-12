@@ -2,22 +2,19 @@
 % Please edit documentation in R/defunct.R
 \name{officer-defunct}
 \alias{officer-defunct}
-\alias{ph_add_text}
-\alias{ph_add_par}
-\alias{ph_add_fpar}
 \alias{slip_in_seqfield}
-\alias{slip_in_img}
+\alias{slip_in_column_break}
+\alias{slip_in_xml}
+\alias{slip_in_text}
 \title{Defunct Functions in Package officer}
 \usage{
-ph_add_text(...)
-
-ph_add_par(...)
-
-ph_add_fpar(...)
-
 slip_in_seqfield(...)
 
-slip_in_img(...)
+slip_in_column_break(...)
+
+slip_in_xml(...)
+
+slip_in_text(...)
 }
 \arguments{
 \item{...}{unused arguments}
@@ -26,13 +23,11 @@ slip_in_img(...)
 Defunct Functions in Package officer
 }
 \details{
-\code{ph_add_text()} is replaced by \code{ph_with(value = fpar(...))}.
-
-\code{ph_add_par()} is replaced by \code{ph_with(value = fpar(...))}.
-
-\code{ph_add_fpar()} is replaced by \code{ph_with(value = fpar(...))}.
-
 \code{slip_in_seqfield()} is replaced by \code{run_word_field()}.
 
-\code{slip_in_img()} is replaced by \code{external_img()}.
+\code{slip_in_column_break()} is replaced by \code{run_columnbreak()}.
+
+\code{slip_in_xml()} is replaced by \code{fpar()}.
+
+\code{slip_in_text()} is replaced by \code{fpar()}.
 }
