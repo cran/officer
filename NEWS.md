@@ -1,3 +1,24 @@
+# officer 0.4.4
+
+## New features
+
+- `fp_par()` now have argument `word_style`
+- add support for `ln` for `external_img` provided by Angus Moore
+- add word_title and word_description to table properties (`prop_table()`). 
+These values can be used as alternative text for Word tables. These values 
+can also be set as "knitr" chunk options.
+
+## Issues
+
+- fix for `is_office_doc_edited()` provided by Andrew Tungate.
+- `tab.lp` is no more set to null with usual rmarkdown outputs
+- autofit was never used when outputting prop_table to xml
+
+## Changes
+
+- Function `opts_current_table()` read some Quarto values related to 
+captions in order to reuse them later.
+
 # officer 0.4.3
 
 ## New features

@@ -165,8 +165,8 @@ to_wml.block_toc <- function(x, add_ns = FALSE, ...) {
       open_tag,
       "<w:pPr/>",
       to_wml(
-        run_seqfield(
-          seqfield = sprintf(
+        run_word_field(
+          field = sprintf(
             "TOC \\o \"1-%.0f\" \\h \\z \\u",
             x$level
           )
@@ -179,8 +179,8 @@ to_wml.block_toc <- function(x, add_ns = FALSE, ...) {
       open_tag,
       "<w:pPr/>",
       to_wml(
-        run_seqfield(
-          seqfield = sprintf(
+        run_word_field(
+          field = sprintf(
             "TOC \\h \\z \\t \"%s%s1\"",
             x$style, x$separator
           )
@@ -193,8 +193,8 @@ to_wml.block_toc <- function(x, add_ns = FALSE, ...) {
       open_tag,
       "<w:pPr/>",
       to_wml(
-        run_seqfield(
-          seqfield = sprintf("TOC \\h \\z \\c \"%s\"", x$seq_id)
+        run_word_field(
+          field = sprintf("TOC \\h \\z \\c \"%s\"", x$seq_id)
         )
       ),
       "</w:p>"
@@ -565,6 +565,8 @@ to_wml.table_colwidths <- function(x, add_ns = FALSE, ...) {
 #' @param colwidths column widths defined by [table_colwidths()]
 #' @param align table alignment (one of left, center or right)
 #' @param tcf conditional formatting settings defined by [table_conditional_formatting()]
+#' @param word_title alternative text for Word table (used as title of the table)
+#' @param word_description alternative text for Word table (used as description of the table)
 #' @examples
 #' prop_table()
 #' to_wml(prop_table())
@@ -574,7 +576,9 @@ prop_table <- function(style = NA_character_, layout = table_layout(),
                        stylenames = table_stylenames(),
                        colwidths = table_colwidths(),
                        tcf = table_conditional_formatting(),
-                       align = "center"){
+                       align = "center",
+                       word_title = NULL,
+                       word_description = NULL){
 
 
   z <- list(
@@ -583,7 +587,9 @@ prop_table <- function(style = NA_character_, layout = table_layout(),
     width = width,
     colsizes = colwidths,
     stylenames = stylenames,
-    tcf = tcf, align = align
+    tcf = tcf, align = align,
+    word_title = word_title,
+    word_description = word_description
   )
   class(z) <- c("prop_table")
   z
@@ -615,12 +621,14 @@ to_wml.prop_table <- function(x, add_ns = FALSE, base_document = NULL, ...) {
 
 
   width <- ""
-  if(!is.null(x$width) && "autofit" %in% x$type)
+  if(!is.null(x$width) && "autofit" %in% x$layout$type)
     width <- to_wml(x$width, add_ns= add_ns, base_document = base_document)
 
   colwidths <- to_wml(x$colsizes, add_ns= add_ns, base_document = base_document)
   tcf <- to_wml(x$tcf, add_ns= add_ns, base_document = base_document)
   paste0("<w:tblPr>",
+         if(!is.null(x$word_title)) paste0("<w:tblCaption w:val=\"", htmlEscapeCopy(x$word_title), "\"/>"),
+         if(!is.null(x$word_description)) paste0("<w:tblDescription w:val=\"", htmlEscapeCopy(x$word_description), "\"/>"),
          if(!is.na(style_id)) paste0("<w:tblStyle w:val=\"", style_id, "\"/>"),
          tbl_layout,
          sprintf( "<w:jc w:val=\"%s\"/>", x$align ),
@@ -859,7 +867,7 @@ to_pml.block_table <- function(x, add_ns = FALSE,
 #' text and images are associated with formatting properties.
 #'
 #' \code{fpar} supports [ftext()], [external_img()], \code{run_*} functions
-#' (i.e. [run_autonum()], [run_seqfield()]) when output is Word, and simple strings.
+#' (i.e. [run_autonum()], [run_word_field()]) when output is Word, and simple strings.
 #'
 #' Default text and paragraph formatting properties can also be modified
 #' with function `update()`.

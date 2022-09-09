@@ -297,10 +297,12 @@ ppr_css <- function(x){
 
   paddings <- sprintf("padding-top:%.0fpt;padding-bottom:%.0fpt;padding-left:%.0fpt;padding-right:%.0fpt;",
                       x$padding.top, x$padding.bottom, x$padding.left, x$padding.right)
+  ls <- formatC(x$line_spacing, format = "f", digits = 2, decimal.mark = ".", drop0trailing = TRUE )
+  line_spacing <- sprintf("line-height: %s;", ls )
 
   shading.color <- sprintf("background-color:%s;", css_color(x$shading.color))
 
-  paste0("margin:0pt;", text.align, borders, paddings,
+  paste0("margin:0pt;", text.align, borders, paddings, line_spacing,
          shading.color)
 }
 
@@ -308,6 +310,11 @@ ppr_wml <- function(x){
 
   if("justify" %in% x$text.align ){
     x$text.align  <- "both";
+  }
+  pstyle <- ""
+  if(!is.null(x$word_style)) {
+    word_style_id <- gsub("[^a-zA-Z0-9]", "", x$word_style)
+    pstyle <- sprintf("<w:pStyle w:val=\"%s\"/>", word_style_id)
   }
   text_align_ <- sprintf("<w:jc w:val=\"%s\"/>", x$text.align)
   keep_with_next <- ""
@@ -332,6 +339,7 @@ ppr_wml <- function(x){
   }
 
   paste0("<w:pPr>",
+         pstyle,
          text_align_,
          keep_with_next,
          borders_,
@@ -574,8 +582,9 @@ tcpr_pml <- function(x){
   bt <- border_pml(x$border.top, side = "T")
   bl <- border_pml(x$border.left, side = "L")
   br <- border_pml(x$border.right, side = "R")
+
   pml_attrs <- paste0(text.direction, vertical.align, margins)
-  paste0("<a:tcPr ", pml_attrs, ">", bl, br, bt, bb,
+  paste0("<a:tcPr", pml_attrs, ">", bl, br, bt, bb,
          background.color, "</a:tcPr>" )
 }
 
@@ -592,12 +601,24 @@ tcpr_wml <- function(x){
   bl <- border_wml(x$border.left, side = "left")
   br <- border_wml(x$border.right, side = "right")
 
-
   margin.bottom <- sprintf("<w:bottom w:w=\"%.0f\" w:type=\"dxa\"/>", x$margin.bottom * 20 )
   margin.top <- sprintf("<w:top w:w=\"%.0f\" w:type=\"dxa\"/>", x$margin.top * 20 )
   margin.left <- sprintf("<w:left w:w=\"%.0f\" w:type=\"dxa\"/>", x$margin.left * 20 )
   margin.right <- sprintf("<w:right w:w=\"%.0f\" w:type=\"dxa\"/>", x$margin.right * 20 )
-  paste0("<w:tcPr><w:tcBorders>", bb, bt, bl, br, "</w:tcBorders>",
+
+  rowspan <- ""
+  if (x$rowspan>1) {
+    rowspan <- paste0("<w:gridSpan w:val=\"", x$rowspan,"\"/>")
+  }
+  colspan <- ""
+  if (x$colspan>1) {
+    colspan <- "<w:vMerge w:val=\"restart\"/>"
+  } else if (x$colspan<1) {
+    colspan <- "<w:vMerge/>"
+  }
+
+  paste0("<w:tcPr>", rowspan, colspan,
+         "<w:tcBorders>", bb, bt, bl, br, "</w:tcBorders>",
                          background.color,
                          "<w:tcMar>", margin.top, margin.bottom, margin.left, margin.right, "</w:tcMar>",
                          text.direction, vertical.align, "</w:tcPr>" )

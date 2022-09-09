@@ -361,6 +361,7 @@ print.fp_border <- function(x, ...) {
 #' a valid color (e.g. "#000000" or "black").
 #' @param keep_with_next a scalar logical. Specifies that the paragraph (or at least part of it) should be rendered
 #' on the same page as the next paragraph when possible.
+#' @param word_style Word paragraph style name
 #' @return a \code{fp_par} object
 #' @examples
 #' fp_par(text.align = "center", padding = 5)
@@ -376,7 +377,8 @@ fp_par = function(text.align = "left",
                   border.bottom, border.left,
                   border.top, border.right,
                   shading.color = "transparent",
-                  keep_with_next = FALSE) {
+                  keep_with_next = FALSE,
+                  word_style = "Normal") {
 
   out = list()
 
@@ -411,6 +413,8 @@ fp_par = function(text.align = "left",
     out <- check_set_border( obj = out, border.left)
   if( !missing(border.right) )
     out <- check_set_border( obj = out, border.right)
+
+  out <- check_set_chr(obj = out, word_style)
 
   out$keep_with_next <- keep_with_next
   class( out ) = "fp_par"
@@ -473,11 +477,14 @@ print.fp_par = function (x, ...){
 update.fp_par <- function(object, text.align, padding, border,
                           padding.bottom, padding.top, padding.left, padding.right,
                           border.bottom, border.left,border.top, border.right,
-                          shading.color, ...) {
+                          shading.color, keep_with_next, word_style, ...) {
 
   if( !missing( text.align ) )
     object <- check_set_choice( obj = object, value = text.align,
                                 choices = c("left", "right", "center", "justify") )
+  if( !missing( word_style ) ){
+    object <- check_set_chr(obj = object, word_style)
+  }
 
   # padding checking
   if( !missing( padding ) )
@@ -509,14 +516,16 @@ update.fp_par <- function(object, text.align, padding, border,
 
   if( !missing( shading.color ) )
     object <- check_set_color(object, shading.color)
+  if( !missing( keep_with_next ) )
+    object <- check_set_bool(object, keep_with_next)
 
   object
 }
 
 # fp_cell ----
 
-vertical.align.styles <- c( "top", "center", "bottom" )
-text.directions <- c( "lrtb", "tbrl", "btlr" )
+vertical.align.styles <- c("top", "center", "bottom")
+text.directions <- c("lrtb", "tbrl", "btlr")
 
 #' @title Cell formatting properties
 #'
@@ -532,56 +541,80 @@ text.directions <- c( "lrtb", "tbrl", "btlr" )
 #' valid color (e.g. "#000000" or "black").
 #' @param text.direction cell text rotation - a single character value, expected
 #' value is one of "lrtb", "tbrl", "btlr".
+#' @param rowspan specify how many rows the cell is spanned over
+#' @param colspan specify how many columns the cell is spanned over
 #' @export
 #' @family functions for defining formatting properties
-fp_cell = function(
-  border = fp_border(width=0),
-  border.bottom, border.left, border.top, border.right,
-  vertical.align = "center",
-  margin = 0,
-  margin.bottom, margin.top, margin.left, margin.right,
-  background.color = "transparent",
-  text.direction = "lrtb"){
-
+fp_cell <- function(border = fp_border(width = 0),
+                    border.bottom, border.left, border.top, border.right,
+                    vertical.align = "center",
+                    margin = 0,
+                    margin.bottom, margin.top, margin.left, margin.right,
+                    background.color = "transparent",
+                    text.direction = "lrtb",
+                    rowspan = 1,
+                    colspan = 1) {
   out <- list()
 
   # border checking
-  out <- check_spread_border( obj = out, border,
-                              dest = c("border.bottom", "border.top",
-                                       "border.left", "border.right") )
-  if( !missing(border.top) )
-    out <- check_set_border( obj = out, border.top)
-  if( !missing(border.bottom) )
-    out <- check_set_border( obj = out, border.bottom)
-  if( !missing(border.left) )
-    out <- check_set_border( obj = out, border.left)
-  if( !missing(border.right) )
-    out <- check_set_border( obj = out, border.right)
+  out <- check_spread_border(
+    obj = out, border,
+    dest = c(
+      "border.bottom", "border.top",
+      "border.left", "border.right"
+    )
+  )
+  if (!missing(border.top)) {
+    out <- check_set_border(obj = out, border.top)
+  }
+  if (!missing(border.bottom)) {
+    out <- check_set_border(obj = out, border.bottom)
+  }
+  if (!missing(border.left)) {
+    out <- check_set_border(obj = out, border.left)
+  }
+  if (!missing(border.right)) {
+    out <- check_set_border(obj = out, border.right)
+  }
 
   # background-color checking
   out <- check_set_color(out, background.color)
 
-  out <- check_set_choice( obj = out, value = vertical.align,
-                           choices = vertical.align.styles )
-  out <- check_set_choice( obj = out, value = text.direction,
-                           choices = text.directions )
+  out <- check_set_choice(
+    obj = out, value = vertical.align,
+    choices = vertical.align.styles
+  )
+  out <- check_set_choice(
+    obj = out, value = text.direction,
+    choices = text.directions
+  )
 
   # margin checking
-  out <- check_spread_integer( out, margin,
-                               c("margin.bottom", "margin.top",
-                                 "margin.left", "margin.right"))
+  out <- check_spread_integer(
+    out, margin,
+    c(
+      "margin.bottom", "margin.top",
+      "margin.left", "margin.right"
+    )
+  )
 
-  if( !missing(margin.bottom) )
-    out <- check_set_integer( obj = out, margin.bottom)
-  if( !missing(margin.left) )
-    out <- check_set_integer( obj = out, margin.left)
-  if( !missing(margin.top) )
-    out <- check_set_integer( obj = out, margin.top)
-  if( !missing(margin.right) )
-    out <- check_set_integer( obj = out, margin.right)
+  if (!missing(margin.bottom)) {
+    out <- check_set_integer(obj = out, margin.bottom)
+  }
+  if (!missing(margin.left)) {
+    out <- check_set_integer(obj = out, margin.left)
+  }
+  if (!missing(margin.top)) {
+    out <- check_set_integer(obj = out, margin.top)
+  }
+  if (!missing(margin.right)) {
+    out <- check_set_integer(obj = out, margin.right)
+  }
 
+  out <- check_set_integer(obj = out, rowspan)
+  out <- check_set_integer(obj = out, colspan)
 
-  class( out ) = "fp_cell"
+  class(out) <- "fp_cell"
   out
 }
 
@@ -591,27 +624,32 @@ fp_cell = function(
 #' @param x,object \code{fp_cell} object
 #' @param type output type - one of 'wml', 'pml', 'html'.
 #' @param ... further arguments - not used
-format.fp_cell = function (x, type = "wml", ...){
-  btlr_list <- list(x$border.bottom, x$border.top,
-                    x$border.left, x$border.right)
-
-  btlr_cols <- lapply( btlr_list,
-                       function(x) {
-                         as.vector(col2rgb(x$color, alpha = TRUE )[,1] )
-                       }
+format.fp_cell <- function(x, type = "wml", ...) {
+  btlr_list <- list(
+    x$border.bottom, x$border.top,
+    x$border.left, x$border.right
   )
-  colmat <- do.call( "rbind", btlr_cols )
-  types <- sapply(btlr_list, function(x) x$style )
-  widths <- sapply(btlr_list, function(x) x$width )
-  shading <- col2rgb(x$background.color, alpha = TRUE )[,1]
 
-  if( type == "wml"){
+  btlr_cols <- lapply(
+    btlr_list,
+    function(x) {
+      as.vector(col2rgb(x$color, alpha = TRUE)[, 1])
+    }
+  )
+  colmat <- do.call("rbind", btlr_cols)
+  types <- sapply(btlr_list, function(x) x$style)
+  widths <- sapply(btlr_list, function(x) x$width)
+  shading <- col2rgb(x$background.color, alpha = TRUE)[, 1]
+
+  if (type == "wml") {
     tcpr_wml(x)
-  } else if( type == "pml"){
+  } else if (type == "pml") {
     tcpr_pml(x)
-  } else if( type == "html" ){
+  } else if (type == "html") {
     tcpr_css(x)
-  } else stop("unimplemented")
+  } else {
+    stop("unimplemented")
+  }
 }
 
 #' @export
@@ -621,7 +659,7 @@ to_wml.fp_cell <- function(x, add_ns = FALSE, ...) {
 
 #' @export
 #' @rdname fp_cell
-print.fp_cell <- function(x, ...){
+print.fp_cell <- function(x, ...) {
   cat(format(x, type = "html"))
 }
 
@@ -630,53 +668,86 @@ print.fp_cell <- function(x, ...){
 #' @rdname fp_cell
 #' @examples
 #' obj <- fp_cell(margin = 1)
-#' update( obj, margin.bottom = 5 )
+#' update(obj, margin.bottom = 5)
 #' @export
 update.fp_cell <- function(object, border,
-                           border.bottom,border.left,border.top,border.right,
+                           border.bottom, border.left, border.top, border.right,
                            vertical.align, margin = 0,
                            margin.bottom, margin.top, margin.left, margin.right,
                            background.color,
-                           text.direction, ...) {
-
-  if( !missing(border) )
-    object <- check_spread_border( obj = object, border,
-                                   dest = c("border.bottom", "border.top",
-                                            "border.left", "border.right") )
-  if( !missing(border.top) )
-    object <- check_set_border( obj = object, border.top)
-  if( !missing(border.bottom) )
-    object <- check_set_border( obj = object, border.bottom)
-  if( !missing(border.left) )
-    object <- check_set_border( obj = object, border.left)
-  if( !missing(border.right) )
-    object <- check_set_border( obj = object, border.right)
+                           text.direction,
+                           rowspan = 1,
+                           colspan = 1, ...) {
+  if (!missing(border)) {
+    object <- check_spread_border(
+      obj = object, border,
+      dest = c(
+        "border.bottom", "border.top",
+        "border.left", "border.right"
+      )
+    )
+  }
+  if (!missing(border.top)) {
+    object <- check_set_border(obj = object, border.top)
+  }
+  if (!missing(border.bottom)) {
+    object <- check_set_border(obj = object, border.bottom)
+  }
+  if (!missing(border.left)) {
+    object <- check_set_border(obj = object, border.left)
+  }
+  if (!missing(border.right)) {
+    object <- check_set_border(obj = object, border.right)
+  }
 
   # background-color checking
-  if( !missing(background.color) )
+  if (!missing(background.color)) {
     object <- check_set_color(object, background.color)
+  }
 
-  if( !missing(vertical.align) )
-    object <- check_set_choice( obj = object, value = vertical.align,
-                                choices = vertical.align.styles )
-  if( !missing(text.direction) )
-    object <- check_set_choice( obj = object, value = text.direction,
-                                choices = text.directions )
+  if (!missing(vertical.align)) {
+    object <- check_set_choice(
+      obj = object, value = vertical.align,
+      choices = vertical.align.styles
+    )
+  }
+  if (!missing(text.direction)) {
+    object <- check_set_choice(
+      obj = object, value = text.direction,
+      choices = text.directions
+    )
+  }
 
   # margin checking
-  if( !missing(margin) )
-    object <- check_spread_integer( object, margin,
-                                    c("margin.bottom", "margin.top",
-                                      "margin.left", "margin.right"))
+  if (!missing(margin)) {
+    object <- check_spread_integer(
+      object, margin,
+      c(
+        "margin.bottom", "margin.top",
+        "margin.left", "margin.right"
+      )
+    )
+  }
 
-  if( !missing(margin.bottom) )
-    object <- check_set_integer( obj = object, margin.bottom)
-  if( !missing(margin.left) )
-    object <- check_set_integer( obj = object, margin.left)
-  if( !missing(margin.top) )
-    object <- check_set_integer( obj = object, margin.top)
-  if( !missing(margin.right) )
-    object <- check_set_integer( obj = object, margin.right)
+  if (!missing(margin.bottom)) {
+    object <- check_set_integer(obj = object, margin.bottom)
+  }
+  if (!missing(margin.left)) {
+    object <- check_set_integer(obj = object, margin.left)
+  }
+  if (!missing(margin.top)) {
+    object <- check_set_integer(obj = object, margin.top)
+  }
+  if (!missing(margin.right)) {
+    object <- check_set_integer(obj = object, margin.right)
+  }
+
+  if (!missing(rowspan)) {
+    object <- check_set_integer(obj = object, rowspan)
+  }
+  if (!missing(colspan)) {
+    object <- check_set_integer(obj = object, colspan)
+  }
 
   object
 }
