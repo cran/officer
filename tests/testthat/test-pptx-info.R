@@ -27,6 +27,38 @@ test_that("layout properties", {
   expect_is( laypr$rotation, "numeric" )
 })
 
+save_png <- function(code, width = 700, height = 700) {
+  path <- tempfile(fileext = ".png")
+  png(path, width = width, height = height, res = 150)
+  on.exit(dev.off())
+  code
+
+  path
+}
+
+test_that("plot layout properties", {
+  skip_if_not_installed("doconv")
+  skip_if_not(doconv::msoffice_available())
+  require(doconv)
+  local_edition(3L)
+  x <- read_pptx()
+
+  png1 <- tempfile(fileext = ".png")
+  png(png1, width = 7, height = 6, res = 150, units = "in")
+  plot_layout_properties( x = x, layout = "Title Slide",
+                          master = "Office Theme" )
+  dev.off()
+  png2 <- tempfile(fileext = ".png")
+  png(png2, width = 7, height = 6, res = 150, units = "in")
+  plot_layout_properties( x = x, layout = "Title Slide",
+                          master = "Office Theme",
+                          labels = FALSE)
+  dev.off()
+  expect_snapshot_doc(name = "plot-twocontent-layout", x = png1, engine = "testthat")
+  expect_snapshot_doc(name = "plot-twocontent-layout-nolabel", x = png2, engine = "testthat")
+
+})
+
 test_that("slide summary", {
   x <- read_pptx()
   x <- add_slide(x, "Title and Content", "Office Theme")

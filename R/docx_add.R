@@ -41,7 +41,7 @@ body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 
   if( file_type %in% ".svg" ){
     if (!requireNamespace("rsvg")){
-      stop("package 'rsvg' is required to convert svg file to rasters")
+      stop("package 'rsvg' is required to convert svg file to rasters.")
     }
 
     file <- tempfile(fileext = ".png")
@@ -92,20 +92,7 @@ body_add_img <- function( x, src, style = NULL, width, height, pos = "after" ){
 #' @export
 #' @family functions for adding content
 body_add_docx <- function( x, src, pos = "after" ){
-  src <- unique( src )
-  rel <- x$doc_obj$relationship()
-  new_rid <- sprintf("rId%.0f", rel$get_next_id())
-  new_docx_file <- basename(tempfile(fileext = ".docx"))
-  file.copy(src, to = file.path(x$package_dir, new_docx_file))
-  rel$add(
-    id = new_rid, type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/aFChunk",
-    target = file.path("../", new_docx_file) )
-  x$content_type$add_override(
-    setNames("application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml", paste0("/", new_docx_file) )
-  )
-  x$content_type$save()
-  xml_elt <- paste0("<w:altChunk xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" ",
-                    "r:id=\"", new_rid, "\"/>")
+  xml_elt <- to_wml(block_pour_docx(file = src), add_ns = TRUE)
   body_add_xml(x = x, str = xml_elt, pos = pos)
 }
 
@@ -119,6 +106,8 @@ body_add_docx <- function( x, src, pos = "after" ){
 #' @param height height in inches
 #' @param res resolution of the png image in ppi
 #' @param scale Multiplicative scaling factor, same as in ggsave
+#' @param pos where to add the new element relative to the cursor,
+#' one of "after", "before", "on".
 #' @param ... Arguments to be passed to png function.
 #' @importFrom grDevices png dev.off
 #' @examples
@@ -134,7 +123,7 @@ body_add_docx <- function( x, src, pos = "after" ){
 #'   print(doc, target = tempfile(fileext = ".docx") )
 #' }
 #' @family functions for adding content
-body_add_gg <- function( x, value, width = 6, height = 5, res = 300, style = "Normal", scale = 1, ... ){
+body_add_gg <- function( x, value, width = 6, height = 5, res = 300, style = "Normal", scale = 1, pos = "after", ... ){
 
   if( !requireNamespace("ggplot2") )
     stop("package ggplot2 is required to use this function")
@@ -145,7 +134,7 @@ body_add_gg <- function( x, value, width = 6, height = 5, res = 300, style = "No
   print(value)
   dev.off()
   on.exit(unlink(file))
-  body_add_img(x, src = file, style = style, width = width, height = height)
+  body_add_img(x, src = file, style = style, width = width, height = height, pos = pos)
 }
 
 
@@ -261,13 +250,6 @@ body_add_par <- function( x, value, style = NULL, pos = "after" ){
 #' @family functions for adding content
 body_add_fpar <- function( x, value, style = NULL, pos = "after" ){
 
-  img_src <- sapply(value$chunks, function(x){
-    if( inherits(x, "external_img"))
-      as.character(x)
-    else NA_character_
-  })
-  img_src <- unique(img_src[!is.na(img_src)])
-
   if( !is.null(style) ){
     style_id <- get_style_id(data = x$styles, style=style, type = "paragraph")
   } else style_id <- NULL
@@ -363,6 +345,8 @@ body_add_toc <- function( x, level = 3, pos = "after", style = NULL, separator =
 #' @param width height in inches
 #' @param height height in inches
 #' @param res resolution of the png image in ppi
+#' @param pos where to add the new element relative to the cursor,
+#' one of "after", "before", "on".
 #' @param ... Arguments to be passed to png function.
 #' @importFrom grDevices png dev.off
 #' @examples
@@ -372,11 +356,11 @@ body_add_toc <- function( x, level = 3, pos = "after", style = NULL, separator =
 #'   doc <- body_add_plot(doc,
 #'     value = plot_instr(
 #'       code = {barplot(1:5, col = 2:6)}),
-#'       style = "centered" )
+#'       style = "centered")
 #'
 #' print(doc, target = tempfile(fileext = ".docx") )
 #' @family functions for adding content
-body_add_plot <- function( x, value, width = 6, height = 5, res = 300, style = "Normal", ... ){
+body_add_plot <- function( x, value, width = 6, height = 5, res = 300, style = "Normal", pos = "after", ... ){
 
   file <- tempfile(fileext = ".png")
   png(filename = file, width = width, height = height, units = "in", res = res, ...)
@@ -387,7 +371,7 @@ body_add_plot <- function( x, value, width = 6, height = 5, res = 300, style = "
     dev.off()
   } )
   on.exit(unlink(file))
-  body_add_img(x, src = file, style = style, width = width, height = height)
+  body_add_img(x, src = file, style = style, width = width, height = height, pos = pos)
 }
 
 
@@ -431,30 +415,26 @@ body_add_caption <- function( x, value, pos = "after"){
 #' @param pos where to add the new element relative to the cursor,
 #' one of "after", "before", "on".
 #' @keywords internal
-body_add_xml <- function(x, str, pos){
+body_add_xml <- function(x, str, pos = c("after", "before", "on")){
   xml_elt <- as_xml_document(str)
-  pos_list <- c("after", "before", "on")
+  pos <- match.arg(pos)
 
-  if( !pos %in% pos_list )
-    stop("unknown pos ", shQuote(pos, type = "sh"), ", it should be ",
-         paste( shQuote(pos_list, type = "sh"), collapse = " or ") )
-
-  cursor_elt <- x$doc_obj$get_at_cursor()
-
-  if( length(x) == 1 ){
-    xml_add_sibling(cursor_elt, xml_elt, .where = "before")
-    x <- cursor_end(x)
+  cursor_elt <- docx_current_block_xml(x)
+  if (is.null(cursor_elt)) {
+    xml_add_child(xml_find_first(x$doc_obj$get(), "/w:document/w:body"),
+                  xml_elt, .where = 0)
+    .name <- xml_name(xml_elt)
+    x$officer_cursor <- cursor_append(x$officer_cursor, .name)
+  } else if (pos == "on") {
+    xml_replace(cursor_elt, xml_elt)
+    x$officer_cursor <- cursor_replace_nodename(x$officer_cursor, xml_name(xml_elt))
+  } else if (pos == "after") {
+    xml_add_sibling(cursor_elt, xml_elt, .where = pos)
+    x$officer_cursor <- cursor_add_after(x$officer_cursor, xml_name(xml_elt))
   } else {
-    if( pos != "on")
-      xml_add_sibling(cursor_elt, xml_elt, .where = pos)
-    else {
-      xml_replace(cursor_elt, xml_elt)
-    }
-    if(pos == "after")
-      x <- cursor_forward(x)
+    xml_add_sibling(cursor_elt, xml_elt, .where = pos)
+    x$officer_cursor <- cursor_add_before(x$officer_cursor, xml_name(xml_elt))
   }
-
-
   x
 }
 
@@ -480,7 +460,7 @@ body_add_xml2 <- function(x, str){
 #' doc <- body_add_par(doc, "centered text", style = "centered")
 #' doc <- body_bookmark(doc, "text_to_replace")
 body_bookmark <- function(x, id){
-  cursor_elt <- x$doc_obj$get_at_cursor()
+  cursor_elt <- docx_current_block_xml(x)
   ns_ <- "xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\""
   new_id <- UUIDgenerate()
   id <- check_bookmark_id(id)
@@ -528,17 +508,14 @@ body_bookmark <- function(x, id){
 #' print(my_doc, target = tempfile(fileext = ".docx"))
 body_remove <- function(x){
 
-  cursor_elt <- x$doc_obj$get_at_cursor()
+  cursor_elt <- docx_current_block_xml(x)
 
-  if( x$doc_obj$length() == 1 && xml_name(cursor_elt) == "sectPr"){
+  if(is.null(cursor_elt)){
     warning("There is nothing left to remove in the document")
     return(x)
   }
-
-  x$doc_obj$cursor_forward()
-  new_cursor_elt <- x$doc_obj$get_at_cursor()
+  x$officer_cursor <- cursor_delete(x$officer_cursor, xml_name(cursor_elt))
   xml_remove(cursor_elt)
-  x$doc_obj$set_cursor(xml_path(new_cursor_elt))
   x
 }
 
@@ -709,7 +686,7 @@ body_add.external_img <- function( x, value, style = "Normal", ... ){
 
   if( file_type %in% ".svg" ){
     if (!requireNamespace("rsvg")){
-      stop("package 'rsvg' is required to convert svg file to rasters")
+      stop("package 'rsvg' is required to convert svg file to rasters.")
     }
 
     file <- tempfile(fileext = ".png")

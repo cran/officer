@@ -18,6 +18,15 @@ content_type <- R6Class(
       doc <- read_xml(x = private$filename )
       ns <- xml_ns(doc)
 
+      node_template <- xml_find_first(doc, "d1:Override[@ContentType='application/vnd.openxmlformats-officedocument.presentationml.template.main+xml']")
+      if (!inherits(node_template, "xml_missing")) {
+        xml_attr(node_template, 'ContentType') <- "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"
+      }
+      node_template <- xml_find_first(doc, "d1:Override[@ContentType='application/vnd.openxmlformats-officedocument.wordprocessingml.template.main+xml']")
+      if (!inherits(node_template, "xml_missing")) {
+        xml_attr(node_template, 'ContentType') <- "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
+      }
+
       extension <- xml_find_all(doc, "//*[contains(local-name(), 'Default')]/@Extension", ns = ns)
       extension <- xml_text( extension )
       content_type <- xml_find_all(doc, "//*[contains(local-name(), 'Default')]/@ContentType", ns = ns)
@@ -75,6 +84,7 @@ content_type <- R6Class(
       self$add_ext(extension = "jpeg", type = "image/jpeg")
       self$add_ext(extension = "gif", type = "image/gif")
       self$add_ext(extension = "png", type = "image/png")
+      self$add_ext(extension = "svg", type = "image/svg+xml")
       self$add_ext(extension = "bmp", type = "image/bmp")
       self$add_ext(extension = "emf", type = "image/x-emf")
       self$add_ext(extension = "wmf", type = "image/x-wmf")

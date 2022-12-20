@@ -7,6 +7,7 @@
 #' Use then this object to add content to it and create Word files
 #' from R.
 #' @param path path to the docx file to use as base document.
+#' `dotx` file are supported.
 #' @return an object of class `rdocx`.
 #' @section styles:
 #'
@@ -57,16 +58,21 @@ read_docx <- function( path = NULL ){
   if( is.null(path) )
     path <- system.file(package = "officer", "template/template.docx")
 
-  if(!grepl("\\.docx$", path, ignore.case = TRUE)){
+  if(!grepl("\\.(docx|dotx)$", path, ignore.case = TRUE)){
     stop("read_docx only support docx files", call. = FALSE)
   }
 
   package_dir <- tempfile()
   unpack_folder( file = path, folder = package_dir )
 
-  obj <- structure(list( package_dir = package_dir ),
+  obj <- structure(list(package_dir = package_dir),
                    .Names = c("package_dir"),
                    class = "rdocx")
+
+  obj$settings <- update(
+    object = docx_settings(),
+    file = file.path(package_dir, "word", "settings.xml")
+  )
 
   obj$rel <- relationship$new()
   obj$rel$feed_from_xml(file.path(package_dir, "_rels", ".rels"))
@@ -79,6 +85,7 @@ read_docx <- function( path = NULL ){
                                cursor = "/w:document/w:body/*[1]",
                                body_xpath = "/w:document/w:body")
   obj$styles <- read_docx_styles(package_dir)
+  obj$officer_cursor <- officer_cursor(obj$doc_obj$get())
 
   header_files <- list.files(file.path(package_dir, "word"),
                              pattern = "^header[0-9]*.xml$")
@@ -137,8 +144,7 @@ print.rdocx <- function(x, target = NULL, ...){
     names(style_sample) <- style_names$style_name
     print(style_sample)
 
-
-    cursor_elt <- x$doc_obj$get_at_cursor()
+    cursor_elt <- docx_current_block_xml(x)
     cat("\n* Content at cursor location:\n")
     print(node_content(cursor_elt, x))
     return(invisible())
@@ -156,10 +162,12 @@ print.rdocx <- function(x, target = NULL, ...){
   process_links(x$doc_obj)
   for(header in x$headers) process_links(header)
   for(footer in x$footers) process_links(footer)
-  process_images(x$doc_obj, x$package_dir)
-  process_images(x$footnotes, x$package_dir)
-  for(header in x$headers) process_images(header, x$package_dir)
-  for(footer in x$footers) process_images(footer, x$package_dir)
+  process_docx_poured(x$doc_obj, x$doc_obj$relationship(), x$content_type,
+                      x$package_dir)
+  process_images(x$doc_obj, x$doc_obj$relationship(), x$package_dir)
+  process_images(x$footnotes, x$footnotes$relationship(), x$package_dir)
+  for(header in x$headers) process_images(header, header$relationship(), x$package_dir)
+  for(footer in x$footers) process_images(footer, footer$relationship(), x$package_dir)
 
   int_id <- 1 # unique id identifier
 
@@ -199,6 +207,7 @@ print.rdocx <- function(x, target = NULL, ...){
   x$footnotes$save()
 
   x$rel$write(file.path(x$package_dir, "_rels", ".rels"))
+  write_docx_settings(x)
 
   # save doc properties
   if(nrow(x$doc_properties$data) >0 ){
@@ -212,90 +221,6 @@ print.rdocx <- function(x, target = NULL, ...){
   invisible(pack_folder(folder = x$package_dir, target = target ))
 }
 
-#' @importFrom xml2 xml_remove as_xml_document xml_parent xml_child
-process_footnotes <- function( x ){
-
-  footnotes <- x$footnotes
-  doc_obj <- x$doc_obj
-
-  rel <- doc_obj$relationship()
-
-  hl_nodes <- xml_find_all(doc_obj$get(), "//w:footnoteReference[@w:id]")
-  which_to_add <- hl_nodes[grepl( "^footnote", xml_attr(hl_nodes, "id") )]
-  hl_ref <- xml_attr(which_to_add, "id")
-  for(i in seq_along(hl_ref) ){
-
-    next_id <- rel$get_next_id()
-    rel$add(
-      paste0("rId", next_id),
-      type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes",
-      target = "footnotes.xml" )
-
-    index <- length(xml_find_all(footnotes$get(), "w:footnote")) - 1
-    xml_attr(which_to_add[[i]], "w:id") <- index
-
-    run <- xml_parent(which_to_add[[i]])
-
-    run_rstyle <- xml_child(run, "w:rPr/w:rStyle")
-
-    styles <- styles_info(x, type = "character")
-    style_id <- xml_attr(run_rstyle, "val")
-    style_id <- styles$style_id[styles$style_name %in% style_id]
-
-    xml_attr(run_rstyle, "w:val") <- style_id
-
-    footnote <- xml_child(which_to_add[[i]], "w:footnote")
-    xml_attr(footnote, "w:id") <- index
-
-    footnote_rstyle <- xml_child(footnote, "w:p/w:r/w:rPr/w:rStyle")
-    xml_attr(footnote_rstyle, "w:val") <- style_id
-
-    newfootnote <- as_xml_document(as.character(footnote))
-    xml_remove(footnote)
-
-    xml_add_child(footnotes$get(), newfootnote)
-  }
-}
-process_links <- function( doc_obj ){
-  rel <- doc_obj$relationship()
-  hl_nodes <- xml_find_all(doc_obj$get(), "//w:hyperlink[@r:id]")
-  which_to_add <- hl_nodes[!grepl( "^rId[0-9]+$", xml_attr(hl_nodes, "id") )]
-  hl_ref <- unique(xml_attr(which_to_add, "id"))
-  for(i in seq_along(hl_ref) ){
-    rid <- sprintf("rId%.0f", rel$get_next_id() )
-
-    rel$add(
-      id = rid, type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
-      target = htmlEscapeCopy(hl_ref[i]), target_mode = "External" )
-
-    which_match_id <- grepl( hl_ref[i], xml_attr(which_to_add, "id"), fixed = TRUE )
-    xml_attr(which_to_add[which_match_id], "r:id") <- rep(rid, sum(which_match_id))
-  }
-}
-process_images <- function( doc_obj, package_dir ){
-  rel <- doc_obj$relationship()
-
-  hl_nodes <- xml_find_all(
-    doc_obj$get(), "//a:blip[@r:embed]",
-    ns = c("a"="http://schemas.openxmlformats.org/drawingml/2006/main",
-           r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"))
-  which_to_add <- hl_nodes[!grepl( "^rId[0-9]+$", xml_attr(hl_nodes, "embed") )]
-  hl_ref <- unique(xml_attr(which_to_add, "embed"))
-  for(i in seq_along(hl_ref) ){
-    rid <- sprintf("rId%.0f", rel$get_next_id() )
-
-    img_path <- file.path(package_dir, "word", "media")
-    dir.create(img_path, recursive = TRUE, showWarnings = FALSE)
-    file.copy(from = hl_ref[i], to = file.path(package_dir, "word", "media", basename(hl_ref[i])))
-
-    rel$add(
-      id = rid, type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
-      target = file.path("media", basename(hl_ref[i])))
-
-    which_match_id <- grepl( hl_ref[i], xml_attr(which_to_add, "embed"), fixed = TRUE )
-    xml_attr(which_to_add[which_match_id], "r:embed") <- rep(rid, sum(which_match_id))
-  }
-}
 
 
 #' @export
@@ -331,6 +256,145 @@ styles_info <- function( x, type = c("paragraph", "character", "table", "numberi
   styles <- styles[styles$style_type %in% type & styles$is_default %in% is_default,]
   styles
 }
+
+#' @export
+#' @title Add or replace paragraph style in a Word document
+#' @description The function lets you add or replace a Word paragraph style.
+#' @param x an rdocx object
+#' @param style_id a unique style identifier for Word.
+#' @param style_name a unique label associated with the style identifier.
+#' This label is the name of the style when Word edit the document.
+#' @param base_on the style name used as base style
+#' @param fp_p paragraph formatting properties, see [fp_par()].
+#' @param fp_t default text formatting properties. This is used as
+#' text formatting properties, see [fp_text()]. If NULL (default), the
+#' paragraph will used the default text formatting properties (defined by
+#' the `base_on` argument).
+#' @examples
+#' library(officer)
+#'
+#' doc <- read_docx()
+#'
+#' doc <- docx_set_paragraph_style(
+#'   doc,
+#'   style_id = "rightaligned",
+#'   style_name = "Explicit label",
+#'   fp_p = fp_par(text.align = "right", padding = 20),
+#'   fp_t = fp_text_lite(
+#'     bold = TRUE,
+#'     shading.color = "#FD34F0",
+#'     color = "white")
+#' )
+#'
+#' doc <- body_add_par(doc,
+#'   value = "This is a test",
+#'   style = "Explicit label")
+#'
+#' docx_file <- print(doc, target = tempfile(fileext = ".docx"))
+#' docx_file
+docx_set_paragraph_style <- function(x, style_id, style_name, base_on = "Normal", fp_p = fp_par(), fp_t = NULL) {
+  styles_file <- file.path(x$package_dir, "word/styles.xml")
+  doc <- read_xml(styles_file)
+
+  if (grepl("[^a-zA-Z0-9\\-]+", style_id)) {
+    stop("`style_id` should only contain '-', numbers and ascii characters.")
+  }
+
+  node_styles <- xml_find_first(doc, "/w:styles")
+
+  fp_p$word_style <- NULL
+
+  if (!is.null(fp_t)){
+    fp_t_xml <- rpr_wml(fp_t)
+  } else {
+    fp_t_xml <- ""
+  }
+  base_on <- get_style_id(data = x$styles, style = base_on, type = "paragraph")
+
+  xml_code <- paste0(
+    sprintf("<w:style xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" w:type=\"paragraph\" w:customStyle=\"1\" w:styleId=\"%s\">", style_id),
+    sprintf("<w:name w:val=\"%s\"/>", style_name),
+    sprintf("<w:basedOn w:val=\"%s\"/>", base_on),
+    ppr_wml(fp_p), fp_t_xml,
+    "</w:style>"
+  )
+
+  node_style <- xml_child(node_styles, sprintf("w:style[@w:styleId='%s']", style_id))
+  if (inherits(node_style, "xml_missing")) {
+    xml_add_child(node_styles, as_xml_document(xml_code))
+  } else {
+    xml_replace(node_style, as_xml_document(xml_code))
+  }
+
+  write_xml(doc, file = styles_file)
+  styles <- read_docx_styles(x$package_dir)
+  x$styles <- styles
+
+  x
+}
+
+#' @export
+#' @title Add character style in a Word document
+#' @description The function lets you add or modify Word character styles.
+#' @param x an rdocx object
+#' @param style_id a unique style identifier for Word.
+#' @param style_name a unique label associated with the style identifier.
+#' This label is the name of the style when Word edit the document.
+#' @param base_on the character style name used as base style
+#' @param fp_t Text formatting properties, see [fp_text()].
+#' @examples
+#' library(officer)
+#' doc <- read_docx()
+#'
+#' doc <- docx_set_character_style(
+#'   doc,
+#'   style_id = "newcharstyle",
+#'   style_name = "label for char style",
+#'   base_on = "Default Paragraph Font",
+#'   fp_text_lite(
+#'     shading.color = "red",
+#'     color = "white")
+#' )
+#' paragraph <- fpar(
+#'   run_wordtext("hello",
+#'     style_id = "newcharstyle"))
+#'
+#' doc <- body_add_fpar(doc, value = paragraph)
+#' docx_file <- print(doc, target = tempfile(fileext = ".docx"))
+#' docx_file
+docx_set_character_style <- function(x, style_id, style_name, base_on, fp_t = fp_text_lite()) {
+  styles_file <- file.path(x$package_dir, "word/styles.xml")
+  doc <- read_xml(styles_file)
+  node_styles <- xml_find_first(doc, "/w:styles")
+
+  if (grepl("[^a-zA-Z0-9\\-]+", style_id)) {
+    stop("`style_id` should only contain '-', numbers and ascii characters.")
+  }
+
+  base_on <- get_style_id(data = x$styles, style = base_on, type = "character")
+
+  xml_code <- paste0(
+    sprintf("<w:style xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" w:type=\"character\" w:customStyle=\"1\" w:styleId=\"%s\">", style_id),
+    sprintf("<w:name w:val=\"%s\"/>", style_name),
+    sprintf("<w:basedOn w:val=\"%s\"/>", base_on),
+    rpr_wml(fp_t),
+    "</w:style>"
+  )
+
+  node_style <- xml_child(node_styles, sprintf("w:style[@w:styleId='%s']", style_id))
+  if (inherits(node_style, "xml_missing")) {
+    xml_add_child(node_styles, as_xml_document(xml_code))
+  } else {
+    xml_replace(node_style, as_xml_document(xml_code))
+  }
+
+  write_xml(doc, file = styles_file)
+  styles <- read_docx_styles(x$package_dir)
+  x$styles <- styles
+
+  x
+}
+
 
 #' @export
 #' @title Read document properties
@@ -430,7 +494,7 @@ set_doc_properties <- function( x, title = NULL, subject = NULL,
 
     custom_props <- x$doc_properties_custom
     for(i in seq_along(values)) {
-      custom_props[names(values)[i], 'value'] <- values[[i]]
+      custom_props[names(values)[i], 'value'] <- enc2utf8(values[[i]])
     }
     x$doc_properties_custom <- custom_props
   }
@@ -452,20 +516,24 @@ set_doc_properties <- function( x, title = NULL, subject = NULL,
 #' docx_dim(read_docx())
 #' @family functions for Word document informations
 docx_dim <- function(x){
-  cursor_elt <- x$doc_obj$get_at_cursor()
-  xpath_ <- paste0(
-    file.path( xml_path(cursor_elt), "following-sibling::w:sectPr"),
-    "|",
-    file.path( xml_path(cursor_elt), "following-sibling::w:p/w:pPr/w:sectPr"),
-    "|",
-    "//w:sectPr"
-  )
-  next_section <- xml_find_first(x$doc_obj$get(), xpath_)
+  cursor <- as.character(x$officer_cursor)
+  if (is.na(cursor)) {
+    next_section <- xml_find_first(x$doc_obj$get(), "/w:document/w:body/w:sectPr")
+  } else {
+    xpath_ <- paste0(
+      file.path( cursor, "following-sibling::w:sectPr"),
+      "|",
+      file.path( cursor, "following-sibling::w:p/w:pPr/w:sectPr"),
+      "|",
+      "//w:sectPr"
+    )
+    next_section <- xml_find_first(x$doc_obj$get(), xpath_)
+  }
+
   sd <- section_dimensions(next_section)
   sd$page <- sd$page / (20*72)
   sd$margins <- sd$margins / (20*72)
   sd
-
 }
 
 
@@ -575,6 +643,20 @@ change_styles <- function( x, mapstyles ){
 #' @keywords internal
 docx_body_xml <- function( x ){
   x$doc_obj$get()
+}
+#' @export
+#' @title xml element on which cursor is
+#' @description Get the current block element as xml. This function
+#' is not to be used by end users, it has been implemented
+#' to allow other packages to work with officer. If the
+#' document is empty, this block will be set to NULL.
+#' @param x an rdocx object
+#' @examples
+#' doc <- read_docx()
+#' docx_current_block_xml(doc)
+#' @keywords internal
+docx_current_block_xml <- function( x ){
+  ooxml_on_cursor(x$officer_cursor, x$doc_obj$get())
 }
 
 #' @export

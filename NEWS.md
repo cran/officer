@@ -1,3 +1,35 @@
+# officer 0.5.0
+
+## New features
+
+- new function `docx_set_character_style()` to add or 
+replace a Word character style.
+- new function `docx_set_paragraph_style()` to add or 
+replace a Word paragraph style.
+- new function `run_wordtext()` to add a chunk of text 
+associated with a Word character style.
+- `potx` and `dotx` files are now supported.
+- SVG images are now supported
+- Word sections can now have headers and footers. See `prop_section()`.
+- function `cursor_reach_test()` to test if an expression has 
+a match in the document.
+- add function `docx_current_block_xml()` to let developpers access 
+the xml content where the cursor is.  
+- `ph_with.xml_document` now manages images paths in slide and 
+treats them in the relevant documents.
+
+## Issues
+
+- close 'Slide Master View' automatically.
+- more careful reading of document properties
+- fix cursor behavior, when `pos='before'`, cursor 
+is now set on element added 'before'. Internals about 
+cursors have been refactored.
+
+## Changes
+
+- function `slip_in_footnote()` is deprecated. Use `run_footnote()` instead.
+
 # officer 0.4.4
 
 ## New features

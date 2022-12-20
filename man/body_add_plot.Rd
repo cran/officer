@@ -11,6 +11,7 @@ body_add_plot(
   height = 5,
   res = 300,
   style = "Normal",
+  pos = "after",
   ...
 )
 }
@@ -27,6 +28,9 @@ body_add_plot(
 
 \item{style}{paragraph style}
 
+\item{pos}{where to add the new element relative to the cursor,
+one of "after", "before", "on".}
+
 \item{...}{Arguments to be passed to png function.}
 }
 \description{
@@ -39,7 +43,7 @@ if( capabilities(what = "png") )
   doc <- body_add_plot(doc,
     value = plot_instr(
       code = {barplot(1:5, col = 2:6)}),
-      style = "centered" )
+      style = "centered")
 
 print(doc, target = tempfile(fileext = ".docx") )
 }

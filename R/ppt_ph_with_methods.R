@@ -415,48 +415,33 @@ ph_with.plot_instr <- function(x, value, location, res = 300, ...){
 #' specified in call to \code{external_img} will be
 #' ignored, their values will be those of the location,
 #' unless use_loc_size is set to FALSE.
-ph_with.external_img <- function(x, value, location, use_loc_size = TRUE, ...){
+ph_with.external_img <- function(x, value, location, use_loc_size = TRUE, ...) {
   location <- fortify_location(location, doc = x)
 
   slide <- x$slide$get_slide(x$cursor)
 
-  if( !use_loc_size ){
+  if (!use_loc_size) {
     location$width <- attr(value, "dims")$width
     location$height <- attr(value, "dims")$height
   }
   width <- location$width
   height <- location$height
 
-  file_type <- gsub("(.*)(\\.[a-zA-Z0-0]+)$", "\\2", value)
 
-  if( file_type %in% ".svg" ){
-    if (!requireNamespace("rsvg")){
-      stop("package 'rsvg' is required to convert svg file to rasters")
-    }
+  xml_str <- to_pml(
+    x = value,
+    left = location$left, top = location$top,
+    width = width, height = height,
+    label = location$ph_label, ph = location$ph,
+    rot = location$rotation, bg = location$bg,
+    ln = location$ln
+  )
 
-    file <- tempfile(fileext = ".png")
-    rsvg::rsvg_png(as.character(value), file = file)
-    value[1] <- file
-    file_type <- ".png"
-  }
-  new_src <- tempfile( fileext = gsub("(.*)(\\.[a-zA-Z0-0]+)$", "\\2", as.character(value)) )
-  file.copy( as.character(value), to = new_src )
-
-  xml_str <- pic_pml(left = location$left, top = location$top,
-                       width = width, height = height,
-                       label = location$ph_label, ph = location$ph,
-                       rot = location$rotation, bg = location$bg,
-                       src = new_src, alt_text = attr(value, "alt"),
-                       ln = location$ln)
-
-  slide$reference_img(src = new_src, dir_name = file.path(x$package_dir, "ppt/media"))
-  xml_elt <- fortify_pml_images(x, xml_str)
-
-  value <- as_xml_document(xml_elt)
+  value <- as_xml_document(xml_str)
   xml_add_child(xml_find_first(slide$get(), "//p:spTree"), value)
   slide$fortify_id()
+  process_images(slide, slide$relationship(), x$package_dir, media_dir = "ppt/media", media_rel_dir = "../media")
   x
-
 }
 
 
@@ -504,7 +489,7 @@ ph_with.empty_content <- function( x, value, location, ... ){
 
 
 
-xml_to_slide <- function(slide, location, value){
+xml_to_slide <- function(slide, location, value, package_dir){
   node <- xml_find_first( value, as_xpath_content_sel("//") )
   if(xml_name(node) == "grpSp"){
     node_sppr <- xml_child(node, "p:grpSpPr")
@@ -573,9 +558,10 @@ ph_with.xml_document <- function( x, value, location, ... ){
 
   location <- fortify_location(location, doc = x)
 
-  xml_to_slide(slide, location, value)
+  xml_to_slide(slide, location, value, x$package_dir)
 
   xml_add_child(xml_find_first(slide$get(), "//p:spTree"), value)
+  process_images(slide, slide$relationship(), x$package_dir, media_dir = "ppt/media", media_rel_dir = "../media")
 
   slide$fortify_id()
   x
