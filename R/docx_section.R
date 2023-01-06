@@ -172,8 +172,6 @@ body_end_block_section <- function(x, value) {
   stopifnot(inherits(value, "block_section"))
   xml_elt <- to_wml(value, add_ns = TRUE, base_document = x)
   body_add_xml(x = x, str = xml_elt, pos = "after")
-
-  x
 }
 
 #' @export
@@ -217,6 +215,13 @@ process_sections <- function(x) {
   sect_dim <- section_dimensions(xml_find_first(x$doc_obj$get(), "w:body/w:sectPr"))
 
   node_def_sec <- xml_find_first(x$doc_obj$get(), "w:body/w:sectPr")
+
+  # if w:type not there, each section is on a new page if not continuous
+  if (inherits(xml_child(node_def_sec, "w:type"), "xml_missing")) {
+    node_type <- as_xml_document("<w:type xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" w:val=\"continuous\"/>")
+    xml_add_child(node_def_sec, node_type)
+  }
+
   x <- officer_section_fortify(node_def_sec, x)
 
   for (node_id in seq_along(all_nodes)) {
@@ -260,12 +265,12 @@ officer_section_fortify <- function(node, x) {
   for (i in seq_along(headers)) {
     if (!inherits(xml_child(headers[[i]], "w:hdr"), "xml_missing")) {
       hof_spread_to_file(node = headers[[i]], x = x, type = "header")
-      if (xml_attr(headers[[i]], "type") %in% "first" && inherits(xml_child(node, "w:titlePg"), "xml_missing")) {
-        xml_add_child(node, as_xml_document(title_page_tag))
-      }
-      if (xml_attr(headers[[i]], "type") %in% "even") {
-        x$settings$even_and_odd_headers <- TRUE
-      }
+    }
+    if (xml_attr(headers[[i]], "type") %in% "first" && inherits(xml_child(node, "w:titlePg"), "xml_missing")) {
+      xml_add_child(node, as_xml_document(title_page_tag))
+    }
+    if (xml_attr(headers[[i]], "type") %in% "even") {
+      x$settings$even_and_odd_headers <- TRUE
     }
   }
 
@@ -275,12 +280,12 @@ officer_section_fortify <- function(node, x) {
   for (i in seq_along(footers)) {
     if (!inherits(xml_child(footers[[i]], "w:ftr"), "xml_missing")) {
       hof_spread_to_file(node = footers[[i]], x = x, type = "footer")
-      if (xml_attr(footers[[i]], "type") %in% "first" && inherits(xml_child(node, "w:titlePg"), "xml_missing")) {
-        xml_add_child(node, as_xml_document(title_page_tag))
-      }
-      if (xml_attr(footers[[i]], "type") %in% "even") {
-        x$settings$even_and_odd_headers <- TRUE
-      }
+    }
+    if (xml_attr(footers[[i]], "type") %in% "first" && inherits(xml_child(node, "w:titlePg"), "xml_missing")) {
+      xml_add_child(node, as_xml_document(title_page_tag))
+    }
+    if (xml_attr(footers[[i]], "type") %in% "even") {
+      x$settings$even_and_odd_headers <- TRUE
     }
   }
   x

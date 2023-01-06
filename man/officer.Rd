@@ -33,6 +33,7 @@ manuals \url{https://davidgohel.github.io/officer/}
 
 Other contributors:
 \itemize{
+  \item ArData [copyright holder]
   \item Frank Hangler \email{frank@plotandscatter.com} (function body_replace_all_text) [contributor]
   \item Liz Sander \email{lsander@civisanalytics.com} (several documentation fixes) [contributor]
   \item Anton Victorson \email{anton@victorson.se} (fixes xml structures) [contributor]
@@ -43,6 +44,7 @@ Other contributors:
   \item Nikolai Beck \email{beck.nikolai@gmail.com} (set speaker notes for .pptx documents) [contributor]
   \item Stefan Moog \email{moogs@gmx.de} (added functionality to set shape geometry and outline) [contributor]
   \item Greg Leleu \email{gregoire.leleu@gmail.com} (fields functionality in ppt) [contributor]
+  \item Hongyuan Jia \email{hongyuanjia@cqust.edu.cn} (\href{https://orcid.org/0000-0002-0075-8183}{ORCID}) [contributor]
 }
 
 }

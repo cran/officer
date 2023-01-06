@@ -144,9 +144,13 @@ print.rdocx <- function(x, target = NULL, ...){
     names(style_sample) <- style_names$style_name
     print(style_sample)
 
-    cursor_elt <- docx_current_block_xml(x)
-    cat("\n* Content at cursor location:\n")
-    print(node_content(cursor_elt, x))
+    if (length(x) > 1) {
+      cursor_elt <- docx_current_block_xml(x)
+      cat("\n* Content at cursor location:\n")
+      print(node_content(cursor_elt, x))
+    } else {
+      cat("\n* empty document\n")
+    }
     return(invisible())
   }
 
@@ -159,9 +163,9 @@ print.rdocx <- function(x, target = NULL, ...){
 
   process_footnotes(x)
 
-  process_links(x$doc_obj)
-  for(header in x$headers) process_links(header)
-  for(footer in x$footers) process_links(footer)
+  process_links(x$doc_obj, type = "wml")
+  for(header in x$headers) process_links(header, type = "wml")
+  for(footer in x$footers) process_links(footer, type = "wml")
   process_docx_poured(x$doc_obj, x$doc_obj$relationship(), x$content_type,
                       x$package_dir)
   process_images(x$doc_obj, x$doc_obj$relationship(), x$package_dir)

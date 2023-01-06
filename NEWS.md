@@ -1,3 +1,27 @@
+# officer 0.5.1
+
+## Issues
+
+- manage also even/first/default sections not defined with officer (indicate 
+there is even/first/default parts).
+- fix behavior regression with headers and footers replace_text_at_bkm. 
+The previous behavior "don't trigger an error if a bookmark is missing" 
+is back. 
+- force Word default continuous section if no type is specified and first 
+page footer/header if it is seen.
+- drop "Compatibility Mode" from Word documents.
+
+## Changes
+
+- Change license to MIT.
+- drop internal `get_at_cursor()`
+- use images sha1 value for filename with package 'openssl'. This should fix 
+issues with duplicated images basenames, or non utf names, etc.
+
+## Features
+
+- export `shape_properties_tags()` for pptx extentions.
+
 # officer 0.5.0
 
 ## New features
