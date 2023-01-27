@@ -1,7 +1,7 @@
 Package: officer
 Type: Package
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.5.1
+Version: 0.5.2
 Authors@R: c(
     person("David", "Gohel", role = c("aut", "cre"),
     email = "david.gohel@ardata.fr"),
@@ -33,9 +33,9 @@ Encoding: UTF-8
 BugReports: https://github.com/davidgohel/officer/discussions
 RoxygenNote: 7.2.3
 Suggests: testthat, devEMF, ggplot2, rmarkdown, base64enc, doconv (>=
-        0.3.0), knitr, rsvg
+        0.3.0), knitr, rsvg, magick
 NeedsCompilation: no
-Packaged: 2023-01-05 23:03:50 UTC; davidgohel
+Packaged: 2023-01-27 08:04:41 UTC; davidgohel
 Author: David Gohel [aut, cre],
   ArData [cph],
   Frank Hangler [ctb] (function body_replace_all_text),
@@ -53,4 +53,4 @@ Author: David Gohel [aut, cre],
   Hongyuan Jia [ctb] (<https://orcid.org/0000-0002-0075-8183>)
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2023-01-06 10:00:16 UTC
+Date/Publication: 2023-01-27 09:10:07 UTC

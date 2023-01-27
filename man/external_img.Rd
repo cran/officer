@@ -4,14 +4,26 @@
 \alias{external_img}
 \title{External image}
 \usage{
-external_img(src, width = 0.5, height = 0.2, alt = "")
+external_img(
+  src,
+  width = 0.5,
+  height = 0.2,
+  unit = "in",
+  guess_size = FALSE,
+  alt = ""
+)
 }
 \arguments{
 \item{src}{image file path}
 
-\item{width}{height in inches.}
+\item{width, height}{size of the image file. It can be ignored
+if parameter \code{guess_size=TRUE}, see parameter \code{guess_size}.}
 
-\item{height}{height in inches}
+\item{unit}{unit for width and height, one of "in", "cm", "mm".}
+
+\item{guess_size}{If package 'magick' is installed, this option
+can be used (set it to \code{TRUE}). The images will be read and
+width and height will be guessed.}
 
 \item{alt}{alternative text for images}
 }
