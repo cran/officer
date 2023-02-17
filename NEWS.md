@@ -1,3 +1,16 @@
+# officer 0.6.0
+
+## Features
+
+- add RTF support, see `rtf_doc()` and `rtf_add()`.
+
+## Internals
+
+- provides `image_to_base64()` and `uuid_generate()` as a tool 
+for other 'officeverse' packages.
+- styles are now injected as is and updated with `process_stylenames()`,
+this allow to depend on a reference doc.
+
 # officer 0.5.2
 
 ## Features

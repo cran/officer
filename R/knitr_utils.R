@@ -40,37 +40,35 @@ get_default_pandoc_data_file <- function(format = "pptx") {
 #' @family functions for officer extensions
 #' @keywords internal
 get_reference_value <- function(format = NULL) {
-
-  if( !is.null(format) && length(format) != 1 ){
+  if (!is.null(format) && length(format) != 1) {
     stop("format must be a scalar character")
   }
 
   check_dep()
 
-  if( compareVersion(as.character(packageVersion("rmarkdown")), "1.10.14") < 0 )
+  if (compareVersion(as.character(packageVersion("rmarkdown")), "1.10.14") < 0) {
     stop("package rmarkdown >= 1.10.14 is required to use this function")
+  }
 
-  if( is.null(format)){
-    if( grepl( "docx", knitr::opts_knit$get("rmarkdown.pandoc.to") ) ){
+  if (is.null(format)) {
+    if (grepl("docx", knitr::opts_knit$get("rmarkdown.pandoc.to"))) {
       format <- "docx"
-    } else if( grepl( "pptx", knitr::opts_knit$get("rmarkdown.pandoc.to") ) ){
+    } else if (grepl("pptx", knitr::opts_knit$get("rmarkdown.pandoc.to"))) {
       format <- "pptx"
-    } else if( grepl( "html", knitr::opts_knit$get("rmarkdown.pandoc.to") ) ){
+    } else if (grepl("html", knitr::opts_knit$get("rmarkdown.pandoc.to"))) {
       format <- "html"
-    } else if( grepl( "latex", knitr::opts_knit$get("rmarkdown.pandoc.to") ) ){
+    } else if (grepl("latex", knitr::opts_knit$get("rmarkdown.pandoc.to"))) {
       format <- "latex"
     } else {
       stop("Unable to determine the format that should be used")
     }
-
-
   }
-  if( !format %in% c("pptx", "docx", "html") ){
+  if (!format %in% c("pptx", "docx", "html")) {
     stop("format must be have value 'docx', 'pptx' or 'html'.")
   }
 
   output.dir <- knitr::opts_knit$get("output.dir")
-  if(is.null(output.dir)){
+  if (is.null(output.dir)) {
     output.dir <- getwd()
   }
 
@@ -79,8 +77,9 @@ get_reference_value <- function(format = NULL) {
   rd <- grep("--reference-doc", pandoc_args)
   if (length(rd)) {
     reference_data <- pandoc_args[rd + 1]
-    if(!file.exists(reference_data))
+    if (!file.exists(reference_data)) {
       reference_data <- file.path(output.dir, reference_data)
+    }
   } else {
     reference_data <- get_default_pandoc_data_file(format = format)
   }

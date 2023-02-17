@@ -1,7 +1,7 @@
 Package: officer
 Type: Package
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.5.2
+Version: 0.6.0
 Authors@R: c(
     person("David", "Gohel", role = c("aut", "cre"),
     email = "david.gohel@ardata.fr"),
@@ -18,24 +18,24 @@ Authors@R: c(
     person("Greg", "Leleu", role = "ctb", email = 'gregoire.leleu@gmail.com', comment = "fields functionality in ppt"),
     person("Hongyuan", "Jia", role = "ctb", email = "hongyuanjia@cqust.edu.cn", comment = c(ORCID = "0000-0002-0075-8183"))
     )
-Description: Access and manipulate 'Microsoft Word' and 'Microsoft PowerPoint' documents from R. 
+Description: Access and manipulate 'Microsoft Word', 'RTF' and 'Microsoft PowerPoint' documents from R. 
   The package focuses on tabular and graphical reporting from R; it also provides two functions
   that let users get document content into data objects. A set of functions 
   lets add and remove images, tables and paragraphs of text in new or existing documents. 
   The package does not require any installation of Microsoft products to be able to write Microsoft 
-  files.
+  files. 
 License: MIT + file LICENSE
-Imports: grDevices, stats, graphics, utils, zip (>= 2.1.0), uuid (>=
-        0.1-4), xml2 (>= 1.1.0), openssl, R6
+Imports: grDevices, stats, graphics, utils, zip (>= 2.1.0), xml2 (>=
+        1.1.0), openssl, R6, uuid
 URL: https://ardata-fr.github.io/officeverse/,
         https://davidgohel.github.io/officer/
 Encoding: UTF-8
 BugReports: https://github.com/davidgohel/officer/discussions
 RoxygenNote: 7.2.3
-Suggests: testthat, devEMF, ggplot2, rmarkdown, base64enc, doconv (>=
-        0.3.0), knitr, rsvg, magick
+Suggests: testthat, devEMF, ggplot2, rmarkdown, doconv (>= 0.3.0),
+        knitr, rsvg, magick
 NeedsCompilation: no
-Packaged: 2023-01-27 08:04:41 UTC; davidgohel
+Packaged: 2023-02-17 18:09:18 UTC; davidgohel
 Author: David Gohel [aut, cre],
   ArData [cph],
   Frank Hangler [ctb] (function body_replace_all_text),
@@ -53,4 +53,4 @@ Author: David Gohel [aut, cre],
   Hongyuan Jia [ctb] (<https://orcid.org/0000-0002-0075-8183>)
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2023-01-27 09:10:07 UTC
+Date/Publication: 2023-02-17 19:00:02 UTC

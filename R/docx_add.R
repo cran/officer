@@ -455,7 +455,6 @@ body_add_xml2 <- function(x, str){
 }
 
 #' @export
-#' @importFrom uuid UUIDgenerate
 #' @title Add bookmark in a 'Word' document
 #' @description Add a bookmark at the cursor location. The bookmark
 #' is added on the first run of text in the current paragraph.
@@ -471,7 +470,7 @@ body_add_xml2 <- function(x, str){
 body_bookmark <- function(x, id){
   cursor_elt <- docx_current_block_xml(x)
   ns_ <- "xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\""
-  new_id <- UUIDgenerate()
+  new_id <- uuid_generate()
   id <- check_bookmark_id(id)
 
   bm_start_str <- sprintf("<w:bookmarkStart w:id=\"%s\" w:name=\"%s\" %s/>", new_id, id, ns_ )
