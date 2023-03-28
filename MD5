@@ -1,7 +1,7 @@
-2edb4ad7ec06756f4c3714d465f89d5d *DESCRIPTION
+2a7ce5bd0ae503452aa4a453bf36be91 *DESCRIPTION
 706ff72a57d21d9f964868222234d757 *LICENSE
 1ffdcd2c531ccbfa1e04f8e39104186b *NAMESPACE
-762a3583abf67506d361588cd3695c64 *NEWS.md
+7530c809deb8137ef0360b4688134465 *NEWS.md
 21528aca17d20d43ef0687c86450a020 *R/core_properties.R
 0f3bdc6e845d396223816d0d484cf35c *R/custom_properties.R
 3d5ecef0a9fd378ec039cdd7d22e7601 *R/defunct.R
@@ -18,9 +18,9 @@ d13ac58595469482bf291b64d20354be *R/fortify_docx.R
 adf40fca70bb7e14e191e4064172de0d *R/fortify_pptx.R
 863e73cd76410bfb54feb9ba864df642 *R/knitr_utils.R
 ebe7fac29acf12b912c4ac520f242a80 *R/officer.R
-b6c5a1b388852bc6c9e31ce7a78fd741 *R/ooxml.R
+fd578f3018c3b69dc5daaa0cab5fee35 *R/ooxml.R
 81bc2ed4cef540c5d3bf1b9b9294a09c *R/ooxml_block_objects.R
-7eac4161255e8e23ad267c544b3ab46b *R/ooxml_run_objects.R
+d388fc823c92735bb1d1de15bd1d1d4c *R/ooxml_run_objects.R
 d4fc2ec4813ddadad2ddbc337e9b892a *R/openxml_content_type.R
 126a1632f315e4fd900178f8251ac9ea *R/openxml_document.R
 aeee4cd90c11c6dd8138ea053711045a *R/pack_folder.R
@@ -39,7 +39,7 @@ f673f54a9fa6b6301084a5f133ca7fab *R/read_docx.R
 ad3fd884999c88b860a8300a7ff08bcb *R/read_pptx.R
 9cccc19d0594775492665b62c0259892 *R/read_xlsx.R
 1d80bfcd2b3007b05c6dfc9228def01e *R/relationship.R
-d21e767dc2ff37b06e90296d005ec5a2 *R/rtf.R
+a663de45b7f9b5197c8eb09b2470eadb *R/rtf.R
 1bc1ef84419c6781acda845205784649 *R/shape_properties.R
 8cd677d2cfba082f21c75da7b1f38566 *R/shorcuts.R
 2f86a08585b963a02b6b93be94c6fc60 *R/utils.R
