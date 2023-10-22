@@ -154,7 +154,7 @@ simple_lag <- function( x, default=0 ){
   c(default, x[-length(x)])
 }
 
-rbind.match.columns <- function(list_df) {
+rbind_match_columns <- function(list_df) {
 
   col <- unique(unlist(lapply(list_df, colnames)))
   x <- Filter(function(x) nrow(x)>0, list_df)
@@ -178,7 +178,7 @@ set_row_span <- function( row_details ){
     dat$row_span[rowspan_pos_at_breaks] <- rowspan_values_at_breaks
     dat
   }, row_details, SIMPLIFY = FALSE)
-  row_details <- rbind.match.columns(row_details)
+  row_details <- rbind_match_columns(row_details)
   row_details$first <- NULL
   row_details
 }
@@ -230,19 +230,10 @@ is_windows <- function() {
   "windows" %in% .Platform$OS.type
 }
 
-is_office_doc_edited <- function(file) {
-
-  file_name <- sub("(.*)\\.(pptx|docx)$", "\\1", basename(file))
-
-  if (nchar(file_name) < 7 || endsWith(file, ".pptx")) {
-    edit_name <- paste0("~$", basename(file))
-  } else if (nchar(file_name) < 8) {
-    edit_name <- paste0("~$", substring(basename(file), 2))
-  } else {
-    edit_name <- paste0("~$", substring(basename(file), 3))
-  }
-
-  file.exists(file.path(dirname(file), edit_name))
+is_doc_open <- function(file) {
+  # The function checks if the `file` is open (a.k.a. is being edited).
+  # This function is valid on Windows operating system only.
+  suppressWarnings(file.exists(file) && !file.rename(from = file, to = file))
 }
 
 

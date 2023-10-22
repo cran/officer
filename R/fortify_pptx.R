@@ -1,9 +1,16 @@
-unfold_row_pml <- function(node, row_id){
+unfold_row_pml <- function(node, row_id, preserve = FALSE){
 
   children_ <- xml_children(node)
   cell_nodes <- children_[sapply(children_, function(x) xml_name(x)=="tc" )]
 
-  txt <- sapply(cell_nodes, xml_text)
+  if (preserve) {
+    txt <- sapply(cell_nodes, function(x) {
+      paras <- xml2::xml_text(xml2::xml_find_all(x, ".//a:r"))
+      paste0(paras, collapse="\n")
+    })
+  } else {
+    txt <- sapply(cell_nodes, xml2::xml_text)
+  }
 
   col_span <- sapply(cell_nodes, function(x) {
     as.integer(xml_attr(x, "gridSpan"))
@@ -22,7 +29,7 @@ unfold_row_pml <- function(node, row_id){
                stringsAsFactors = FALSE
     )
   })
-  row_span <- rbind.match.columns(row_span)
+  row_span <- rbind_match_columns(row_span)
   row_span$row_merge <- !is.na(row_span$v_merged) | !is.na(row_span$row_span)
   row_span$first <- !is.na(row_span$row_span)
   row_span$row_span[!is.na(row_span$v_merged)] <- 0L
@@ -40,13 +47,13 @@ unfold_row_pml <- function(node, row_id){
 
 globalVariables(c(".", "src", "width", "height"))
 
-pptxtable_as_tibble <- function( node ){
+pptxtable_as_tibble <- function( node, preserve = FALSE ){
   tbl <- xml_child(node, "/a:graphic/a:graphicData/a:tbl")
   xpath_ <- paste0( xml_path(tbl), "/a:tr")
   rows <- xml_find_all(node, xpath_)
   if( length(rows) < 1 ) return(NULL)
-  row_details <- mapply(unfold_row_pml, rows, seq_along(rows), SIMPLIFY = FALSE)
-  row_details <- rbind.match.columns(row_details)
+  row_details <- mapply(unfold_row_pml, rows, seq_along(rows), preserve = preserve, SIMPLIFY = FALSE)
+  row_details <- rbind_match_columns(row_details)
   row_details <- set_row_span(row_details)
   row_details$text[row_details$col_span < 1 | row_details$row_span < 1] <- NA_character_
   row_details
@@ -99,6 +106,7 @@ media_extract <- function( x, path, target ){
 #' @description Read content of a PowerPoint document and
 #' return a dataset representing the document.
 #' @param x an rpptx object
+#' @inheritParams docx_summary
 #' @examples
 #' example_pptx <- system.file(package = "officer",
 #'   "doc_examples/example.pptx")
@@ -106,7 +114,7 @@ media_extract <- function( x, path, target ){
 #' pptx_summary(doc)
 #' pptx_summary(example_pptx)
 #' @export
-pptx_summary <- function( x ){
+pptx_summary <- function( x, preserve = FALSE ){
   if (is.character(x)) {
     x = read_pptx(x)
   }
@@ -130,7 +138,7 @@ pptx_summary <- function( x ){
       id <- xml_attr(xml_child(node, "/p:cNvPr"), "id")
 
       if( is_table ){
-        ppt_tab <- pptxtable_as_tibble(node)
+        ppt_tab <- pptxtable_as_tibble(node, preserve = preserve)
         ppt_tab$id <- id
         ppt_tab$content_type <- "table cell"
         ppt_tab$slide_id <- slide_id
@@ -158,8 +166,8 @@ pptx_summary <- function( x ){
       }
     }, nodes, slide_id = i, SIMPLIFY = FALSE)
 
-    list_content[[length(list_content)+1]] <- rbind.match.columns(content)
+    list_content[[length(list_content)+1]] <- rbind_match_columns(content)
   }
 
-  rbind.match.columns(list_content)
+  rbind_match_columns(list_content)
 }

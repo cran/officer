@@ -1,11 +1,19 @@
-unfold_row_wml <- function(node, row_id){
+unfold_row_wml <- function(node, row_id, preserve = FALSE){
   is_header_1 <- !inherits(xml_child(node, "w:trPr/w:tblHeader"), "xml_missing")
   is_header_2 <- !inherits(xml_child(node, "w:trPr/w:cnfStyle[@w:firstRow='1']"), "xml_missing")
   is_header <- is_header_1 | is_header_2
   children_ <- xml_children(node)
   cell_nodes <- children_[sapply(children_, function(x) xml_name(x)=="tc" )]
 
-  txt <- sapply(cell_nodes, xml_text)
+  if (preserve) {
+    txt <- sapply(cell_nodes, function(x) {
+      paras <- xml2::xml_text(xml2::xml_find_all(x, "./w:p"))
+      paste0(paras, collapse="\n")
+    })
+  } else {
+    txt <- sapply(cell_nodes, xml2::xml_text)
+  }
+
   col_span <- sapply(cell_nodes, function(x) {
     gs <- xml_child(x, "w:tcPr/w:gridSpan")
     as.integer(xml_attr(gs, "val"))
@@ -20,7 +28,7 @@ unfold_row_wml <- function(node, row_id){
            stringsAsFactors = FALSE
     )
   })
-  row_span <- rbind.match.columns(row_span)
+  row_span <- rbind_match_columns(row_span)
   txt[row_span$row_merge & !row_span$first] <- NA
 
   out <- data.frame(row_id = row_id, is_header = is_header,
@@ -50,20 +58,20 @@ unfold_row_wml <- function(node, row_id){
   out_add_$col_span, out_add_$row_merge, out_add_$first, out_add_$row_span,
   SIMPLIFY = FALSE)
   if( length(out_add_) > 0 ){
-    out_add_ <- rbind.match.columns(out_add_)
+    out_add_ <- rbind_match_columns(out_add_)
     out <- rbind(out, out_add_)
   }
   out[order(out$cell_id),]
 }
 
 
-docxtable_as_tibble <- function( node, styles ){
+docxtable_as_tibble <- function( node, styles, preserve = FALSE ){
   xpath_ <- paste0( xml_path(node), "/w:tr")
   rows <- xml_find_all(node, xpath_)
   if( length(rows) < 1 ) return(NULL)
 
-  row_details <- mapply(unfold_row_wml, rows, seq_along(rows), SIMPLIFY = FALSE)
-  row_details <- rbind.match.columns(row_details)
+  row_details <- mapply(unfold_row_wml, rows, seq_along(rows), preserve = preserve,  SIMPLIFY = FALSE)
+  row_details <- rbind_match_columns(row_details)
   row_details <- set_row_span(row_details)
 
   style_node <- xml_child(node, "w:tblPr/w:tblStyle")
@@ -98,11 +106,11 @@ par_as_tibble <- function(node, styles){
   par_data
 }
 
-node_content <- function(node, x){
+node_content <- function(node, x, preserve = FALSE){
   node_name <- xml_name(node)
   switch(node_name,
          p = par_as_tibble(node, styles_info(x)),
-         tbl = docxtable_as_tibble(node, styles_info(x)),
+         tbl = docxtable_as_tibble(node, styles_info(x), preserve = preserve),
          NULL)
 }
 
@@ -114,22 +122,31 @@ node_content <- function(node, x){
 #' Documents included with \code{body_add_docx()} will
 #' not be accessible in the results.
 #' @param x an rdocx object
+#' @param preserve If `FALSE` (default), text in table cells is collapsed into a
+#'   single line. If `TRUE`, line breaks in table cells are preserved as a "\\n"
+#'   character. This feature is adapted from \code{docxtractr::docx_extract_tbl()}
+#'   published under a [MIT
+#'   licensed](https://github.com/hrbrmstr/docxtractr/blob/master/LICENSE) in
+#'   the `{docxtractr}` package by Bob Rudis.
 #' @examples
 #' example_pptx <- system.file(package = "officer",
 #'   "doc_examples/example.docx")
 #' doc <- read_docx(example_pptx)
+#'
 #' docx_summary(doc)
+#'
+#' docx_summary(doc, preserve = TRUE)[28, ]
 #' @export
-docx_summary <- function( x ){
+docx_summary <- function( x, preserve = FALSE ){
 
   all_nodes <- xml_find_all(x$doc_obj$get(),"/w:document/w:body/*[self::w:p or self::w:tbl]")
-  data <- lapply( all_nodes, node_content, x = x )
+  data <- lapply( all_nodes, node_content, x = x, preserve = preserve )
 
   data <- mapply(function(x, id) {
         x$doc_index <- id
         x
       }, data, seq_along(data), SIMPLIFY = FALSE)
-  data <- rbind.match.columns(data)
+  data <- rbind_match_columns(data)
 
   colnames <- c("doc_index", "content_type", "style_name", "text",
     "level", "num_id", "row_id", "is_header", "cell_id",

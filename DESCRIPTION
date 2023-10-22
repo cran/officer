@@ -1,7 +1,7 @@
 Package: officer
 Type: Package
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.6.2
+Version: 0.6.3
 Authors@R: c(
     person("David", "Gohel", role = c("aut", "cre"),
     email = "david.gohel@ardata.fr"),
@@ -14,7 +14,7 @@ Authors@R: c(
     person("John", "Muschelli", role = "ctb", email = 'muschellij2@gmail.com', comment = "google doc compatibility"),
     person("Bill", "Denney", email="wdenney@humanpredictions.com", role="ctb", comment=c(ORCID="0000-0002-5759-428X", "function as.matrix.rpptx")),
     person("Nikolai", "Beck", role = "ctb", email = 'beck.nikolai@gmail.com', comment = "set speaker notes for .pptx documents"),
-    person("Stefan", "Moog", role = "ctb", email = 'moogs@gmx.de', comment = "added functionality to set shape geometry and outline"),
+    person("Stefan", "Moog", role = "ctb", email = 'moogs@gmx.de', comment = "PowerPoint shape geometry and outline and Word comments"),
     person("Greg", "Leleu", role = "ctb", email = 'gregoire.leleu@gmail.com', comment = "fields functionality in ppt"),
     person("Hongyuan", "Jia", role = "ctb", email = "hongyuanjia@cqust.edu.cn", comment = c(ORCID = "0000-0002-0075-8183"))
     )
@@ -35,7 +35,7 @@ RoxygenNote: 7.2.3
 Suggests: testthat, devEMF, ggplot2, rmarkdown, doconv (>= 0.3.0),
         knitr, rsvg, magick
 NeedsCompilation: no
-Packaged: 2023-03-28 19:52:56 UTC; davidgohel
+Packaged: 2023-10-22 15:46:49 UTC; davidgohel
 Author: David Gohel [aut, cre],
   ArData [cph],
   Frank Hangler [ctb] (function body_replace_all_text),
@@ -47,10 +47,10 @@ Author: David Gohel [aut, cre],
   Bill Denney [ctb] (<https://orcid.org/0000-0002-5759-428X>, function
     as.matrix.rpptx),
   Nikolai Beck [ctb] (set speaker notes for .pptx documents),
-  Stefan Moog [ctb] (added functionality to set shape geometry and
-    outline),
+  Stefan Moog [ctb] (PowerPoint shape geometry and outline and Word
+    comments),
   Greg Leleu [ctb] (fields functionality in ppt),
   Hongyuan Jia [ctb] (<https://orcid.org/0000-0002-0075-8183>)
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2023-03-28 20:30:02 UTC
+Date/Publication: 2023-10-22 16:30:03 UTC

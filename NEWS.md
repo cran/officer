@@ -1,3 +1,17 @@
+# officer 0.6.3
+
+## Features
+
+- new function `run_comment()` to create a run with a comment.
+- new function `docx_comments()` to read comments in a Word document as a data.frame.
+- Add pptx support for invalid pptx files downloaded from https://slides.new.
+
+## Issues
+
+- Internal function `is_doc_open()` replaces `is_office_doc_edited()` to check if a document is open on Windows. This solves the issue where RStudio crashed while trying to write to an open Office document.
+- Add option `preserve` to preserve cell line breaks to `docx_summary()`.
+- fix `ph_hyperlink()` when several hyperlinks are inside one slide and refactored `ph_remove()`.
+
 # officer 0.6.2
 
 ## Issues
