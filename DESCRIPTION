@@ -1,10 +1,10 @@
 Package: officer
 Type: Package
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.6.3
+Version: 0.6.4
 Authors@R: c(
-    person("David", "Gohel", role = c("aut", "cre"),
-    email = "david.gohel@ardata.fr"),
+    person("David", "Gohel", role = c("aut", "cre"), email = "david.gohel@ardata.fr"),
+    person("Stefan", "Moog", role = "aut", email = 'moogs@gmx.de'),
     person(given = "ArData", role = "cph"),
     person("Frank", "Hangler", role = "ctb", email = "frank@plotandscatter.com", comment = "function body_replace_all_text"),
     person("Liz", "Sander", role = "ctb", email = 'lsander@civisanalytics.com', comment = "several documentation fixes"),
@@ -14,7 +14,6 @@ Authors@R: c(
     person("John", "Muschelli", role = "ctb", email = 'muschellij2@gmail.com', comment = "google doc compatibility"),
     person("Bill", "Denney", email="wdenney@humanpredictions.com", role="ctb", comment=c(ORCID="0000-0002-5759-428X", "function as.matrix.rpptx")),
     person("Nikolai", "Beck", role = "ctb", email = 'beck.nikolai@gmail.com', comment = "set speaker notes for .pptx documents"),
-    person("Stefan", "Moog", role = "ctb", email = 'moogs@gmx.de', comment = "PowerPoint shape geometry and outline and Word comments"),
     person("Greg", "Leleu", role = "ctb", email = 'gregoire.leleu@gmail.com', comment = "fields functionality in ppt"),
     person("Hongyuan", "Jia", role = "ctb", email = "hongyuanjia@cqust.edu.cn", comment = c(ORCID = "0000-0002-0075-8183"))
     )
@@ -31,12 +30,13 @@ URL: https://ardata-fr.github.io/officeverse/,
         https://davidgohel.github.io/officer/
 Encoding: UTF-8
 BugReports: https://github.com/davidgohel/officer/discussions
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Suggests: testthat, devEMF, ggplot2, rmarkdown, doconv (>= 0.3.0),
         knitr, rsvg, magick
 NeedsCompilation: no
-Packaged: 2023-10-22 15:46:49 UTC; davidgohel
+Packaged: 2024-02-05 13:26:54 UTC; davidgohel
 Author: David Gohel [aut, cre],
+  Stefan Moog [aut],
   ArData [cph],
   Frank Hangler [ctb] (function body_replace_all_text),
   Liz Sander [ctb] (several documentation fixes),
@@ -47,10 +47,8 @@ Author: David Gohel [aut, cre],
   Bill Denney [ctb] (<https://orcid.org/0000-0002-5759-428X>, function
     as.matrix.rpptx),
   Nikolai Beck [ctb] (set speaker notes for .pptx documents),
-  Stefan Moog [ctb] (PowerPoint shape geometry and outline and Word
-    comments),
   Greg Leleu [ctb] (fields functionality in ppt),
   Hongyuan Jia [ctb] (<https://orcid.org/0000-0002-0075-8183>)
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2023-10-22 16:30:03 UTC
+Date/Publication: 2024-02-05 14:20:03 UTC

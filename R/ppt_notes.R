@@ -8,7 +8,9 @@ add_notesMaster <- function(x) {
     path <- system.file(package = "officer", "template/notesMaster.xml")
     xml_file <- file.path(x$package_dir, "ppt/notesMasters/notesMaster1.xml")
     dir.create(dirname(xml_file), showWarnings = FALSE, recursive = FALSE)
-    file.copy(path, to = xml_file, overwrite = T)
+    file.copy(path, to = xml_file,
+              overwrite = TRUE,
+              copy.mode = FALSE)
 
     # copy theme file
     theme_file <- "theme1.xml"
@@ -16,7 +18,9 @@ add_notesMaster <- function(x) {
     theme_index <- as.integer(gsub("^(theme)([0-9]+)(\\.xml)$", "\\2", theme_files ))
     theme_file <- gsub(pattern = "[0-9]+", replacement = max(theme_index) + 1, theme_file)
     file.copy(file.path(x$package_dir, "ppt/theme/theme1.xml"),
-              to = file.path(x$package_dir, "ppt/theme", theme_file), overwrite = T)
+              to = file.path(x$package_dir, "ppt/theme", theme_file),
+              overwrite = TRUE,
+              copy.mode = FALSE)
 
     # add relation to theme file
     newrel <- relationship$new()$add(id = "rId1",
@@ -67,7 +71,7 @@ get_or_create_notesSlide <- function(x) {
     # copy slide template
     xml_file <- file.path(x$package_dir, "ppt/notesSlides", nslidename)
     path <- system.file(package = "officer", "template/notesSlide.xml")
-    file.copy(path, to = xml_file)
+    file.copy(path, to = xml_file, copy.mode = FALSE)
 
     # add relationships to notesMaster and slide
     rel_filename <- file.path(
@@ -143,8 +147,10 @@ ph_from_location.location_label <- function(loc, doc, ...) {
   xfrm <- doc$notesMaster$xfrm()
   location <- xfrm[xfrm$ph_label == loc$ph_label, ]
   if (nrow(location) < 1) stop("No placeholder with label ", loc$ph_label, " found!")
-  str <- "<p:nvSpPr><p:cNvPr id=\"0\" name=\"%s\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr><p:spPr/>"
-  new_ph <- sprintf(str, location$ph_label, location$ph)
+
+  id <- uuid_generate()
+  str <- "<p:nvSpPr><p:cNvPr id=\"%s\" name=\"%s\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr><p:spPr/>"
+  new_ph <- sprintf(str, id, location$ph_label, location$ph)
   return(list(ph = new_ph, label = location$ph_label))
 }
 
@@ -153,8 +159,10 @@ ph_from_location.location_type <- function(loc, doc, ...) {
   xfrm <- doc$notesMaster$xfrm()
   location <- xfrm[xfrm$type == loc$type, ]
   if (nrow(location) < 1) stop("No placeholder of type ", loc$type, " found!")
-  str <- "<p:nvSpPr><p:cNvPr id=\"0\" name=\"%s\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr><p:spPr/>"
-  new_ph <- sprintf(str, location$ph_label[1], location$ph[1])
+
+  id <- uuid_generate()
+  str <- "<p:nvSpPr><p:cNvPr id=\"%s\" name=\"%s\"/><p:cNvSpPr><a:spLocks noGrp=\"1\"/></p:cNvSpPr><p:nvPr>%s</p:nvPr></p:nvSpPr><p:spPr/>"
+  new_ph <- sprintf(str, id, location$ph_label[1], location$ph[1])
   return(list(ph = new_ph, label = location$ph_label[1]))
 }
 

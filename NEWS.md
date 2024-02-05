@@ -1,3 +1,30 @@
+# officer 0.6.4
+
+## Features 
+
+- `fp_border()` gains support for all line border styles listed in ECMA-376 
+  § 17.18.2 and allowed CSS border styles. Closes #165 and #443.
+
+## Changes
+
+- the dataframe returned by `docx_comments()` gains a list column `para_id` containing 
+the id(s) of the parent paragraph(s). A possible breaking change is that the `commented_text` 
+is now returned as a list column to account for comments spanning multiple runs.
+The docs gain a description of the columns of the returned dataframe.
+- `opts_current_table()` now ignore 'Quarto' setting.
+
+## Issues
+
+- Fix. Refactor `docx_comments()` to (properly) account for comments spanning 
+multiple paragraphs, multiple comments in the same paragraph and replies. Closes #541.
+- Check and stop if `fp_text_lite()` is using a *shading.color* but no *color*.
+- Check used style in `body_add_caption()`.
+- fix `ph_remove()`, `ph_slidelink()` and `ph_hyperlink()` that were not working since
+the latest refactoring.
+- Use fake attribute `stlname` if available in `docx_summary()`.
+- calls to `file.copy(from = "template/*.xml")` are now done with argument 
+`copy.mode = FALSE` for compatibility with 'nix'.
+
 # officer 0.6.3
 
 ## Features

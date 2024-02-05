@@ -26,7 +26,8 @@ Values can be read from \code{\link{slide_summary}}.}
 \item{id_chr}{deprecated.}
 
 \item{ph_label}{label associated to the placeholder. Use column
-\code{ph_label} of result returned by \code{\link{slide_summary}}.}
+\code{ph_label} of result returned by \code{\link{slide_summary}}.
+If used, \code{type} and \code{id} are ignored.}
 
 \item{slide_index}{slide index to reach}
 }
@@ -45,7 +46,7 @@ doc <- on_slide(doc, 1)
 slide_summary(doc) # read column ph_label here
 doc <- ph_slidelink(x = doc, ph_label = "Title 1", slide_index = 2)
 
-print(doc, target = fileout )
+print(doc, target = fileout)
 }
 \seealso{
 \code{\link{ph_with}}
