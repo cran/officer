@@ -1,7 +1,7 @@
 Package: officer
 Type: Package
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.6.4
+Version: 0.6.5
 Authors@R: c(
     person("David", "Gohel", role = c("aut", "cre"), email = "david.gohel@ardata.fr"),
     person("Stefan", "Moog", role = "aut", email = 'moogs@gmx.de'),
@@ -34,7 +34,7 @@ RoxygenNote: 7.3.1
 Suggests: testthat, devEMF, ggplot2, rmarkdown, doconv (>= 0.3.0),
         knitr, rsvg, magick
 NeedsCompilation: no
-Packaged: 2024-02-05 13:26:54 UTC; davidgohel
+Packaged: 2024-02-24 10:40:22 UTC; davidgohel
 Author: David Gohel [aut, cre],
   Stefan Moog [aut],
   ArData [cph],
@@ -51,4 +51,4 @@ Author: David Gohel [aut, cre],
   Hongyuan Jia [ctb] (<https://orcid.org/0000-0002-0075-8183>)
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2024-02-05 14:20:03 UTC
+Date/Publication: 2024-02-24 16:10:06 UTC
