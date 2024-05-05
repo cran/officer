@@ -1,3 +1,24 @@
+# officer 0.6.6
+
+## Issues
+
+- Fix. Add alt text to ggplot's added to a pptx with ph_with.gg. Closes #556.
+- embedded image in PPT can now be associated with an hyperlink
+- add a check to `block_pour_docx()` to avoid working with file paths 
+containing '&'.
+
+## Features
+
+- add coverage to rtf, contributions from Davide Garolini at roche.
+- `cursor_reach()` gains new argument `fixed` to enable exact matching.
+It defaults to FALSE for backward compatibility.
+- `remove_slide()` gains new argument `rm_images` to enable images deletion
+from ppt/media.
+- new function `body_comment()` adds a comment on an existing paragraph 
+at the cursor position.
+- `docx_summary()` gains parameter 'remove_field' to prevent field codes 
+from appearing in the returned data.frame. 
+
 # officer 0.6.5
 
 ## Features 
