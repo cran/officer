@@ -224,7 +224,10 @@ block_pour_docx <- function(file){
     stop("file {", file, "} is not a docx file.", call. = FALSE)
   }
   if(grepl("&", file, ignore.case = TRUE)){
-    stop("file path {", file, "} contains '&', please rename your file to use it with `block_pour_docx()`.", call. = FALSE)
+    stop("file path {", file, "} contains '&', please rename your file.", call. = FALSE)
+  }
+  if(grepl(" ", basename(file), ignore.case = TRUE)){
+    stop("file path {", basename(file), "} contains ' ', please rename your file.", call. = FALSE)
   }
 
   z <- list(file = file)
@@ -883,6 +886,7 @@ fortify_fpar <- function(x){
 }
 
 
+#' @export
 as.data.frame.fpar <- function( x, ...){
   chks <- fortify_fpar(x)
   chks <- chks[sapply(chks, function(x) inherits(x, "ftext"))]
@@ -893,6 +897,7 @@ as.data.frame.fpar <- function( x, ...){
   }, chks, SIMPLIFY = FALSE)
   rbind_match_columns(chks)
 }
+
 
 #' @export
 to_wml.fpar <- function(x, add_ns = FALSE, style_id = NULL, ...) {

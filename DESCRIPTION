@@ -1,10 +1,12 @@
 Type: Package
 Package: officer
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.6.6
+Version: 0.6.7
 Authors@R: c(
     person("David", "Gohel", , "david.gohel@ardata.fr", role = c("aut", "cre")),
     person("Stefan", "Moog", , "moogs@gmx.de", role = "aut"),
+    person("Mark", "Heckmann", , "heckmann.mark@gmail.com", role = "aut",
+           comment = c(ORCID = "0000-0002-0736-7417")),
     person("ArData", role = "cph"),
     person("Frank", "Hangler", , "frank@plotandscatter.com", role = "ctb",
            comment = "function body_replace_all_text"),
@@ -24,6 +26,7 @@ Authors@R: c(
            comment = "set speaker notes for .pptx documents"),
     person("Greg", "Leleu", , "gregoire.leleu@gmail.com", role = "ctb",
            comment = "fields functionality in ppt"),
+    person("Majid", "Eismann", role = "ctb"),
     person("Hongyuan", "Jia", , "hongyuanjia@cqust.edu.cn", role = "ctb",
            comment = c(ORCID = "0000-0002-0075-8183"))
   )
@@ -37,17 +40,18 @@ Description: Access and manipulate 'Microsoft Word', 'RTF' and 'Microsoft
 License: MIT + file LICENSE
 URL: https://ardata-fr.github.io/officeverse/,
         https://davidgohel.github.io/officer/
-BugReports: https://github.com/davidgohel/officer/discussions
-Imports: graphics, grDevices, openssl, R6, ragg, stats, utils, uuid,
-        xml2 (>= 1.1.0), zip (>= 2.1.0)
+BugReports: https://github.com/davidgohel/officer/issues
+Imports: cli, graphics, grDevices, openssl, R6, ragg, stats, utils,
+        uuid, xml2 (>= 1.1.0), zip (>= 2.1.0)
 Suggests: devEMF, doconv (>= 0.3.0), ggplot2, knitr, magick, rmarkdown,
         rsvg, testthat
 Encoding: UTF-8
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 NeedsCompilation: no
-Packaged: 2024-05-05 17:35:34 UTC; davidgohel
+Packaged: 2024-10-09 20:04:50 UTC; davidgohel
 Author: David Gohel [aut, cre],
   Stefan Moog [aut],
+  Mark Heckmann [aut] (<https://orcid.org/0000-0002-0736-7417>),
   ArData [cph],
   Frank Hangler [ctb] (function body_replace_all_text),
   Liz Sander [ctb] (several documentation fixes),
@@ -59,7 +63,8 @@ Author: David Gohel [aut, cre],
     as.matrix.rpptx),
   Nikolai Beck [ctb] (set speaker notes for .pptx documents),
   Greg Leleu [ctb] (fields functionality in ppt),
+  Majid Eismann [ctb],
   Hongyuan Jia [ctb] (<https://orcid.org/0000-0002-0075-8183>)
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2024-05-05 18:10:02 UTC
+Date/Publication: 2024-10-09 20:40:02 UTC

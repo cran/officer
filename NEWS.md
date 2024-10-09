@@ -1,7 +1,53 @@
+# officer 0.6.7
+
+## Issues
+
+- store paddings as numeric values and not integer values.
+- remove_fields in `docx_summary()` now also removes "w:fldData" nodes.
+- complete the manual of `body_add_docx()` with a note about the file basename
+that can not contain ' ' and trigger an error if it contains a ' '. 
+- `plot_layout_properties()` gains a 'title' parameter, which will add the layout name as the plot title. Defaults to 
+`FALSE`, to not alter the old behavior. Also, the slide width and height are now correctly displayed in the plot. 
+Before, a box was drawn around the plot area. However, the plot area var with device size, not slide size.
+- class `dir_collection`: Files are now added to a container in the order of their trailing numeric index (#596).
+For example, `slideLayout2.xml` will now preceed `slideLayout10.xml`. Before, alphabetical sorting was used, where 
+`slideLayout10.xml` comes before `slideLayout2.xml`.
+- `layout_properties()` now returns all placeholders in case of multiple master (#597). Also, the internal `xfrmize()` 
+now sorts the resulting data by placeholder position. This yields an intuitive order, with placeholders sorted from 
+top to bottom and left to right.
+- `ph_location_type()` now throws an error if the `id` for a `type` is out of range (#602) and a more 
+informative error message if the type is not present in layout (#601).
+- `plot_layout_properties()` assignment order fixed for `labels= FALSE` (#604)
+- `layout_properties()` gains a `type_idx` column to index phs of the same type on a layout. Indexing is performed based on ph position, following a top-to-bottom, left-to-right order (#606).
+- `plot_layout_properties()` plots more information by default now: layout name, ph label, ph id, ph type + index by default (#606).
+- `ph_location_type()`: new `type_idx` arg replaces the deprecated `id` arg (#606).
+- Add `ph_location_id()` as a new member to the `ph_location_*` family. It references a placeholder via its unique id (#606).
+- `plot_layout_properties()`: Now accepts the layout index (see `layout_summary()`) as an alternative to the layout name.
+  Gains an argument `legend` to add a legend to the plot. Also prints the current slide's layout by 
+  default now, if not layout name is provided explicitly (#595).
+  
+## Features
+
+- `layout_rename_ph_labels()` to rename ph labels (#610).
+- add `layout_dedupe_ph_labels()` to handle duplicate placeholder labels (#589). 
+By default, it will only detect duplicate labels, but apply no changes. With 
+`action = "rename"`, it auto-renames duplicate labels and `action = "delete"` 
+deletes duplicates, only keeping their first occurrence.
+- new convenience functions `body_replace_gg_at_bkm()` and `body_replace_plot_at_bkm()`
+to replace text content enclosed in a bookmark with a ggplot or a base plot.
+- add `unit` (in, cm, mm) argument in function `page_size()`.
+
 # officer 0.6.6
 
 ## Issues
 
+- Fix. `docx_summary` preserves non-breaking hyphens. Non-breaking hyphens are 
+replaced with a hyphen-minus (Unicode character 002D). Closes #573.
+- `docx_summary()` gains parameter 'detailed' which allows to get a detailed 
+summary including formatting properties of runs in a paragraph. Formatting 
+properties are stored in a list column `run`, where each element 
+is a dataframe with rows corresponding to a single 
+run and columns containing the information on formatting properties.
 - Fix. Add alt text to ggplot's added to a pptx with ph_with.gg. Closes #556.
 - embedded image in PPT can now be associated with an hyperlink
 - add a check to `block_pour_docx()` to avoid working with file paths 

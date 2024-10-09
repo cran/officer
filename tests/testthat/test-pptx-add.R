@@ -1,8 +1,9 @@
 test_that("add wrong arguments", {
   doc <- read_pptx()
-  expect_error(add_slide(doc, "Title and blah", "Office Theme"))
-  expect_error(add_slide(doc, "Title and Content", "Office Tddheme"))
+  expect_error(add_slide(doc, "Title and blah", "Office Theme"), fixed = TRUE)
+  expect_error(add_slide(doc, "Title and Content", "Office Tddheme"), fixed = TRUE)
 })
+
 
 test_that("add simple elements into placeholder", {
   skip_if_not_installed("doconv")
@@ -18,6 +19,7 @@ test_that("add simple elements into placeholder", {
   doc <- ph_with(doc, c(TRUE, FALSE), location = ph_location_right())
   expect_snapshot_doc(x = doc, name = "pptx-add-simple", engine = "testthat")
 })
+
 
 test_that("add ggplot into placeholder", {
   skip_if_not_installed("doconv")
@@ -45,6 +47,8 @@ test_that("add ggplot into placeholder", {
   )
   expect_snapshot_doc(x = doc, name = "pptx-add-ggplot2", engine = "testthat")
 })
+
+
 test_that("add base plot into placeholder", {
   skip_if_not_installed("doconv")
   skip_if_not(doconv::msoffice_available())
@@ -62,6 +66,7 @@ test_that("add base plot into placeholder", {
   )
   expect_snapshot_doc(x = doc, name = "pptx-add-barplot", engine = "testthat")
 })
+
 
 test_that("add unordered_list into placeholder", {
   skip_if_not_installed("doconv")
@@ -86,6 +91,7 @@ test_that("add unordered_list into placeholder", {
   doc <- ph_with(doc, ul2, location = ph_location_type())
   expect_snapshot_doc(x = doc, name = "pptx-add-ul", engine = "testthat")
 })
+
 
 test_that("add block_list into placeholder", {
   skip_if_not_installed("doconv")
@@ -113,6 +119,7 @@ test_that("add block_list into placeholder", {
   )
   expect_snapshot_doc(x = doc, name = "pptx-add-blocklist", engine = "testthat")
 })
+
 
 test_that("add formatted par into placeholder", {
   bold_face <- shortcuts$fp_bold(font.size = 30)
@@ -151,6 +158,7 @@ test_that("add xml into placeholder", {
   expect_equal(sm[1, ]$text, "Hello world 1")
   expect_equal(sm[2, ]$text, "Hello world 1")
 })
+
 
 test_that("slidelink shape", {
   doc <- read_pptx()
@@ -271,6 +279,7 @@ test_that("empty_content in pptx", {
   expect_equal(slide_summary(doc)$cx, 2)
 })
 
+
 test_that("pptx ph locations", {
   doc <- read_pptx()
   doc <- add_slide(doc, "Title and Content", "Office Theme")
@@ -334,6 +343,108 @@ test_that("pptx ph locations", {
   expect_equivalent(observed_xfrm, theorical_xfrm)
 })
 
+
+test_that("pptx ph_location_type", {
+  opts <- options(cli.num_colors = 1) # suppress colors for easier error message check
+  on.exit(options(opts))
+
+  x <- read_pptx()
+  x <- add_slide(x, "Two Content")
+
+  expect_no_error({
+    ph_with(x, "correct ph type id", ph_location_type("body", type_idx = 1))
+  })
+
+  expect_warning({
+    ph_with(x, "cannot supply id AND type_idx", ph_location_type("body", type_idx = 1, id = 1))
+  }, regexp = "`id` is ignored if `type_idx` is provided", fixed = TRUE)
+
+  expect_warning({
+    ph_with(x, "id still working with warning to avoid breaking change", ph_location_type("body", id = 1))
+  }, regexp = "The `id` argument in `ph_location_type()` is deprecated", fixed = TRUE)
+
+  expect_error({
+      ph_with(x, "out of range type id", ph_location_type("body", type_idx = 3)) # 3 does not exists => no error or warning
+  }, regexp = "`type_idx` is out of range.", fixed = TRUE)
+
+  expect_error({
+    expect_warning({
+    ph_with(x, "out of range type id", ph_location_type("body", id = 3)) # 3 does not exists => no error or warning
+    }, regexp = " The `id` argument in `ph_location_type()` is deprecated", fixed = TRUE)
+  }, regexp = "`id` is out of range.", fixed = TRUE)
+
+  expect_error({
+    ph_with(x, "type okay but not available in layout", ph_location_type("tbl")) # tbl not on layout
+  }, regexp = "Found no placeholder of type", fixed = TRUE)
+
+  expect_error({
+    ph_with(x, "xxx is unknown type", ph_location_type("xxx"))
+  }, regexp = 'type "xxx" is unknown', fixed = TRUE)
+
+  expect_no_error({ # for complete coverage
+    ph_with(x, " ph type position_right", ph_location_type("body", position_right = TRUE))
+  })
+})
+
+
+test_that("pptx ph_location_id", {
+  opts <- options(cli.num_colors = 1) # no colors for easier error message check
+  on.exit(options(opts))
+
+  # direct errors
+  error_exp <- "`id` must be one number"
+  expect_error(ph_location_id(id = 1:2), regex = error_exp, fixed = TRUE)
+  expect_error(ph_location_id(id = -1:1), regex = error_exp, fixed = TRUE)
+  expect_error(ph_location_id(id = c("A", "B")), regex = error_exp, fixed = TRUE)
+  expect_error(ph_location_id(id = c(NA, NA)), regex = error_exp, fixed = TRUE)
+
+  error_exp <- "`id` must be a positive number"
+  expect_error(ph_location_id(id = NULL), regex = error_exp, fixed = TRUE)
+  expect_error(ph_location_id(id = NA), regex = error_exp, fixed = TRUE)
+  expect_error(ph_location_id(id = NaN), regex = error_exp, fixed = TRUE)
+  expect_error(ph_location_id(id = character(0)), regex = error_exp, fixed = TRUE)
+  expect_error(ph_location_id(id = integer(0)), regex = error_exp, fixed = TRUE)
+
+  expect_error(ph_location_id(id = "A"), regex = 'Cannot convert "A" to integer', fixed = TRUE)
+  expect_error(ph_location_id(id = ""), regex = 'Cannot convert "" to integer', fixed = TRUE)
+  expect_error(ph_location_id(id = Inf), regex = "Cannot convert Inf to integer", fixed = TRUE)
+  expect_error(ph_location_id(id = -Inf), regex = "Cannot convert -Inf to integer", fixed = TRUE)
+
+  error_exp <- "`id` must be a positive number"
+  expect_error(ph_location_id(id = 0), regex = error_exp, fixed = TRUE)
+  expect_error(ph_location_id(id = -1), regex = error_exp, fixed = TRUE)
+
+  # downstream errors
+  x <- read_pptx()
+  x <- add_slide(x, "Comparison")
+
+  expect_error(
+    {
+      ph_with(x, "id does not exist", ph_location_id(id = 1000))
+    },
+    "`id` 1000 does not exist",
+    fixed = TRUE
+  )
+
+  # test for correct results
+  expect_no_error({
+    ids <- layout_properties(x, "Comparison")$id
+    for (id in ids) {
+      ph_with(x, paste("text:", id), ph_location_id(id, newlabel = paste("newlabel:", id)))
+    }
+  })
+  nodes <- xml_find_all(
+    x = x$slide$get_slide(1)$get(),
+    xpath = "/p:sld/p:cSld/p:spTree/p:sp"
+  )
+  # text inside phs
+  expect_true(all(xml_text(nodes) == paste("text:", ids)))
+  # assigned shape names
+  all_nvpr <- xml_find_all(nodes, "./p:nvSpPr/p:cNvPr")
+  expect_true(all(xml_attr(all_nvpr, "name") == paste("newlabel:", ids)))
+})
+
+
 test_that("pptx ph labels", {
   doc <- read_pptx()
   doc <- add_slide(doc, "Title and Content", "Office Theme")
@@ -366,8 +477,43 @@ test_that("pptx ph labels", {
     xml_attr(all_nvpr, "name"),
     paste0("label", 1:4)
   )
+
+  expect_error({
+    doc <- ph_with(
+      x = doc, value = "error if label does not exist",
+      location = ph_location_label(ph_label = "xxx")
+    )
+  })
 })
 
+
+
+test_that("as_ph_location", {
+  ref_names <- c("width", "height", "left", "top", "ph_label", "ph", "type", "rotation", "fld_id", "fld_type")
+  l <- replicate(length(ref_names), "dummy", simplify = FALSE)
+  df <- as.data.frame(l)
+  names(df) <- ref_names
+
+  expect_no_error({
+    as_ph_location(df)
+  })
+
+  expect_error({
+    as_ph_location(df[, -(1:2)])
+  }, regexp = "missing column values:width,height", fixed = TRUE)
+
+  expect_error({
+    as_ph_location("wrong class supplied")
+  }, regexp = "`x` must be a data frame", fixed = TRUE)
+})
+
+
+test_that("get_ph_loc", {
+  x <- read_pptx()
+  get_ph_loc(x, "Comparison", "Office Theme", type =  "body",
+             position_right = TRUE, position_top = FALSE)
+
+})
 
 
 unlink("*.pptx")

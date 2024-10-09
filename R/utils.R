@@ -51,12 +51,18 @@ read_xfrm <- function(nodeset, file, name){
           name = name )
 }
 
-fortify_master_xfrm <- function(master_xfrm){
 
+fortify_master_xfrm <- function(master_xfrm) {
   master_xfrm <- as.data.frame(master_xfrm)
   has_type <- grepl("type=", master_xfrm$ph)
   master_xfrm <- master_xfrm[has_type, ]
-  master_xfrm <- master_xfrm[!duplicated(master_xfrm$type),]
+  if (nrow(master_xfrm) > 0) {    # see #597
+    list_xfrm <- split(master_xfrm, master_xfrm$file)
+    list_xfrm <- lapply(list_xfrm, function(x) {
+      x[!duplicated(x$type), , drop = FALSE]
+    })
+    master_xfrm <- do.call("rbind", list_xfrm)
+  }
 
   tmp_names <- names(master_xfrm)
 
@@ -72,12 +78,15 @@ fortify_master_xfrm <- function(master_xfrm){
   master_xfrm
 }
 
-xfrmize <- function( slide_xfrm, master_xfrm ){
-  x <- as.data.frame( slide_xfrm )
 
-  master_ref <- unique( data.frame(file = master_xfrm$file,
-                                     master_name = master_xfrm$name,
-                                     stringsAsFactors = FALSE ) )
+xfrmize <- function(slide_xfrm, master_xfrm) {
+  x <- as.data.frame(slide_xfrm)
+
+  master_ref <- unique(data.frame(
+    file = master_xfrm$file,
+    master_name = master_xfrm$name,
+    stringsAsFactors = FALSE
+  ))
   master_xfrm <- fortify_master_xfrm(master_xfrm)
 
   slide_key_id <- paste0(x$master_file, x$type)
@@ -85,17 +94,20 @@ xfrmize <- function( slide_xfrm, master_xfrm ){
 
   slide_xfrm_no_match <- x[!slide_key_id %in% master_key_id, ]
   slide_xfrm_no_match <- merge(slide_xfrm_no_match,
-                               master_ref, by.x = "master_file", by.y = "file",
-                               all.x = TRUE, all.y = FALSE)
+    master_ref,
+    by.x = "master_file", by.y = "file",
+    all.x = TRUE, all.y = FALSE
+  )
 
   x <- merge(x, master_xfrm,
-                      by.x = c("master_file", "type"),
-                      by.y = c("file", "type"),
-                      all = FALSE)
-  x$offx <- ifelse( !is.finite(x$offx), x$offx_ref, x$offx )
-  x$offy <- ifelse( !is.finite(x$offy), x$offy_ref, x$offy )
-  x$cx <- ifelse( !is.finite(x$cx), x$cx_ref, x$cx )
-  x$cy <- ifelse( !is.finite(x$cy), x$cy_ref, x$cy )
+    by.x = c("master_file", "type"),
+    by.y = c("file", "type"),
+    all = FALSE
+  )
+  x$offx <- ifelse(!is.finite(x$offx), x$offx_ref, x$offx)
+  x$offy <- ifelse(!is.finite(x$offy), x$offy_ref, x$offy)
+  x$cx <- ifelse(!is.finite(x$cx), x$cx_ref, x$cx)
+  x$cy <- ifelse(!is.finite(x$cy), x$cy_ref, x$cy)
   x$offx_ref <- NULL
   x$offy_ref <- NULL
   x$cx_ref <- NULL
@@ -104,11 +116,19 @@ xfrmize <- function( slide_xfrm, master_xfrm ){
   x$fld_type_ref <- NULL
 
   x <- rbind(x, slide_xfrm_no_match, stringsAsFactors = FALSE)
-  x[
-    !is.na( x$offx ) &
-      !is.na( x$offy ) &
-      !is.na( x$cx ) &
-      !is.na( x$cy ),]
+
+  i_master <- get_file_index(x$master_file)
+  i_layout <- get_file_index(x$file)
+  x <- x[order(i_master, i_layout, x$offy, x$offx), , drop = FALSE] # intuitive sorting: top -> bottom, left -> right
+  x <- x[!(is.na(x$offx) | is.na(x$offy) | is.na(x$cx) | is.na(x$cy)),  ]
+
+  x$type_idx <- stats::ave(x$type, x$master_file, x$file, x$type, FUN = seq_along)
+  x$type_idx <- as.numeric(x$type_idx) # NB: ave returns character
+
+  x$id <- as.integer(x$id)
+
+  rownames(x) <- NULL # prevent meaningless rownames
+  x
 }
 
 
@@ -210,9 +230,6 @@ correct_id <- function(doc, int_id){
 }
 
 
-
-
-
 check_bookmark_id <- function(bkm){
   if(!is.null(bkm)){
     invalid_bkm <- is.character(bkm) &&
@@ -237,7 +254,89 @@ is_doc_open <- function(file) {
 }
 
 
+# Extract trailing numeric index in .xml filename
+#
+# Useful to for slideMaster and slideLayout .xml files.
+#
+# Examples:
+#   files <- c("slideLayout1.xml", "slideLayout2.xml", "slideLayout10.xml")
+#   get_file_index(files)
+#
+get_file_index <- function(file) {
+  x <- sub(pattern = ".+?(\\d+).xml$", replacement = "\\1", x = basename(file), ignore.case = TRUE)
+  as.numeric(x)
+}
+
+
+# Sort xml filenames by trailing numeric index
+#
+# Useful to for slideMaster and slideLayout xml files.
+#
+# Examples:
+#   files <- c("slideLayout1.xml", "slideLayout2.xml", "slideLayout12.xml")
+#   sort_vec_by_index(files)  # => order corresponding to trailing index
+#   sort(files)           # => incorrect lexicographical ordering
+#
+sort_vec_by_index <- function(x) {
+  indexes <- get_file_index(x)
+  x[order(indexes)]
+}
+
+
+# Sort dataframe column by trailing index
+#
+# df: A dataframe
+# ...: columsn to sort by, comma separated
+#
+# Examples:
+# df <- data.frame(
+#   a = paste0("file_", rep(3:1, each = 2), ".xml"),
+#   b = paste0("file_", rep(3:1, 2), ".xml")
+# )
+# sort_dataframe_by_index(df, "a", "b")
+# sort_dataframe_by_index(df, "b", "a")
+#
+sort_dataframe_by_index <- function(df, ...) {
+  sort_columns <- c(...)
+  l <- lapply(sort_columns, function(.col) {
+    get_file_index(df[[.col]])
+  })
+  df[do.call(order, l), , drop =FALSE]
+}
+
+
+# rename dataframe columns
+#
+# Examples:
+#   df_rename(mtcars, c("mpg", "cyl"), c("A", "B"))
+#
+df_rename <- function(df, old, new) {
+  .nms <- names(df)
+  .nms[match(old, .nms)] <- new
+  stats::setNames(df, .nms)
+}
+
+
+# replacement for stopifnot() with nicer user feedback
+stop_if_not_class <- function(x, class, arg = NULL) {
+  check <- inherits(x, what = class)
+  if (!check) {
+    msg_arg <- ifelse(is.null(arg), "Incorrect input.", "Incorrect input for {.arg {arg}}")
+    cli::cli_abort(c(
+      msg_arg,
+      "x" = "Expected {.cls {class}} but got {.cls {class(x)[1]}}"
+    ), call = NULL)
+  }
+}
+
+
+stop_if_not_rpptx <- function(x, arg = NULL) {
+  stop_if_not_class(x, "rpptx", arg)
+}
+
+
 # htmlEscapeCopy ----
+
 htmlEscapeCopy <- local({
 
   .htmlSpecials <- list(
@@ -276,17 +375,39 @@ htmlEscapeCopy <- local({
 })
 
 
-# metric units -----
+# metric units -----------------------------------------------
+#
 cm_to_inches <- function(x) {
   x / 2.54
 }
+
 mm_to_inches <- function(x) {
   x / 25.4
 }
+
 convin <- function(unit, x) {
   unit <- match.arg(unit, choices = c("in", "cm", "mm"), several.ok = FALSE)
   if (!identical("in", unit)) {
     x <- do.call(paste0(unit, "_to_inches"), list(x = x))
   }
   x
+}
+
+
+# from rlang pkg  ------------------------------------------
+
+is_named <- function(x) {
+  nms <- names(x)
+  if (is.null(nms)) {
+    return(FALSE)
+  }
+  if (any(detect_void_name(nms))) {
+    return(FALSE)
+  }
+  TRUE
+}
+
+
+detect_void_name <- function(x) {
+  x == "" | is.na(x)
 }

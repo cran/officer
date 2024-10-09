@@ -22,6 +22,7 @@ This is to be used when need to know what parameters should be used with
 \code{ph_location*} calls. The parameters are printed in their corresponding shapes.
 
 Note that if there are duplicated \code{ph_label}, you should not use \code{ph_location_label}.
+Hint: You can dedupe labels using \code{\link{layout_dedupe_ph_labels}}.
 }
 \examples{
 # To generate an anotation of the default base document with officer:
@@ -33,7 +34,7 @@ annotate_base(output_file = tempfile(fileext = ".pptx"))
 
 }
 \seealso{
-Other functions for reading presentation informations: 
+Other functions for reading presentation information: 
 \code{\link{color_scheme}()},
 \code{\link{doc_properties}()},
 \code{\link{layout_properties}()},
@@ -43,4 +44,4 @@ Other functions for reading presentation informations:
 \code{\link{slide_size}()},
 \code{\link{slide_summary}()}
 }
-\concept{functions for reading presentation informations}
+\concept{functions for reading presentation information}

@@ -643,10 +643,15 @@ inch_to_tweep <- function(x) round(x * 72 * 20, digits = 0)
 #' in landscape mode then the length becomes the width and the width becomes the length.
 #' @param width,height page width, page height (in inches).
 #' @param orient page orientation, either 'landscape', either 'portrait'.
+#' @param unit unit for width and height, one of "in", "cm", "mm".
 #' @examples
 #' page_size(orient = "landscape")
 #' @family functions for section definition
-page_size <- function(width = 21 / 2.54, height = 29.7 / 2.54, orient = "portrait") {
+page_size <- function(width = 21 / 2.54, height = 29.7 / 2.54, orient = "portrait", unit = "in") {
+
+  width <- convin(unit = unit, x = width)
+  height <- convin(unit = unit, x = height)
+
   if (orient %in% "portrait") {
     h <- max(c(height, width))
     w <- min(c(height, width))
@@ -1045,11 +1050,15 @@ external_img <- function(src, width = .5, height = .2, unit = "in", guess_size =
   src
 }
 
+
+#' @export
 dim.external_img <- function(x) {
   x <- attr(x, "dims")
   data.frame(width = x$width, height = x$height)
 }
 
+
+#' @export
 as.data.frame.external_img <- function(x, ...) {
   dimx <- attr(x, "dims")
   data.frame(path = as.character(x), width = dimx$width, height = dimx$height, alt = attr(x, "alt"), stringsAsFactors = FALSE)
