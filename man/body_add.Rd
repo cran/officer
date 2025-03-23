@@ -59,10 +59,20 @@ body_add(x, value, ...)
   res = 300,
   style = "Normal",
   scale = 1,
+  unit = "in",
   ...
 )
 
-\method{body_add}{plot_instr}(x, value, width = 6, height = 5, res = 300, style = "Normal", ...)
+\method{body_add}{plot_instr}(
+  x,
+  value,
+  width = 6,
+  height = 5,
+  res = 300,
+  style = "Normal",
+  unit = "in",
+  ...
+)
 
 \method{body_add}{block_pour_docx}(x, value, ...)
 
@@ -93,13 +103,15 @@ argument \code{path} from \link{read_docx}).}
 \item{alignment}{columns alignement, argument length must match with columns length,
 values must be "l" (left), "r" (right) or "c" (center).}
 
-\item{width}{height in inches}
-
-\item{height}{height in inches}
+\item{width, height}{plot size in units expressed by the unit argument.
+Defaults to a width of 6 and a height of 5 "in"ches.}
 
 \item{res}{resolution of the png image in ppi}
 
 \item{scale}{Multiplicative scaling factor, same as in ggsave}
+
+\item{unit}{One of the following units in which the width and height
+arguments are expressed: "in", "cm" or "mm".}
 }
 \description{
 This function add objects into a Word document. Values are added

@@ -12,6 +12,7 @@ body_add_plot(
   res = 300,
   style = "Normal",
   pos = "after",
+  unit = "in",
   ...
 )
 }
@@ -20,9 +21,8 @@ body_add_plot(
 
 \item{value}{plot instructions, see \code{\link[=plot_instr]{plot_instr()}}.}
 
-\item{width}{height in inches}
-
-\item{height}{height in inches}
+\item{width, height}{plot size in units expressed by the unit argument.
+Defaults to a width of 6 and a height of 5 "in"ches.}
 
 \item{res}{resolution of the png image in ppi}
 
@@ -30,6 +30,9 @@ body_add_plot(
 
 \item{pos}{where to add the new element relative to the cursor,
 one of "after", "before", "on".}
+
+\item{unit}{One of the following units in which the width and height
+arguments are expressed: "in", "cm" or "mm".}
 
 \item{...}{Arguments to be passed to png function.}
 }
@@ -40,14 +43,16 @@ Add a plot as a png image into an rdocx object.
 doc <- read_docx()
 
 if (capabilities(what = "png")) {
-  doc <- body_add_plot(doc,
-    value = plot_instr(
+  p <- plot_instr(
       code = {
         barplot(1:5, col = 2:6)
       }
-    ),
-    style = "centered"
-  )
+    )
+
+  doc <- body_add_plot(doc, value = p, style = "centered")
+
+  # Set the unit in which the width and height arguments are expressed
+  doc <- body_add_plot(doc, value = p, style = "centered", unit = "cm")
 }
 
 print(doc, target = tempfile(fileext = ".docx"))

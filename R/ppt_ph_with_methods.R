@@ -1,3 +1,5 @@
+# PH_WITH -------
+
 #' @export
 #' @title Add objects on the current slide
 #' @description add object into a new shape in the current slide. This
@@ -9,19 +11,33 @@
 #' unordered list of formatted paragraphs,
 #' pretty tables with package flextable, editable graphics with
 #' package rvg, 'Microsoft' charts with package mschart.
-#' @param location a placeholder location object.
-#' It will be used to specify the location of the new shape. This location
-#' can be defined with a call to one of the ph_location functions. See
-#' section \code{"see also"}.
+#' @param location a placeholder location object or a location short form. It will be used
+#' to specify the location of the new shape. This location can be defined with a call to one
+#' of the `ph_location_*` functions (see section `"see also"`). In `ph_with()`, several location
+#' short forms can be used, as listed in section `"Short forms"`.
 #' @param ... further arguments passed to or from other methods. When
 #' adding a `ggplot` object or `plot_instr`, these arguments will be used
 #' by png function.
+#'
+#' @section Short forms:
+#' The `location` argument of `ph_with()` either expects a location object as returned by the
+#' `ph_location_*` functions or a corresponding location *short form* (string or numeric):
+#'
+#' | **Location function**                       | **Short form**             | **Description**                                      |
+#' |---------------------------------------------|----------------------------|------------------------------------------------------|
+#' | `ph_location_left()`                        | `"left"`                   | Keyword string                                       |
+#' | `ph_location_right()`                       | `"right"`                  | Keyword string                                       |
+#' | `ph_location_fullsize()`                    | `"fullsize"`               | Keyword string                                       |
+#' | `ph_location_type("body", 1)`               | `"body [1]"`               | String: type + index in brackets (`1` if omitted)    |
+#' | `ph_location_label("my_label")`             | `"my_label"`               | Any string not matching a keyword or type            |
+#' | `ph_location_id(1)`                         | `1`                        | Length 1 integer                                     |
+#' | `ph_location(0, 0, 4, 5)`                   | `c(0,0,4,5)`               | Length 4 numeric, optionally named, `c(top=0, left=0, ...)` |
+#'
 #' @examples
 #' # this name will be used to print the file
 #' # change it to "youfile.pptx" to write the pptx
 #' # file in your working directory.
 #' fileout <- tempfile(fileext = ".pptx")
-#'
 #'
 #' doc_1 <- read_pptx()
 #' sz <- slide_size(doc_1)
@@ -158,13 +174,34 @@
 #' )
 #'
 #' print(doc_1, target = fileout)
-#' @seealso [ph_location_type], [ph_location], [ph_location_label],
-#' [ph_location_left], [ph_location_right], [ph_location_fullsize],
-#' [ph_location_template]
+#'
+#'
+#' # Example using short form locations ----
+#' x <- read_pptx()
+#' x <- add_slide(x, "Title Slide")
+#' x <- ph_with(x, "A title", "Title 1")        # label
+#' x <- ph_with(x, "A subtitle", 3)             # id
+#' x <- ph_with(x, "A left text", "left")       # keyword
+#' x <- ph_with(x, "A date", "dt[1]")           # type + index
+#' x <- ph_with(x, "More content", c(5,.5,9,2)) # numeric vector
+#' file <- tempfile(fileext = ".pptx")
+#' print(x, file)
+#' # browseURL(file)  # opens file on some systems
+#'
+#' @seealso Specify placeholder locations with [ph_location_type], [ph_location],
+#' [ph_location_label], [ph_location_left], [ph_location_right],
+#' [ph_location_fullsize], [ph_location_template]. [phs_with] is a sibling of
+#' `ph_with` that fills mutiple placeholders at once.
 #' @section Illustrations:
 #'
 #' \if{html}{\figure{ph_with_doc_1.png}{options: width=80\%}}
 ph_with <- function(x, value, location, ...) {
+  location <- resolve_location(location)
+  .ph_with(x, value, location, ...)
+}
+
+
+.ph_with <- function(x, value, location, ...) {
   UseMethod("ph_with", value)
 }
 
@@ -608,5 +645,81 @@ ph_with.xml_document <- function(x, value, location, ...) {
   xml_to_slide(slide, location, value, x$package_dir)
 
   xml_add_child(xml_find_first(slide$get(), "//p:spTree"), value)
+  x
+}
+
+
+# PHS_WITH -------
+
+#' @title Fill multiple placeholders using key value syntax
+#' @description A sibling of [officer::ph_with] that fills mutiple placeholders at once. Placeholder locations are
+#'   specfied using the short form syntax. The location and corresponding object are passed as key value pairs
+#'   (`phs_with("short form location" = object)`). Under the hood, [officer::ph_with] is called for each pair. Note
+#'   that `phs_with` does not cover all options from the `ph_location_*` family and is also less customization. It is a
+#'   covenience wrapper for the most common use cases. The implemented short forms are listed in section
+#'   `"Short forms"`.
+#' @param x A `rpptx` object.
+#' @param ... Key-value pairs of the form `"short form location" = object`. If the short form is an integer or a string
+#'   with blanks, you must wrap it in quotes or backticks.
+#' @param .dots List of key-value pairs `"short form location" = object`. Alternative to `...`.
+#' @param .slide_idx Numeric indexes of slides to process. `NULL` (default) processes the current slide only. Use
+#'   keyword `all` for all slides.
+#' @section Short forms: The following short forms are implemented and can be used as the parameter in the function
+#'   call. The corresponding function from the `ph_location_*` family (called under the hood) is displayed on the
+#'   right.
+#'
+#' | **Short form** | **Description**                                   | **Location function**           |
+#' |----------------|---------------------------------------------------|---------------------------------|
+#' | `"left"`       | Keyword string                                    | `ph_location_left()`            |
+#' | `"right"`      | Keyword string                                    | `ph_location_right()`           |
+#' | `"fullsize"`   | Keyword string                                    | `ph_location_fullsize()`        |
+#' | `"body [1]"`   | String: type + index in brackets (`1` if omitted) | `ph_location_type("body", 1)`   |
+#' | `"my_label"`   | Any string not matching a keyword or type         | `ph_location_label("my_label")` |
+#' | `1`            | Length 1 integer                                  | `ph_location_id(1)`             |
+#'
+#' @export
+#' @seealso [ph_with()], [add_slide()]
+#' @example inst/examples/example_phs_with.R
+phs_with <- function(x, ..., .dots = NULL, .slide_idx = NULL) {
+  dots_list <- list(...)
+  if (length(dots_list) > 0 && !is_named(dots_list)) {
+    cli::cli_abort(
+      c("Missing key in {.arg ...}",
+        "x" = "{.arg ...} requires a key-value syntax, with a ph short-form location as the key",
+        "i" = "Example: {.code phs_with(x, title = 'My title', 'body[1]' = 'My body')}"
+      )
+    )
+  }
+  if (length(.dots) > 0 && !is_named(.dots)) {
+    cli::cli_abort(
+      c("Missing names in {.arg .dots}",
+        "x" = "{.arg .dots} must be a named list, with ph short-form locations as names",
+        "i" = "Example: {.code phs_with(x, .dots = list(title = 'My title', 'body[1]' = 'My body'))}"
+      )
+    )
+  }
+  dots <- utils::modifyList(dots_list, .dots %||% list())
+  if (length(dots) == 0) {
+    return(x)
+  }
+  .slide_idx <- .slide_idx %||% x$cursor # default is current slide
+  if (is.character(.slide_idx) && .slide_idx == "all") {
+    .slide_idx <- seq_len(length(x))
+  }
+  stop_if_not_in_slide_range(x, .slide_idx)
+
+  loc_strings <- as.list(names(dots))
+  ii <- grepl("^\\d+$", loc_strings) # find integer short-forms
+  loc_strings[ii] <- as.integer(loc_strings[ii])
+  locations <- lapply(loc_strings, resolve_location)
+
+  .old_cursor <- x$cursor
+  for (slide_idx in .slide_idx) {
+    x$cursor <- slide_idx # pw_with always uses the current slide
+    for (i in seq_along(dots)) {
+      x <- ph_with(x, dots[[i]], locations[[i]])
+    }
+  }
+  x$cursor <- .old_cursor
   x
 }

@@ -1,3 +1,23 @@
+# officer 0.6.8
+
+## Issues
+
+- Simplified input format for `location` arg in `ph_with_*` functions (#623). Instead of a `location` object 
+  created by the `ph_location_*` function family, `ph_with_*` functions now resolves certain short form
+  input into corresponding `location` objects. For example, instead of using `ph_location_label("<label>")`
+  you can now simply pass the `"<label>"` to the `location` arg. The functionn will convert the string into
+  the corresponding location object automatically. Other examples are `"body [1]"` for 
+  `ph_location_type(type = "body", type_idx = 1)`, or the integer `1` for `ph_location_id(id = 1)`
+- Add `slide_visible()` to get and set the visibility of slides (#622).
+- debug selector for `ph_remove()` (see #625) that was not working for rvg outputs.
+- `phs_with`: filling multiple placeholders on one or more slides at once using key-value pair syntax (#639).
+- `add_slide`: new args `...` and `.dots`, both passed to `phs_with` to create slide and fill placeholders in one step (#639).
+- add support for pdf in office extensions (#613).
+
+## Internals
+
+- remove old visual tests
+
 # officer 0.6.7
 
 ## Issues
