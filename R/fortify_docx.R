@@ -101,7 +101,14 @@ docxtable_as_tibble <- function(node, styles, preserve = FALSE) {
     style_name <- NA
   } else {
     style_id <- xml_attr(style_node, "val")
-    row_details$style_name <- rep(styles$style_name[styles$style_id %in% style_id], nrow(row_details))
+    officer_style_name <- xml_attr(style_node, "tstlname")
+    if (!is.na(style_id)) {
+      row_details$style_name <- rep(styles$style_name[styles$style_id %in% style_id], nrow(row_details))
+    } else if (!is.na(officer_style_name)) {
+      row_details$style_name <- rep(officer_style_name, nrow(row_details))
+    } else {
+      row_details$style_name <- rep(NA_character_, nrow(row_details))
+    }
   }
   row_details$content_type <- rep("table cell", nrow(row_details))
   row_details$text[row_details$col_span < 1 | row_details$row_span < 1] <- NA_character_
@@ -118,6 +125,9 @@ par_as_tibble <- function(node, styles, detailed = FALSE) {
   } else {
     style_id <- xml_attr(style_node, "val")
     style_name <- styles$style_name[styles$style_id %in% style_id]
+    if (length(style_name) < 1L) {
+      style_name <- NA_character_
+    }
   }
 
   replace_no_break_hyphen(node)
@@ -125,13 +135,14 @@ par_as_tibble <- function(node, styles, detailed = FALSE) {
   par_data <- data.frame(
     level = as.integer(xml_attr(xml_child(node, "w:pPr/w:numPr/w:ilvl"), "val")) + 1,
     num_id = as.integer(xml_attr(xml_child(node, "w:pPr/w:numPr/w:numId"), "val")),
-    text = xml_text(node), style_name = style_name,
+    text = xml_text(node),
+    style_name = style_name,
     stringsAsFactors = FALSE
   )
 
   if (detailed) {
     nodes_run <- xml_find_all(node, "w:r")
-    run_data <- lapply(nodes_run, run_as_tibble)
+    run_data <- lapply(nodes_run, run_as_tibble, styles = styles)
 
     run_data <- mapply(function(x, id) {
       x$id <- id
@@ -173,6 +184,9 @@ run_as_tibble <- function(node, styles) {
     style_id <- xml_attr(style_node, "val")
     style_name <- styles$style_name[styles$style_id %in% style_id]
   }
+  if (length(style_name) < 1L) {
+    style_name <- NA_character_
+  }
   run_data <- data.frame(
     text = xml_text(node),
     bold = val_child_lgl(node, "w:rPr/w:b", default = "true"),
@@ -184,6 +198,7 @@ run_as_tibble <- function(node, styles) {
     shading = val_child(node, "w:rPr/w:shd"),
     shading_color = val_child(node, "w:rPr/w:shd", attr = "color"),
     shading_fill = val_child(node, "w:rPr/w:shd", attr = "fill"),
+    style_name = style_name,
     stringsAsFactors = FALSE
   )
 
@@ -204,15 +219,15 @@ node_content <- function(node, x, preserve = FALSE, detailed = FALSE) {
 #' @description read content of a Word document and
 #' return a data.frame representing the document.
 #' @note
-#' Documents included with \code{body_add_docx()} will
+#' Documents included with [body_add_docx()] will
 #' not be accessible in the results.
 #' @param x an rdocx object
 #' @param preserve If `FALSE` (default), text in table cells is collapsed into a
 #'   single line. If `TRUE`, line breaks in table cells are preserved as a "\\n"
-#'   character. This feature is adapted from \code{docxtractr::docx_extract_tbl()}
+#'   character. This feature is adapted from `docxtractr::docx_extract_tbl()`
 #'   published under a [MIT
 #'   licensed](https://github.com/hrbrmstr/docxtractr/blob/master/LICENSE) in
-#'   the `{docxtractr}` package by Bob Rudis.
+#'   the 'docxtractr' package by Bob Rudis.
 #' @param remove_fields if TRUE, prevent field codes from appearing in the
 #' returned data.frame.
 #' @param detailed Should information on runs be included in summary dataframe?
@@ -236,7 +251,7 @@ docx_summary <- function(x, preserve = FALSE, remove_fields = FALSE, detailed = 
   if (remove_fields) {
     instrText_nodes <- xml_find_all(x$doc_obj$get(), "//w:instrText")
     xml_remove(instrText_nodes)
-    
+
     fldData_nodes <- xml_find_all(x$doc_obj$get(), "//w:fldData")
     xml_remove(fldData_nodes)
   }

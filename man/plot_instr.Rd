@@ -31,7 +31,7 @@ print(doc, target = tempfile(fileext = ".docx"))
 
 
 doc <- read_pptx()
-doc <- add_slide(doc)
+doc <- add_slide(doc, "Title and Content")
 doc <- ph_with(
   doc, anyplot,
   location = ph_location_fullsize(),
@@ -43,6 +43,7 @@ print(doc, target = tempfile(fileext = ".pptx"))
 
 Other block functions for reporting: 
 \code{\link{block_caption}()},
+\code{\link{block_gg}()},
 \code{\link{block_list}()},
 \code{\link{block_pour_docx}()},
 \code{\link{block_section}()},

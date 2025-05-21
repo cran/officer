@@ -1,3 +1,55 @@
+# officer 0.6.9 (development version)
+
+## Features
+
+- New functions `body_append_start_context()`, `write_elements_to_context()` and 
+  `body_append_stop_context()` to append elements at the end of a Word document
+  in a faster way. This is useful when the document is large and the user wants to
+  only append elements at the end of the document. 
+- New function `block_gg()` to add a ggplot object to a Word document. It is 
+  handy when the user wants to add a ggplot object to a Word document with 
+  new function `write_elements_to_context()`.
+- New function `fp_par_lite()` to create a paragraph formatting object with only the 
+  properties that are needed. It is useful when the user wants to create a 
+  paragraph object with only the properties that are needed and not all the 
+  properties. It can also be used to create a paragraph formatting object 
+  that reuse a style but with some modifications.
+- Function `print.rdocx()` gains new arguments `copy_header_refs` and 
+  `copy_footer_refs` to copy header and footer references from the
+  default section to other sections. This should be useful when the user
+  wants to add sections but also propagate the header and footer references.
+  
+
+## Performances
+
+- Refactored `body_add.block_list()` to speed up the process of adding a block 
+  list to a Word document, optimization of the process is made by minimizing call 
+  to `docx_current_block_xml()`.
+- `print.rdocx()` execution time improvements.
+
+## Issues
+
+- `add_slide()`: It now suffices to specify a unique `layout`. The `master` will be inferred automatically.  
+  Also, the default values for the `layout` (`"Title and Content"`) and `master` (`"Office Theme"`) arg were removed. 
+  They only applied to the default pptx template used by `read_pptx()`. To avoid breaking changes in old code, 
+  `add_slide()` now throws a deprecation warning, if no layout is specified (either via the `layout` arg or by setting 
+  a default layout). It then uses the `layout` arg's former default value (`"Title and Content"`). This makes sure, 
+  that the behavior of `add_slide()` does not change and avoids backward compatibility issues (#635)
+- `layout_default()` sets a default layout for `add_slide()` (#635).
+- `print.rpptx` now uses pluralization and marks the default layout (if set by `layout_default()`) with an asterisk (#635)
+- Fixed `docx_summary()` when a text run is associated with a text style and 
+  when paragraph or text styles are not registered in the Word document style 
+  table (thanks to Kaspar Meili).
+- `plot_layout_properties()` now takes `cex` as a vector or a list and matches by position, name or partial name. 
+  Zero values now hide the text. A single value now applies to all three cex parameters (label, type, and id) (#645)
+- `plot_layout_properties()` now shows the default layout, if one is set and there are not slides yet (#645)
+- Default page size is now set to exact A4 format for Word documents: `11906 / 1440` and `16838 / 1440` 
+instead of `21 / 2.54` and `29.7 / 2.54`.
+
+## Changes
+
+- Deprecate function `docx_reference_img()` as it is no longer useful..
+
 # officer 0.6.8
 
 ## Issues
@@ -177,7 +229,7 @@ any fonts.
 - provides `image_to_base64()` and `uuid_generate()` as a tool 
 for other 'officeverse' packages.
 - styles are now injected as is and updated with `process_stylenames()`,
-this allow to depend on a reference doc.
+this allow to depend on a reference doc (now `convert_custom_styles_in_wml()`).
 
 # officer 0.5.2
 

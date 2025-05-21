@@ -56,7 +56,7 @@ value <- block_list(
 value
 
 doc <- read_pptx()
-doc <- add_slide(doc)
+doc <- add_slide(doc, "Title and Content")
 doc <- ph_with(doc, value, location = ph_location_type(type = "body"))
 print(doc, target = tempfile(fileext = ".pptx"))
 }
@@ -65,6 +65,7 @@ print(doc, target = tempfile(fileext = ".pptx"))
 
 Other block functions for reporting: 
 \code{\link{block_caption}()},
+\code{\link{block_gg}()},
 \code{\link{block_pour_docx}()},
 \code{\link{block_section}()},
 \code{\link{block_table}()},

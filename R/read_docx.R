@@ -67,8 +67,8 @@ read_docx <- function(path = NULL) {
   unpack_folder(file = path, folder = package_dir)
 
   obj <- structure(list(package_dir = package_dir),
-    .Names = c("package_dir"),
-    class = "rdocx"
+                   .Names = c("package_dir"),
+                   class = "rdocx"
   )
 
   obj$settings <- update(
@@ -83,9 +83,9 @@ read_docx <- function(path = NULL) {
   obj$doc_properties <- read_core_properties(package_dir)
   obj$content_type <- content_type$new(package_dir)
   obj$doc_obj <- docx_part$new(package_dir,
-    main_file = "document.xml",
-    cursor = "/w:document/w:body/*[1]",
-    body_xpath = "/w:document/w:body"
+                               main_file = "document.xml",
+                               cursor = "/w:document/w:body/*[1]",
+                               body_xpath = "/w:document/w:body"
   )
   obj$styles <- read_docx_styles(package_dir)
   obj$officer_cursor <- officer_cursor(obj$doc_obj$get())
@@ -142,8 +142,12 @@ read_docx <- function(path = NULL) {
 #' file.
 #' @param x an rdocx object
 #' @param target path to the docx file to write
+#' @param copy_header_refs,copy_footer_refs logical, default is FALSE.
+#' If TRUE, copy the references to the header and footer in each section
+#' of the body of the document. This parameter is experimental and my change
+#' in a future version.
 #' @param ... unused
-print.rdocx <- function(x, target = NULL, ...) {
+print.rdocx <- function(x, target = NULL, copy_header_refs = FALSE, copy_footer_refs = FALSE, ...) {
   if (is.null(target)) {
     cat("rdocx document with", length(x), "element(s)\n")
     cat("\n* styles:\n")
@@ -171,44 +175,89 @@ print.rdocx <- function(x, target = NULL, ...) {
     stop(target, " is open. To write to this document, please, close it.")
   }
 
-  x <- process_sections(x)
+  # write the xml to a tempfile in a formatted way so that grepl is easy
+  xml_str <- xml_document_to_chrs(x$doc_obj$get())
+  xml_str <- process_sections_content(x, xml_str)
+  xml_str <- process_footnotes_content(x$doc_obj, footnotes = x$footnotes, xml_str)
+  xml_str <- process_comments_content(x$doc_obj, comments = x$comments, xml_str)
+  xml_str <- convert_custom_styles_in_wml(xml_str, x$styles)
+  xml_str <- fix_hyperlink_refs_in_wml(xml_str, x$doc_obj)
+  xml_str <- fix_img_refs_in_wml(xml_str, x$doc_obj, x$doc_obj$relationship(), x$package_dir)
+  xml_str <- fix_svg_refs_in_wml(xml_str, x$doc_obj, x$doc_obj$relationship(), x$package_dir)
+  # make all id unique for document
+  xml_str <- fix_empty_ids_in_wml(xml_str)
+  if (copy_header_refs) {
+    xml_str <- copy_header_references_everywhere(x, xml_str = xml_str)
+  }
+  if (copy_footer_refs) {
+    xml_str <- copy_footer_references_everywhere(x, xml_str = xml_str)
+  }
+  x <- guess_and_set_even_and_odd_headers(x, xml_str)
 
-  process_comments(x)
-  process_footnotes(x)
-  process_stylenames(x$doc_obj, x$styles)
-  process_links(x$doc_obj, type = "wml")
+  x <- replace_xml_body_from_chr(x = x, xml_str = xml_str)
+
+
   process_docx_poured(
     doc_obj = x$doc_obj,
     relationships = x$doc_obj$relationship(),
     content_type = x$content_type,
     package_dir = x$package_dir
   )
-  process_images(x$doc_obj, x$doc_obj$relationship(), x$package_dir)
-  process_images(x$footnotes, x$footnotes$relationship(), x$package_dir)
 
   x$headers <- update_hf_list(part_list = x$headers, type = "header", package_dir = x$package_dir)
   x$footers <- update_hf_list(part_list = x$footers, type = "footer", package_dir = x$package_dir)
-  for (header in x$headers) process_links(header, type = "wml")
-  for (footer in x$footers) process_links(footer, type = "wml")
-  for (header in x$headers) process_images(header, header$relationship(), x$package_dir)
-  for (footer in x$footers) process_images(footer, footer$relationship(), x$package_dir)
+
+  for (header in x$headers) {
+    xml_str <- xml_document_to_chrs(header$get())
+    xml_str <- convert_custom_styles_in_wml(xml_str, x$styles)
+    xml_str <- fix_empty_ids_in_wml(xml_str)
+    xml_str <- fix_hyperlink_refs_in_wml(xml_str, header)
+    xml_str <- fix_img_refs_in_wml(xml_str, header, header$relationship(), x$package_dir)
+    xml_str <- fix_svg_refs_in_wml(xml_str, header, header$relationship(), x$package_dir)
+    tf_xml <- tempfile(fileext = ".txt")
+    writeLines(xml_str, tf_xml, useBytes = TRUE)
+    header$replace_xml(tf_xml)
+  }
+  for (footer in x$footers) {
+    xml_str <- xml_document_to_chrs(footer$get())
+    xml_str <- convert_custom_styles_in_wml(xml_str, x$styles)
+    xml_str <- fix_empty_ids_in_wml(xml_str)
+    xml_str <- fix_hyperlink_refs_in_wml(xml_str, footer)
+    xml_str <- fix_img_refs_in_wml(xml_str, footer, footer$relationship(), x$package_dir)
+    xml_str <- fix_svg_refs_in_wml(xml_str, footer, footer$relationship(), x$package_dir)
+
+    tf_xml <- tempfile(fileext = ".txt")
+    writeLines(xml_str, tf_xml, useBytes = TRUE)
+    footer$replace_xml(tf_xml)
+  }
+  if (TRUE) {
+    xml_str <- xml_document_to_chrs(x$footnotes$get())
+    xml_str <- convert_custom_styles_in_wml(xml_str, x$styles)
+    xml_str <- fix_empty_ids_in_wml(xml_str)
+    xml_str <- fix_hyperlink_refs_in_wml(xml_str, x$footnotes)
+    xml_str <- fix_img_refs_in_wml(xml_str, x$footnotes, x$footnotes$relationship(), x$package_dir)
+    xml_str <- fix_svg_refs_in_wml(xml_str, x$footnotes, x$footnotes$relationship(), x$package_dir)
+
+    tf_xml <- tempfile(fileext = ".txt")
+    writeLines(xml_str, tf_xml, useBytes = TRUE)
+    x$footnotes$replace_xml(tf_xml)
+  }
+  if (TRUE) {
+    xml_str <- xml_document_to_chrs(x$comments$get())
+    xml_str <- convert_custom_styles_in_wml(xml_str, x$styles)
+    xml_str <- fix_empty_ids_in_wml(xml_str)
+    xml_str <- fix_hyperlink_refs_in_wml(xml_str, x$comments)
+    xml_str <- fix_img_refs_in_wml(xml_str, x$comments, x$comments$relationship(), x$package_dir)
+    xml_str <- fix_svg_refs_in_wml(xml_str, x$comments, x$comments$relationship(), x$package_dir)
+
+    tf_xml <- tempfile(fileext = ".txt")
+    writeLines(xml_str, tf_xml, useBytes = TRUE)
+    x$comments$replace_xml(tf_xml)
+  }
 
   int_id <- 1 # unique id identifier
-
-  # make all id unique for document
-  int_id <- correct_id(x$doc_obj$get(), int_id)
-  # make all id unique for footnote
-  int_id <- correct_id(x$footnotes$get(), int_id)
   # make all id unique for footnote
   int_id <- correct_id(x$comments$get(), int_id)
-  # make all id unique for headers
-  for (docpart in x[["headers"]]) {
-    int_id <- correct_id(docpart$get(), int_id)
-  }
-  # make all id unique for footers
-  for (docpart in x[["footers"]]) {
-    int_id <- correct_id(docpart$get(), int_id)
-  }
 
   body <- xml_find_first(x$doc_obj$get(), "w:body")
 
@@ -227,6 +276,7 @@ print.rdocx <- function(x, target = NULL, ...) {
   for (footer in x$footers) {
     footer$save()
   }
+
   x$doc_obj$save()
   x$content_type$save()
   x$footnotes$save()
@@ -515,8 +565,8 @@ set_doc_properties <- function( x, title = NULL, subject = NULL,
                "/docProps/custom.xml")
     )
     x$rel$add(id = paste0("rId", x$rel$get_next_id()),
-                type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties",
-                target = "docProps/custom.xml")
+              type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties",
+              target = "docProps/custom.xml")
 
     custom_props <- x$doc_properties_custom
     for(i in seq_along(values)) {
@@ -537,7 +587,7 @@ set_doc_properties <- function( x, title = NULL, subject = NULL,
 #' @title 'Word' page layout
 #' @description Get page width, page height and margins (in inches). The return values
 #' are those corresponding to the section where the cursor is.
-#' @param x an \code{rdocx} object
+#' @param x an `rdocx` object
 #' @examples
 #' docx_dim(read_docx())
 #' @family functions for Word document informations
@@ -567,7 +617,7 @@ docx_dim <- function(x){
 #' @title List Word bookmarks
 #' @description List bookmarks id that can be found in a
 #' 'Word' document.
-#' @param x an \code{rdocx} object
+#' @param x an `rdocx` object
 #' @examples
 #' library(officer)
 #'

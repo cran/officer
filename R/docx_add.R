@@ -158,7 +158,8 @@ body_add_gg <- function(x, value, width = 6, height = 5, res = 300, style = "Nor
 
   stopifnot(inherits(value, "gg"))
 
-  if ("units" %in% names(list(...))) {
+  args <- sys.call()
+  if ("units" %in% names(args[-1])) {
     cli::cli_abort(
       c("Found a {.arg units} argument. Did you mean {.arg unit}?")
     )
@@ -178,7 +179,7 @@ body_add_gg <- function(x, value, width = 6, height = 5, res = 300, style = "Nor
 
 #' @export
 #' @title Add a list of blocks into a 'Word' document
-#' @description add a list of blocks produced by \code{block_list} into
+#' @description add a list of blocks produced by [block_list()] into
 #' into an rdocx object.
 #' @inheritParams body_add_break
 #' @param blocks set of blocks to be used as footnote content returned by
@@ -254,7 +255,7 @@ body_add_par <- function(x, value, style = NULL, pos = "after") {
 
 #' @export
 #' @title Add fpar in a 'Word' document
-#' @description Add an \code{fpar} (a formatted paragraph)
+#' @description Add an [fpar()] (a formatted paragraph)
 #' into an rdocx object.
 #' @param x a docx device
 #' @param value a character
@@ -292,7 +293,7 @@ body_add_par <- function(x, value, style = NULL, pos = "after") {
 #' doc <- body_add_fpar(doc, img_in_par)
 #' print(doc, target = tempfile(fileext = ".docx"))
 #'
-#' @seealso \code{\link{fpar}}
+#' @seealso [fpar()]
 #' @family functions for adding content
 body_add_fpar <- function(x, value, style = NULL, pos = "after") {
   if (!is.null(style)) {
@@ -643,15 +644,15 @@ body_comment <- function(x,
     "</w:comment>"
   )
 
-  cmt_start_str <- sprintf("<w:commentRangeStart w:id=\"%s\" %s/>", id, ns_)
-  cmt_start_end <- sprintf("<w:commentRangeEnd %s w:id=\"%s\"/>", ns_, id)
+  cmt_start_str <- sprintf("<w:commentRangeStart w:officer=\"true\" w:id=\"%s\" %s/>", id, ns_)
+  cmt_start_end <- sprintf("<w:commentRangeEnd w:officer=\"true\" w:id=\"%s\" %s/>", id, ns_)
 
   path_ <- paste0(xml_path(cursor_elt), "//w:r")
 
   cmt_ref_xml <- paste0(
     open_tag,
     if (!is.null(x$pr)) rpr_wml(x$pr),
-    "<w:commentReference w:id=\"",
+    "<w:commentReference w:officer=\"true\" w:id=\"",
     id,
     "\">",
     cmt_xml,
@@ -818,15 +819,32 @@ body_add.block_caption <- function(x, value, ...) {
 
 
 #' @export
-#' @describeIn body_add add a [block_list] object.
+#' @describeIn body_add add a [block_list] object. Use this function
+#' to add a list of block elements (e.g. paragraphs, images, tables)
+#' into a Word document in a more efficient way than with usual
+#' `body_add_*` functions. This function will add several elements
+#' in a faster way because the cursor is not calculated for
+#' each iteraction over the elements, as a consequence the
+#' function only append elements at the end of the document
+#' and does not allow to insert elements at a specific position.
 body_add.block_list <- function(x, value, ...) {
-  if (length(value) > 0) {
-    for (i in seq_along(value)) {
-      x <- body_add(x, value = value[[i]])
+
+  x <- cursor_end(x)
+  cursor_elt <- docx_current_block_xml(x)
+  for (i in rev(seq_along(value))) {
+    str <- to_wml(value[[i]], add_ns = TRUE)
+    xml_elt <- as_xml_document(str)
+    if (is.null(cursor_elt)) {
+      xml_add_child(
+        xml_find_first(x$doc_obj$get(), "/w:document/w:body"),
+        xml_elt,
+        .where = 0
+      )
+    } else {
+      xml_add_sibling(cursor_elt, xml_elt, .where = "after")
     }
   }
-
-  x
+  cursor_end(x)
 }
 
 #' @export
@@ -926,19 +944,29 @@ body_add.run_columnbreak <- function(x, value, style = NULL, ...) {
 #' @param scale Multiplicative scaling factor, same as in ggsave
 body_add.gg <- function(x, value, width = 6, height = 5, res = 300, style = "Normal", scale = 1, unit = "in", ...) {
   if (!requireNamespace("ggplot2")) {
-    stop("package ggplot2 is required to use this function")
+    cli::cli_abort("package ggplot2 is required to use this function")
+  }
+
+  args <- sys.call()
+  if ("units" %in% names(args[-1])) {
+    cli::cli_abort(
+      c("Found a {.arg units} argument. Did you mean {.arg unit}?")
+    )
   }
 
   unit <- check_unit(unit, c("in", "cm", "mm"))
 
-  file <- tempfile(fileext = ".png")
-  agg_png(filename = file, width = width, height = height, units = unit, res = res, scaling = scale, background = "transparent", ...)
-  print(value)
-  dev.off()
-  on.exit(unlink(file))
-
-  value <- external_img(src = file, width = width, height = height, unit = unit)
-  body_add(x, value, style = style)
+  bl <- block_gg(
+    value = value,
+    fp_p = fp_par_lite(word_style = style),
+    width = width,
+    height = height,
+    res = res,
+    scale = scale,
+    unit = unit
+  )
+  xml_elt <- to_wml(bl, add_ns = TRUE)
+  body_add_xml2(x = x, str = xml_elt)
 }
 
 #' @export

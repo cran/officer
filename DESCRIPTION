@@ -1,7 +1,7 @@
 Type: Package
 Package: officer
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.6.8
+Version: 0.6.9
 Authors@R: c(
     person("David", "Gohel", , "david.gohel@ardata.fr", role = c("aut", "cre")),
     person("Stefan", "Moog", , "moogs@gmx.de", role = "aut"),
@@ -28,7 +28,8 @@ Authors@R: c(
            comment = "fields functionality in ppt"),
     person("Majid", "Eismann", role = "ctb"),
     person("Hongyuan", "Jia", , "hongyuanjia@cqust.edu.cn", role = "ctb",
-           comment = c(ORCID = "0000-0002-0075-8183"))
+           comment = c(ORCID = "0000-0002-0075-8183")),
+    person("Michael", "Stackhouse", , "mike.stackhouse@atorusresearch.com", role = "ctb")
   )
 Description: Access and manipulate 'Microsoft Word', 'RTF' and 'Microsoft
     PowerPoint' documents from R.  The package focuses on tabular and
@@ -61,12 +62,13 @@ Collate: 'core_properties.R' 'custom_properties.R' 'defunct.R'
         'pptx_layout_helper.R' 'pptx_matrix.R' 'utils.R'
         'pptx_slide_manip.R' 'read_docx.R' 'read_docx_styles.R'
         'read_pptx.R' 'read_xlsx.R' 'relationship.R' 'rtf.R'
-        'shape_properties.R' 'shorcuts.R'
+        'shape_properties.R' 'shorcuts.R' 'docx_append_context.R'
+        'utils-xml.R' 'deprecated.R'
 NeedsCompilation: no
-Packaged: 2025-03-23 10:41:00 UTC; davidgohel
+Packaged: 2025-05-21 15:03:39 UTC; davidgohel
 Author: David Gohel [aut, cre],
   Stefan Moog [aut],
-  Mark Heckmann [aut] (<https://orcid.org/0000-0002-0736-7417>),
+  Mark Heckmann [aut] (ORCID: <https://orcid.org/0000-0002-0736-7417>),
   ArData [cph],
   Frank Hangler [ctb] (function body_replace_all_text),
   Liz Sander [ctb] (several documentation fixes),
@@ -74,12 +76,13 @@ Author: David Gohel [aut, cre],
   Jon Calder [ctb] (update vignettes),
   John Harrold [ctb] (function annotate_base),
   John Muschelli [ctb] (google doc compatibility),
-  Bill Denney [ctb] (<https://orcid.org/0000-0002-5759-428X>, function
-    as.matrix.rpptx),
+  Bill Denney [ctb] (ORCID: <https://orcid.org/0000-0002-5759-428X>,
+    function as.matrix.rpptx),
   Nikolai Beck [ctb] (set speaker notes for .pptx documents),
   Greg Leleu [ctb] (fields functionality in ppt),
   Majid Eismann [ctb],
-  Hongyuan Jia [ctb] (<https://orcid.org/0000-0002-0075-8183>)
+  Hongyuan Jia [ctb] (ORCID: <https://orcid.org/0000-0002-0075-8183>),
+  Michael Stackhouse [ctb]
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2025-03-23 11:40:02 UTC
+Date/Publication: 2025-05-21 17:10:02 UTC

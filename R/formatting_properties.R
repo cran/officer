@@ -6,6 +6,10 @@ check_spread_integer <- function(obj, value, dest) {
     for (i in dest) {
       obj[[i]] <- as.integer(value)
     }
+  } else if (length(value) == 1 && is.na(value)) {
+    for (i in dest) {
+      obj[[varname]] <- value
+    }
   } else {
     stop(varname, " must be a positive integer scalar.", call. = FALSE)
   }
@@ -22,22 +26,7 @@ check_set_color <- function(obj, value) {
   obj
 }
 
-check_set_pic <- function(obj, value) {
-  varname <- as.character(substitute(value))
-  if (!grepl(pattern = "^rId[0-9]+", value)) {
-    stop(varname, " must be a valid reference id: ", value, call. = FALSE)
-  }
-  obj[[varname]] <- value
-  obj
-}
-check_set_file <- function(obj, value) {
-  varname <- as.character(substitute(value))
-  if (!file.exists(value)) {
-    stop(varname, " must be a valid filename.", call. = FALSE)
-  }
-  obj[[varname]] <- value
-  obj
-}
+
 check_set_border <- function(obj, value) {
   varname <- as.character(substitute(value))
   if (!inherits(value, "fp_border")) {
@@ -80,7 +69,6 @@ check_set_numeric <- function(obj, value) {
 }
 
 
-
 check_set_bool <- function(obj, value) {
   varname <- as.character(substitute(value))
   if (is.na(value) || (is.logical(value) && length(value) == 1)) {
@@ -108,7 +96,9 @@ check_set_choice <- function(obj, value, choices) {
   } else {
     if (is.character(value) && length(value) == 1) {
       if (!value %in% choices) {
-        stop(varname, " must be one of ",
+        stop(
+          varname,
+          " must be one of ",
           paste(shQuote(choices), collapse = ", "),
           call. = FALSE
         )
@@ -187,8 +177,7 @@ is_character <- function(x) {
 }
 # fp_text ----
 #' @title Text formatting properties
-#'
-#' @description Create a \code{fp_text} object that describes
+#' @description Create an `fp_text` object that describes
 #' text formatting properties.
 #'
 #' @param color font color - a single character value specifying
@@ -209,24 +198,31 @@ is_character <- function(x) {
 #' characters in a Unicode range which does not fall into one of the
 #' other categories.
 #' @param vertical.align single character value specifying font vertical alignments.
-#' Expected value is one of the following : default \code{'baseline'}
-#' or \code{'subscript'} or \code{'superscript'}
+#' Expected value is one of the following : default `'baseline'`
+#' or `'subscript'` or `'superscript'`
 #' @param shading.color shading color - a single character value specifying
 #' a valid color (e.g. "#000000" or "black").
-#' @return a \code{fp_text} object
+#' @return a `fp_text` object
 #' @examples
 #' fp_text()
 #' fp_text(color = "red")
 #' fp_text(bold = TRUE, shading.color = "yellow")
 #' @family functions for defining formatting properties
-#' @seealso [ftext], [fpar]
+#' @seealso [ftext()], [fpar()]
 #' @export
-fp_text <- function(color = "black", font.size = 10,
-                    bold = FALSE, italic = FALSE, underlined = FALSE,
-                    font.family = "Arial",
-                    cs.family = NULL, eastasia.family = NULL, hansi.family = NULL,
-                    vertical.align = "baseline",
-                    shading.color = "transparent") {
+fp_text <- function(
+  color = "black",
+  font.size = 10,
+  bold = FALSE,
+  italic = FALSE,
+  underlined = FALSE,
+  font.family = "Arial",
+  cs.family = NULL,
+  eastasia.family = NULL,
+  hansi.family = NULL,
+  vertical.align = "baseline",
+  shading.color = "transparent"
+) {
   out <- default_rpr
   if (is_positive_numeric(font.size)) {
     out$font.size <- font.size
@@ -262,9 +258,9 @@ fp_text <- function(color = "black", font.size = 10,
     out$hansi.family <- hansi.family
   }
 
-
   out <- check_set_choice(
-    obj = out, value = vertical.align,
+    obj = out,
+    value = vertical.align,
     choices = c("subscript", "superscript", "baseline")
   )
   out <- check_set_color(out, shading.color)
@@ -281,15 +277,30 @@ fp_text <- function(color = "black", font.size = 10,
 #' undefined properties will inherit from the default settings.
 #' @export
 fp_text_lite <- function(
-    color = NA, font.size = NA,
-    font.family = NA, cs.family = NA, eastasia.family = NA, hansi.family = NA,
-    bold = NA, italic = NA, underlined = NA,
-    vertical.align = "baseline", shading.color = NA) {
+  color = NA,
+  font.size = NA,
+  font.family = NA,
+  cs.family = NA,
+  eastasia.family = NA,
+  hansi.family = NA,
+  bold = NA,
+  italic = NA,
+  underlined = NA,
+  vertical.align = "baseline",
+  shading.color = NA
+) {
   fp_text(
-    color = color, font.size = font.size,
-    bold = bold, italic = italic, underlined = underlined,
-    font.family = font.family, cs.family = cs.family, eastasia.family = eastasia.family, hansi.family = hansi.family,
-    vertical.align = vertical.align, shading.color = shading.color
+    color = color,
+    font.size = font.size,
+    bold = bold,
+    italic = italic,
+    underlined = underlined,
+    font.family = font.family,
+    cs.family = cs.family,
+    eastasia.family = eastasia.family,
+    hansi.family = hansi.family,
+    vertical.align = vertical.align,
+    shading.color = shading.color
   )
 }
 
@@ -320,7 +331,7 @@ to_wml.fp_text <- function(x, add_ns = FALSE, ...) {
   format(x, type = "wml")
 }
 
-#' @param x \code{fp_text} object
+#' @param x `fp_text` object
 #' @examples
 #' print(fp_text(color = "red", font.size = 12))
 #' @rdname fp_text
@@ -337,21 +348,33 @@ print.fp_text <- function(x, ...) {
     fontname_cs = x$cs.family,
     fontname_eastasia = x$eastasia.family,
     fontname.hansi = x$hansi.family,
-    vertical_align = x$vertical.align, stringsAsFactors = FALSE
+    vertical_align = x$vertical.align,
+    stringsAsFactors = FALSE
   )
   print(out)
   invisible()
 }
 
 
-#' @param object \code{fp_text} object to modify
+#' @param object `fp_text` object to modify
 #' @param ... further arguments - not used
 #' @rdname fp_text
 #' @export
-update.fp_text <- function(object, color, font.size,
-                           bold, italic, underlined,
-                           font.family, cs.family, eastasia.family, hansi.family,
-                           vertical.align, shading.color, ...) {
+update.fp_text <- function(
+  object,
+  color,
+  font.size,
+  bold,
+  italic,
+  underlined,
+  font.family,
+  cs.family,
+  eastasia.family,
+  hansi.family,
+  vertical.align,
+  shading.color,
+  ...
+) {
   if (!missing(font.size)) {
     object <- check_set_numeric(obj = object, font.size)
   }
@@ -381,7 +404,8 @@ update.fp_text <- function(object, color, font.size,
   }
   if (!missing(vertical.align)) {
     object <- check_set_choice(
-      obj = object, value = vertical.align,
+      obj = object,
+      value = vertical.align,
       choices = c("subscript", "superscript", "baseline")
     )
   }
@@ -394,13 +418,36 @@ update.fp_text <- function(object, color, font.size,
 
 # fp_border ----
 border_styles <- c(
-  "nil", "none", "solid", "single", "thick", "double", "dotted", "dashed",
-  "dotDash", "dotDotDash", "triple", "thinThickSmallGap", "thickThinSmallGap",
-  "thinThickThinSmallGap", "thinThickMediumGap", "thickThinMediumGap",
-  "thinThickThinMediumGap", "thinThickLargeGap", "thickThinLargeGap",
-  "thinThickThinLargeGap", "wave", "doubleWave", "dashSmallGap",
-  "dashDotStroked", "threeDEmboss", "ridge", "threeDEngrave", "groove",
-  "outset", "inset"
+  "nil",
+  "none",
+  "solid",
+  "single",
+  "thick",
+  "double",
+  "dotted",
+  "dashed",
+  "dotDash",
+  "dotDotDash",
+  "triple",
+  "thinThickSmallGap",
+  "thickThinSmallGap",
+  "thinThickThinSmallGap",
+  "thinThickMediumGap",
+  "thickThinMediumGap",
+  "thinThickThinMediumGap",
+  "thinThickLargeGap",
+  "thickThinLargeGap",
+  "thinThickThinLargeGap",
+  "wave",
+  "doubleWave",
+  "dashSmallGap",
+  "dashDotStroked",
+  "threeDEmboss",
+  "ridge",
+  "threeDEngrave",
+  "groove",
+  "outset",
+  "inset"
 )
 
 #' @title Border properties object
@@ -464,7 +511,8 @@ fp_border <- function(color = "black", style = "solid", width = 1) {
   out <- check_set_numeric(obj = out, width)
   out <- check_set_color(out, color)
   out <- check_set_choice(
-    obj = out, style,
+    obj = out,
+    style,
     choices = border_styles
   )
 
@@ -499,7 +547,15 @@ update.fp_border <- function(object, color, style, width, ...) {
 
 #' @export
 print.fp_border <- function(x, ...) {
-  msg <- paste0("line: color: ", x$color, ", width: ", x$width, ", style: ", x$style, "\n")
+  msg <- paste0(
+    "line: color: ",
+    x$color,
+    ", width: ",
+    x$width,
+    ", style: ",
+    x$style,
+    "\n"
+  )
   cat(msg)
   invisible()
 }
@@ -526,9 +582,13 @@ fp_tab <- function(pos, style = "decimal") {
   out <- list()
   out <- check_set_numeric(obj = out, pos)
   out <- check_set_choice(
-    obj = out, style,
+    obj = out,
+    style,
     choices = c(
-      "decimal", "left", "right", "center"
+      "decimal",
+      "left",
+      "right",
+      "center"
     )
   )
 
@@ -540,7 +600,8 @@ fp_tab <- function(pos, style = "decimal") {
 to_wml.fp_tab <- function(x, add_ns = FALSE, ...) {
   sprintf(
     "<w:tab w:val=\"%s\" w:leader=\"none\" w:pos=\"%.0f\"/>",
-    x$style, inch_to_tweep(x$pos)
+    x$style,
+    inch_to_tweep(x$pos)
   )
 }
 #' @export
@@ -609,17 +670,17 @@ as.character.fp_tabs <- function(x, ...) {
 # fp_par -----
 #' @title Paragraph formatting properties
 #'
-#' @description Create a \code{fp_par} object that describes
+#' @description Create a `fp_par` object that describes
 #' paragraph formatting properties.
 #'
 #' @param text.align text alignment - a single character value, expected value
 #' is one of 'left', 'right', 'center', 'justify'.
 #' @param padding.bottom,padding.top,padding.left,padding.right paragraph paddings - 0 or positive integer value.
-#' @param padding paragraph paddings - 0 or positive integer value. Argument \code{padding} overwrites
-#' arguments \code{padding.bottom}, \code{padding.top}, \code{padding.left}, \code{padding.right}.
+#' @param padding paragraph paddings - 0 or positive integer value. Argument `padding` overwrites
+#' arguments `padding.bottom`, `padding.top`, `padding.left`, `padding.right`.
 #' @param line_spacing line spacing, 1 is single line spacing, 2 is double line spacing.
 #' @param border shortcut for all borders.
-#' @param border.bottom,border.left,border.top,border.right \code{\link{fp_border}} for
+#' @param border.bottom,border.left,border.top,border.right [fp_border()] for
 #' borders. overwrite other border properties.
 #' @param shading.color shading color - a single character value specifying
 #' a valid color (e.g. "#000000" or "black").
@@ -629,37 +690,47 @@ as.character.fp_tabs <- function(x, ...) {
 #' or an object returned by [fp_tabs()]. Note this can only have effect with Word
 #' or RTF outputs.
 #' @param word_style Word paragraph style name
-#' @return a \code{fp_par} object
+#' @return a `fp_par` object
 #' @examples
 #' fp_par(text.align = "center", padding = 5)
 #' @export
 #' @family functions for defining formatting properties
 #' @seealso [fpar]
-fp_par <- function(text.align = "left",
-                   padding = 0,
-                   line_spacing = 1,
-                   border = fp_border(width = 0),
-                   padding.bottom, padding.top,
-                   padding.left, padding.right,
-                   border.bottom, border.left,
-                   border.top, border.right,
-                   shading.color = "transparent",
-                   keep_with_next = FALSE,
-                   tabs = NULL,
-                   word_style = "Normal") {
+fp_par <- function(
+  text.align = "left",
+  padding = 0,
+  line_spacing = 1,
+  border = fp_border(width = 0),
+  padding.bottom,
+  padding.top,
+  padding.left,
+  padding.right,
+  border.bottom,
+  border.left,
+  border.top,
+  border.right,
+  shading.color = "transparent",
+  keep_with_next = FALSE,
+  tabs = NULL,
+  word_style = "Normal"
+) {
   out <- list()
 
   out <- check_set_color(out, shading.color)
   out <- check_set_choice(
-    obj = out, value = text.align,
+    obj = out,
+    value = text.align,
     choices = c("left", "right", "center", "justify")
   )
   # padding checking
   out <- check_spread_integer(
-    out, padding,
+    out,
+    padding,
     c(
-      "padding.bottom", "padding.top",
-      "padding.left", "padding.right"
+      "padding.bottom",
+      "padding.top",
+      "padding.left",
+      "padding.right"
     )
   )
   if (!missing(padding.bottom)) {
@@ -678,24 +749,30 @@ fp_par <- function(text.align = "left",
   out <- check_set_numeric(obj = out, line_spacing)
 
   # border checking
-  out <- check_spread_border(
-    obj = out, border,
-    dest = c(
-      "border.bottom", "border.top",
-      "border.left", "border.right"
+  if (!is.null(border) && !isFALSE(border)) {
+    out <- check_spread_border(
+      obj = out,
+      border,
+      dest = c(
+        "border.bottom",
+        "border.top",
+        "border.left",
+        "border.right"
+      )
     )
-  )
+  }
 
-  if (!missing(border.top)) {
+
+  if (!missing(border.top) && !isFALSE(border.top)) {
     out <- check_set_border(obj = out, border.top)
   }
-  if (!missing(border.bottom)) {
+  if (!missing(border.bottom) && !isFALSE(border.bottom)) {
     out <- check_set_border(obj = out, border.bottom)
   }
-  if (!missing(border.left)) {
+  if (!missing(border.left) && !isFALSE(border.left)) {
     out <- check_set_border(obj = out, border.left)
   }
-  if (!missing(border.right)) {
+  if (!missing(border.right) && !isFALSE(border.right)) {
     out <- check_set_border(obj = out, border.right)
   }
 
@@ -710,6 +787,51 @@ fp_par <- function(text.align = "left",
 
   out
 }
+
+
+#' @rdname fp_par
+#' @description Function `fp_par_lite()` is generating properties
+#' with only entries for the parameters users provided. The
+#' undefined properties will inherit from the default settings.
+#' @export
+fp_par_lite <- function(
+    text.align = NA,
+    padding = NA,
+    line_spacing = NA,
+    border = FALSE,
+    padding.bottom = NA,
+    padding.top = NA,
+    padding.left = NA,
+    padding.right = NA,
+    border.bottom = FALSE,
+    border.left = FALSE,
+    border.top = FALSE,
+    border.right = FALSE,
+    shading.color = NA,
+    keep_with_next = NA,
+    tabs = FALSE,
+    word_style = NA
+) {
+  fp_par(
+    text.align = text.align,
+    padding = padding,
+    line_spacing = line_spacing,
+    border = border,
+    padding.bottom = padding.bottom,
+    padding.top = padding.top,
+    padding.left = padding.left,
+    padding.right = padding.right,
+    border.bottom = border.bottom,
+    border.left = border.left,
+    border.top = border.top,
+    border.right = border.right,
+    shading.color = shading.color,
+    keep_with_next = keep_with_next,
+    tabs = tabs,
+    word_style = word_style
+  )
+}
+
 
 #' @export
 #' @importFrom grDevices col2rgb
@@ -734,11 +856,12 @@ to_wml.fp_par <- function(x, add_ns = FALSE, ...) {
   format(x, type = "wml")
 }
 
-#' @param x,object \code{fp_par} object
+#' @param x,object `fp_par` object
 #' @param ... further arguments - not used
 #' @rdname fp_par
 #' @export
 print.fp_par <- function(x, ...) {
+
   out <- data.frame(
     text.align = as.character(x$text.align),
     padding.top = as.character(x$padding.top),
@@ -750,15 +873,24 @@ print.fp_par <- function(x, ...) {
   out <- as.data.frame(t(out))
   names(out) <- "values"
   print(out)
-  cat("borders:\n")
-  borders <- rbind(
-    as.data.frame(unclass(x$border.top)),
-    as.data.frame(unclass(x$border.bottom)),
-    as.data.frame(unclass(x$border.left)),
-    as.data.frame(unclass(x$border.right))
-  )
-  row.names(borders) <- c("top", "bottom", "left", "right")
-  print(borders)
+  if (!is.null(x$border.top) && !isFALSE(x$border.top) &&
+      !is.null(x$border.bottom) && !isFALSE(x$border.bottom) &&
+      !is.null(x$border.left) && !isFALSE(x$border.left) &&
+      !is.null(x$border.right) && !isFALSE(x$border.right)) {
+    cat("borders:\n")
+    borders <- rbind(
+      as.data.frame(unclass(x$border.top)),
+      as.data.frame(unclass(x$border.bottom)),
+      as.data.frame(unclass(x$border.left)),
+      as.data.frame(unclass(x$border.right))
+    )
+    row.names(borders) <- c("top", "bottom", "left", "right")
+    print(borders)
+  } else {
+    cat("no borders!\n")
+  }
+
+
 }
 
 
@@ -767,13 +899,28 @@ print.fp_par <- function(x, ...) {
 #' obj <- fp_par(text.align = "center", padding = 1)
 #' update(obj, padding.bottom = 5)
 #' @export
-update.fp_par <- function(object, text.align, padding, border,
-                          padding.bottom, padding.top, padding.left, padding.right,
-                          border.bottom, border.left, border.top, border.right,
-                          shading.color, keep_with_next, word_style, ...) {
+update.fp_par <- function(
+  object,
+  text.align,
+  padding,
+  border,
+  padding.bottom,
+  padding.top,
+  padding.left,
+  padding.right,
+  border.bottom,
+  border.left,
+  border.top,
+  border.right,
+  shading.color,
+  keep_with_next,
+  word_style,
+  ...
+) {
   if (!missing(text.align)) {
     object <- check_set_choice(
-      obj = object, value = text.align,
+      obj = object,
+      value = text.align,
       choices = c("left", "right", "center", "justify")
     )
   }
@@ -784,10 +931,13 @@ update.fp_par <- function(object, text.align, padding, border,
   # padding checking
   if (!missing(padding)) {
     object <- check_spread_integer(
-      object, padding,
+      object,
+      padding,
       c(
-        "padding.bottom", "padding.top",
-        "padding.left", "padding.right"
+        "padding.bottom",
+        "padding.top",
+        "padding.left",
+        "padding.right"
       )
     )
   }
@@ -807,10 +957,13 @@ update.fp_par <- function(object, text.align, padding, border,
   # border checking
   if (!missing(border)) {
     object <- check_spread_border(
-      obj = object, border,
+      obj = object,
+      border,
       dest = c(
-        "border.bottom", "border.top",
-        "border.left", "border.right"
+        "border.bottom",
+        "border.top",
+        "border.left",
+        "border.right"
       )
     )
   }
@@ -844,10 +997,10 @@ text.directions <- c("lrtb", "tbrl", "btlr")
 
 #' @title Cell formatting properties
 #'
-#' @description Create a \code{fp_cell} object that describes cell formatting properties.
+#' @description Create a `fp_cell` object that describes cell formatting properties.
 #'
 #' @param border shortcut for all borders.
-#' @param border.bottom,border.left,border.top,border.right \code{\link{fp_border}} for borders.
+#' @param border.bottom,border.left,border.top,border.right [fp_border()] for borders.
 #' @param vertical.align cell content vertical alignment - a single character value,
 #' expected value is one of "center" or "top" or "bottom"
 #' @param margin shortcut for all margins.
@@ -860,23 +1013,34 @@ text.directions <- c("lrtb", "tbrl", "btlr")
 #' @param colspan specify how many columns the cell is spanned over
 #' @export
 #' @family functions for defining formatting properties
-fp_cell <- function(border = fp_border(width = 0),
-                    border.bottom, border.left, border.top, border.right,
-                    vertical.align = "center",
-                    margin = 0,
-                    margin.bottom, margin.top, margin.left, margin.right,
-                    background.color = "transparent",
-                    text.direction = "lrtb",
-                    rowspan = 1,
-                    colspan = 1) {
+fp_cell <- function(
+  border = fp_border(width = 0),
+  border.bottom,
+  border.left,
+  border.top,
+  border.right,
+  vertical.align = "center",
+  margin = 0,
+  margin.bottom,
+  margin.top,
+  margin.left,
+  margin.right,
+  background.color = "transparent",
+  text.direction = "lrtb",
+  rowspan = 1,
+  colspan = 1
+) {
   out <- list()
 
   # border checking
   out <- check_spread_border(
-    obj = out, border,
+    obj = out,
+    border,
     dest = c(
-      "border.bottom", "border.top",
-      "border.left", "border.right"
+      "border.bottom",
+      "border.top",
+      "border.left",
+      "border.right"
     )
   )
   if (!missing(border.top)) {
@@ -896,20 +1060,25 @@ fp_cell <- function(border = fp_border(width = 0),
   out <- check_set_color(out, background.color)
 
   out <- check_set_choice(
-    obj = out, value = vertical.align,
+    obj = out,
+    value = vertical.align,
     choices = vertical.align.styles
   )
   out <- check_set_choice(
-    obj = out, value = text.direction,
+    obj = out,
+    value = text.direction,
     choices = text.directions
   )
 
   # margin checking
   out <- check_spread_integer(
-    out, margin,
+    out,
+    margin,
     c(
-      "margin.bottom", "margin.top",
-      "margin.left", "margin.right"
+      "margin.bottom",
+      "margin.top",
+      "margin.left",
+      "margin.right"
     )
   )
 
@@ -936,7 +1105,7 @@ fp_cell <- function(border = fp_border(width = 0),
 
 #' @export
 #' @rdname fp_cell
-#' @param x,object \code{fp_cell} object
+#' @param x,object `fp_cell` object
 #' @param type output type - one of 'wml', 'pml', 'html', 'rtf'.
 #' @param ... further arguments - not used
 format.fp_cell <- function(x, type = "wml", ...) {
@@ -968,26 +1137,39 @@ print.fp_cell <- function(x, ...) {
 }
 
 
-
 #' @rdname fp_cell
 #' @examples
 #' obj <- fp_cell(margin = 1)
 #' update(obj, margin.bottom = 5)
 #' @export
-update.fp_cell <- function(object, border,
-                           border.bottom, border.left, border.top, border.right,
-                           vertical.align, margin = 0,
-                           margin.bottom, margin.top, margin.left, margin.right,
-                           background.color,
-                           text.direction,
-                           rowspan = 1,
-                           colspan = 1, ...) {
+update.fp_cell <- function(
+  object,
+  border,
+  border.bottom,
+  border.left,
+  border.top,
+  border.right,
+  vertical.align,
+  margin = 0,
+  margin.bottom,
+  margin.top,
+  margin.left,
+  margin.right,
+  background.color,
+  text.direction,
+  rowspan = 1,
+  colspan = 1,
+  ...
+) {
   if (!missing(border)) {
     object <- check_spread_border(
-      obj = object, border,
+      obj = object,
+      border,
       dest = c(
-        "border.bottom", "border.top",
-        "border.left", "border.right"
+        "border.bottom",
+        "border.top",
+        "border.left",
+        "border.right"
       )
     )
   }
@@ -1011,13 +1193,15 @@ update.fp_cell <- function(object, border,
 
   if (!missing(vertical.align)) {
     object <- check_set_choice(
-      obj = object, value = vertical.align,
+      obj = object,
+      value = vertical.align,
       choices = vertical.align.styles
     )
   }
   if (!missing(text.direction)) {
     object <- check_set_choice(
-      obj = object, value = text.direction,
+      obj = object,
+      value = text.direction,
       choices = text.directions
     )
   }
@@ -1025,10 +1209,13 @@ update.fp_cell <- function(object, border,
   # margin checking
   if (!missing(margin)) {
     object <- check_spread_integer(
-      object, margin,
+      object,
+      margin,
       c(
-        "margin.bottom", "margin.top",
-        "margin.left", "margin.right"
+        "margin.bottom",
+        "margin.top",
+        "margin.left",
+        "margin.right"
       )
     )
   }

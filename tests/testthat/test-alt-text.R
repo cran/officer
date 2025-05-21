@@ -8,8 +8,9 @@ test_that("add alt text to ggplot", {
     geom_bar()
 
   doc <- read_pptx()
-  doc <- add_slide(doc)
-  doc <- ph_with(doc,
+  doc <- add_slide(doc, "Title and Content")
+  doc <- ph_with(
+    doc,
     value = gg,
     location = ph_location_type("body"),
     alt_text = alt_text
@@ -22,9 +23,10 @@ test_that("add alt text to ggplot", {
   )
 
   alt_labs <- "Alt text added with 'ggplot2::labs(alt=)'."
-  doc <- add_slide(doc)
-  doc <- ph_with(doc,
-    value = gg  + labs(alt = alt_labs),
+  doc <- add_slide(doc, "Title and Content")
+  doc <- ph_with(
+    doc,
+    value = gg + labs(alt = alt_labs),
     location = ph_location_type("body")
   )
   xmldoc <- doc$slide$get_slide(id = 2)$get()
@@ -33,11 +35,8 @@ test_that("add alt text to ggplot", {
     alt_labs
   )
 
-  doc <- add_slide(doc)
-  doc <- ph_with(doc,
-                 value = gg,
-                 location = ph_location_type("body")
-  )
+  doc <- add_slide(doc, "Title and Content")
+  doc <- ph_with(doc, value = gg, location = ph_location_type("body"))
   xmldoc <- doc$slide$get_slide(id = 3)$get()
   expect_equal(
     xml_attr(xml_find_all(xmldoc, "//p:nvPicPr//p:cNvPr"), "descr"),

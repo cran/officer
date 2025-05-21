@@ -1,11 +1,11 @@
 #' @export
 #' @title Number of slides
-#' @description Function \code{length} will return the number of slides.
+#' @description Function `length` will return the number of slides.
 #' @param x an rpptx object
 #' @examples
 #' my_pres <- read_pptx()
-#' my_pres <- add_slide(my_pres)
-#' my_pres <- add_slide(my_pres)
+#' my_pres <- add_slide(my_pres, "Title and Content")
+#' my_pres <- add_slide(my_pres, "Title and Content")
 #' length(my_pres)
 #' @family functions for reading presentation information
 length.rpptx <- function( x ){
@@ -118,7 +118,8 @@ layout_properties <- function(x, layout = NULL, master = NULL) {
 #'    _NB_: The id is set by PowerPoint automatically and lack a meaningful order.
 #'
 #' @param x an `rpptx` object
-#' @param layout slide layout name or numeric index (row index from [layout_summary()).
+#' @param layout slide layout name or numeric index (row index from [layout_summary()]. If `NULL` (default), it plots
+#'   the current slide's layout or the default layout (if set and there are not slides yet).
 #' @param master master layout name where `layout` is located. Can be omitted if layout is unambiguous.
 #' @param title if `TRUE` (default), adds a title with the layout name at the top.
 #' @param labels if `TRUE` (default), adds placeholder labels (centered in *red*).
@@ -126,55 +127,46 @@ layout_properties <- function(x, layout = NULL, master = NULL) {
 #'   in the upper left corner (in *blue*).
 #' @param id if `TRUE` (default), adds the placeholder's unique `id` (see column `id` from
 #'  [layout_properties()]) in the upper right corner (in *green*).
-#' @param cex named list or vector to specify font size for `labels`, `type`, and `id`. Default is
+#' @param cex List or vector to specify font size for `labels`, `type`, and `id`. Default is
 #'   `c(labels = .5, type = .5, id = .5)`. See [graphics::text()] for details on how `cex` works.
+#'   Matching by position and partial name matching is supported. A single numeric value will apply to all
+#'   three parameters.
 #' @param legend Add a legend to the plot (default `FALSE`).
 #' @importFrom graphics plot rect text box
 #' @family functions for reading presentation information
 #' @example inst/examples/example_plot_layout_properties.R
 #'
-plot_layout_properties <- function(x, layout = NULL, master = NULL, labels = TRUE, title = TRUE,
-                                   type = TRUE, id = TRUE, cex = NULL, legend = FALSE) {
+plot_layout_properties <- function(x, layout = NULL, master = NULL, labels = TRUE, title = TRUE, type = TRUE,
+                                   id = TRUE, cex = c(labels = .5, type = .5, id = .5), legend = FALSE) {
   stop_if_not_rpptx(x, "x")
   loffset <- ifelse(legend, 1, 0) # make space for legend at top
   old_par <- par(mar = c(2, 2, 1.5 + loffset, 0))
   on.exit(par(old_par))
 
-  cex_default <- list(labels = .5, type = .5, id = .5)
-  cex_unknown <- setdiff(names(cex), names(cex_default))
-  if (length(cex_unknown) > 0) {
-    cli::cli_abort(c("Unknown name {.val {cex_unknown}} in {.arg cex}",
-      "x" = "Allowed names are {.val {names(cex_default)}}",
-      "i" = cli::col_grey("{.arg cex} expects a named list or vector")
-    ))
-  }
-  .cex <- utils::modifyList(x = cex_default, val = as.list(cex), keep.null = TRUE)
+  .cex <- update_named_defaults(cex, default = list(labels = .5, type = .5, id = .5), default_if_null = TRUE, argname = "cex")
+  if (.cex$labels <= 0) labels <- FALSE
+  if (.cex$type <= 0) type <- FALSE
+  if (.cex$id <= 0) id <- FALSE
 
-  # use current slides layout as default (if layout and master = NULL)
-  if (is.null(layout) && is.null(master)) {
-    if (length(x) == 0) {
+  if (is.null(layout) && is.null(master) && length(x) == 0) { # fail or use default layout if set
+    if (!has_layout_default(x)) {
       cli::cli_abort(
         c("No {.arg layout} selected and no slides in presentation.",
-        "x" = "Pass a layout name or index (see {.fn layout_summary})")
+          "x" = "Pass a layout name or index (see {.fn layout_summary})"
+        )
       )
     }
+    .ld <- get_layout_default(x)
+    la <- get_layout(x, layout = .ld$layout, master = .ld$master)
+    cli::cli_inform(c("i" = "Showing default layout: {.val {la$layout_name}}"))
+  } else if (is.null(layout) && is.null(master) && length(x) > 0) { # use current slides layout as default (if layout and master are NULL)
     la <- get_layout_for_current_slide(x)
-    cli::cli_inform(c("i"="Showing current slide's layout: {.val {la$layout_name}}"))
+    cli::cli_inform(c("i" = "Showing current slide's layout: {.val {la$layout_name}}"))
   } else {
-    la <- get_layout(x, layout, master)
+    la <- get_layout(x, layout, master, layout_by_id = TRUE)
   }
 
   dat <- layout_properties(x, layout = la$layout_name, master = la$master_name)
-  if (length(unique(dat$name)) > 1) {
-    cli::cli_abort(c("One single layout must be chosen",
-      "x" = "Did you supply a master?"
-    ), call = NULL)
-  }
-  if (length(unique(dat$name)) < 1) {
-    cli::cli_abort(c("One layout must be chosen",
-                     "x" = "Did you misspell the layout name?"
-    ), call = NULL)
-  }
 
   s <- slide_size(x)
   h <- s$height
@@ -202,15 +194,13 @@ plot_layout_properties <- function(x, layout = NULL, master = NULL, labels = TRU
     text(x = offx + cx, y = -offy, labels = dat$id, cex = .cex$id, col = "darkgreen", adj = c(1.3, 1.2))
   }
   if (legend) {
-    legend(x = w / 2, y = 0, x.intersp = 0.4, xjust = .5, yjust = 0,
+    legend(
+      x = w / 2, y = 0, x.intersp = 0.4, xjust = .5, yjust = 0,
       legend = c("type [type_idx]", "ph_label", "id"), fill = c("blue", "red", "darkgreen"),
       bty = "n", pt.cex = 1.2, cex = .7, text.width = NA,
       text.col = c("blue", "red", "darkgreen"), horiz = TRUE, xpd = TRUE
     )
   }
-
-
-
 }
 
 
@@ -220,10 +210,10 @@ plot_layout_properties <- function(x, layout = NULL, master = NULL, labels = TRU
 #' identify the placeholder indexes, types, names, master names and layout names.
 #'
 #' This is to be used when need to know what parameters should be used with
-#' \code{ph_location*} calls. The parameters are printed in their corresponding shapes.
+#' `ph_location*` calls. The parameters are printed in their corresponding shapes.
 #'
-#' Note that if there are duplicated \code{ph_label}, you should not use \code{ph_location_label}.
-#' Hint: You can dedupe labels using \code{\link{layout_dedupe_ph_labels}}.
+#' Note that if there are duplicated `ph_label`, you should not use `ph_location_label()`.
+#' Hint: You can dedupe labels using [layout_dedupe_ph_labels()].
 #'
 #' @param path path to the pptx file to use as base document or NULL to use the officer default
 #' @param output_file filename to store the annotated powerpoint file or NULL to suppress generation
@@ -288,18 +278,18 @@ annotate_base <- function(path = NULL, output_file = 'annotated_layout.pptx' ){
 #' into a data.frame. Data for any tables, images, or paragraphs are
 #' imported into the resulting data.frame.
 #' @note
-#' The column \code{id} of the result is not to be used by users.
+#' The column `id` of the result is not to be used by users.
 #' This is a technical string id whose value will be used by office
 #' when the document will be rendered. This is not related to argument
-#' \code{index} required by functions \code{ph_with}.
+#' `index` required by functions [ph_with()].
 #' @inheritParams length.rpptx
 #' @param index slide index
 #' @examples
 #' my_pres <- read_pptx()
-#' my_pres <- add_slide(my_pres)
+#' my_pres <- add_slide(my_pres, "Title and Content")
 #' my_pres <- ph_with(my_pres, format(Sys.Date()),
 #'   location = ph_location_type(type="dt"))
-#' my_pres <- add_slide(my_pres)
+#' my_pres <- add_slide(my_pres, "Title and Content")
 #' my_pres <- ph_with(my_pres, iris[1:2,],
 #'   location = ph_location_type(type="body"))
 #' slide_summary(my_pres)
