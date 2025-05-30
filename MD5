@@ -1,7 +1,7 @@
-2c73c9c611daf2a36622254fbf7260ba *DESCRIPTION
+7a15198946a8e497ab514652823e65e1 *DESCRIPTION
 706ff72a57d21d9f964868222234d757 *LICENSE
 9a6d24633489a1c0a42c30b85bb527f4 *NAMESPACE
-e73d9c17516126b3fda2486a5dce1a58 *NEWS.md
+3a114d8c18fb81f57c71afb973a013d7 *NEWS.md
 694dd594033f4dc61abaa8e390f0d9f4 *R/core_properties.R
 42596f6a79a253f4e45d34f3a343fd05 *R/custom_properties.R
 3d5ecef0a9fd378ec039cdd7d22e7601 *R/defunct.R
@@ -17,11 +17,11 @@ b988785b072951a040fbd9ec2541d013 *R/docx_replace.R
 87477b8d7627da6a6012217b8d07bd93 *R/docx_settings.R
 a036861e907324dc757272035f9e7b11 *R/empty_content.R
 33e67a65d3e9eed9d996c5dafa288642 *R/formatting_properties.R
-3df420d137c7d189212e2e74d9cf91f8 *R/fortify_docx.R
+6a547bfd1da9847491477f093b7c1848 *R/fortify_docx.R
 bf541514266b3df95a3dda17c7ea123d *R/fortify_pptx.R
 7483af54066c988620be957dc616eba0 *R/knitr_utils.R
 ebe7fac29acf12b912c4ac520f242a80 *R/officer.R
-8fa008dc7269c4915916c29ba53e2fbd *R/ooxml.R
+699d62239c1e343f5efbea54ac0a7c56 *R/ooxml.R
 9c3c37cd899166a0c53e17ed59af2cc9 *R/ooxml_block_objects.R
 18b25bbba09e9f5c6302431ac394225f *R/ooxml_run_objects.R
 b9fbdc3c5b126d98b630f87f5935528c *R/openxml_content_type.R
@@ -45,7 +45,7 @@ fb031e0cc391db1ccb35ecdfdcaf5676 *R/pptx_informations.R
 74be9df8198d081cd94a5ce56611cc66 *R/read_pptx.R
 123451b3f02ff614729b1d659fc060ef *R/read_xlsx.R
 1d80bfcd2b3007b05c6dfc9228def01e *R/relationship.R
-81b0d7fc84b7f4ec83c164577afc3736 *R/rtf.R
+cc332fd7997c52ff13be2cf6d71f5f14 *R/rtf.R
 0189c3c76e198ab8c0a30721f6362074 *R/shape_properties.R
 59a28ca0c04d700f2539ccb492b9cb62 *R/shorcuts.R
 71cd13704b35929f9fbf5245b30ab921 *R/utils-xml.R
@@ -257,7 +257,7 @@ eaf036eefbb123d10fc0eabe8fc2cbf4 *tests/testthat/docs_dir/test-three-identical-m
 7cea96859280f57fb1a41ada928e32ba *tests/testthat/test-alt-text.R
 d624620065a57324478d4addc9250133 *tests/testthat/test-block_list.R
 c1bec06d2c073e761e36f278601aa91c *tests/testthat/test-defunct.R
-d10e8ecb06b1b51457a76e48a30d45af *tests/testthat/test-doc-summary.R
+685126e9083c533d012b26711aa4bee9 *tests/testthat/test-doc-summary.R
 a8f7d93573a80b4f3ef8062f1bf8924f *tests/testthat/test-docx-add.R
 e51149b236bbf45b728dda65ea2304bf *tests/testthat/test-docx-comments.R
 f4693efcb94b1e2ed7129ba98decf737 *tests/testthat/test-docx-footnotes.R
@@ -270,7 +270,8 @@ ef83c70964b808f85bce19d871e990be *tests/testthat/test-docx-styles.R
 8f6accc20a69d69a0859fb86a48c2826 *tests/testthat/test-fp-text.R
 f9f5079fda746aa08d3a4b6372107603 *tests/testthat/test-fp_border.R
 cd11d3ec8522311305120f5d7a87fbfb *tests/testthat/test-fp_cell.R
-80c76b4e45c53da5dbfa7a23e53ba3b9 *tests/testthat/test-fp_par.R
+5d37627f09556bd44c84eabb68b7afdf *tests/testthat/test-fp_par.R
+479bc5dbdfb6fbe133a7e58573bec545 *tests/testthat/test-fp_tab.R
 602dd5a19cd8d15c9e8b965758953263 *tests/testthat/test-fpar.R
 013fbd05064d4cbaf05a257647172a28 *tests/testthat/test-hyperlinks.R
 044698f9094787edbdf419bcb5d74b4e *tests/testthat/test-images.R
@@ -293,7 +294,7 @@ a124a9f3a21cafee9ac1c6078c0a3785 *tests/testthat/test-properties.R
 25b04f63bdec878c8427ad85c3b68090 *tests/testthat/test-relationships.R
 a948e354be0affa5e3ef87361263fb3e *tests/testthat/test-rtf-add.R
 bc3a823ffd2a73843e5b2299fad3e498 *tests/testthat/test-sections.R
-16f7af0dd71f9c9e30f8bf6321f0d7b4 *tests/testthat/test-to_rtf.R
+367cf363fad2ef999e273f919d148b37 *tests/testthat/test-to_rtf.R
 84d03d7f992a8f2b0b44cf3aa496f852 *tests/testthat/test-utils.R
 acc0b4ad4875ab67683834ddc0d5d6b8 *tests/testthat/test-wml-chunks.R
 0b101bf14bd616be5db5494c13e0831b *tests/testthat/test-xlsx-misc.R
