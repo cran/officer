@@ -16,7 +16,7 @@ one of "after", "before", "on".}
 
 \item{style}{optional. style in the document that will be used to build entries of the TOC.}
 
-\item{separator}{optional. Some configurations need "," (i.e. from Canada) separator instead of ";"}
+\item{separator}{unused, no effect}
 }
 \description{
 Add a table of content into an rdocx object.
@@ -41,6 +41,7 @@ Other functions for adding content:
 \code{\link{body_add_par}()},
 \code{\link{body_add_plot}()},
 \code{\link{body_add_table}()},
-\code{\link{body_append_start_context}()}
+\code{\link{body_append_start_context}()},
+\code{\link{body_import_docx}()}
 }
 \concept{functions for adding content}

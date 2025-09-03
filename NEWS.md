@@ -1,3 +1,30 @@
+# officer 0.7.0
+
+## Features
+
+- new function `docx_set_settings()` to set document settings of a Word document.
+This function can be used to specify if the document should handle odd and even headers and footers,
+to change the list separator, etc.
+- new function `body_import_docx()` to import content from an external Word document.
+- `fp_text()` now supports `strike` argument to set strikethrough text.
+- `ph_with()` now handles `Date` objects without prior conversion to character. 
+  The date format can be set locally via the `date_format` arg or globally via 
+  `options(officer.date_format = ...)` (#683)
+
+## Issues
+
+- Fix Rmd output with paragraphs `fpar()` so that no stylename is used.
+- Improve `set_doc_properties()` error and warning messages.
+- `page_size()` now manage correctly sizes if `orient = "landscape"` and not 
+`unit = "in"`.
+- `phs_with()` and `add_slide()` now have a more informative error message if 
+the ph label is unknown (#672)
+- Function `set_doc_properties()` now supports NULL and NA custom properties in 
+a Word document.
+- argument `separator` is not used anymore in `block_toc`. Now the Word field is 
+generated with no separator making it more portable over the different locales 
+Word users could have.
+
 # officer 0.6.10
 
 ## Issues
@@ -5,6 +32,8 @@
 - Fix RTF generation so that `fp_par_lite()` works also for RTF output.
 - Fix `doc_summary(... detailed=TRUE)` when the runs has a shading (w:shd) with 
 a fill but no color attribute.
+- `plot_layout_properties()`: new `slide_idx` arg to specify which slide’s layout 
+  to plot. The plot title now also contains the master's name (#666)
 
 # officer 0.6.9
 

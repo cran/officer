@@ -44,7 +44,8 @@
 #' doc_2 <- body_add_plot(doc_2, pinst)
 #' docx_file_2 <- print(doc_2, target = tempfile(fileext = ".docx"))
 #'
-#' @seealso [body_add_par], [body_add_plot], [body_add_table]
+#' @seealso [body_add_par()], [body_add_plot()], [body_add_table()],
+#' [docx_set_settings()], [set_doc_properties()], [styles_info()]
 #' @section Illustrations:
 #'
 #' \if{html}{\figure{read_docx_doc_1.png}{options: width=80\%}}
@@ -71,8 +72,8 @@ read_docx <- function(path = NULL) {
                    class = "rdocx"
   )
 
-  obj$settings <- update(
-    object = docx_settings(),
+  obj$settings <- update_docx_settings_from_file(
+    x = docx_settings(),
     file = file.path(package_dir, "word", "settings.xml")
   )
 
@@ -82,10 +83,11 @@ read_docx <- function(path = NULL) {
   obj$doc_properties_custom <- read_custom_properties(package_dir)
   obj$doc_properties <- read_core_properties(package_dir)
   obj$content_type <- content_type$new(package_dir)
-  obj$doc_obj <- docx_part$new(package_dir,
-                               main_file = "document.xml",
-                               cursor = "/w:document/w:body/*[1]",
-                               body_xpath = "/w:document/w:body"
+  obj$doc_obj <- body_part$new(
+    package_dir,
+    main_file = "document.xml",
+    cursor = "/w:document/w:body/*[1]",
+    body_xpath = "/w:document/w:body"
   )
   obj$styles <- read_docx_styles(package_dir)
   obj$officer_cursor <- officer_cursor(obj$doc_obj$get())
@@ -121,10 +123,11 @@ read_docx <- function(path = NULL) {
     )
   }
 
-  obj$footnotes <- docx_part$new(
+  obj$footnotes <- footnotes_part$new(
     package_dir,
     main_file = "footnotes.xml",
-    cursor = "/w:footnotes/*[last()]", body_xpath = "/w:footnotes"
+    cursor = "/w:footnotes/*[last()]",
+    body_xpath = "/w:footnotes"
   )
 
   default_refs <- obj$styles[obj$styles$is_default, ]
@@ -137,6 +140,7 @@ read_docx <- function(path = NULL) {
   obj
 }
 
+
 #' @export
 #' @describeIn read_docx write docx to a file. It returns the path of the result
 #' file.
@@ -146,8 +150,29 @@ read_docx <- function(path = NULL) {
 #' If TRUE, copy the references to the header and footer in each section
 #' of the body of the document. This parameter is experimental and my change
 #' in a future version.
+#' @param preview Save `x` to a temporary file and open it (default `FALSE`).
 #' @param ... unused
-print.rdocx <- function(x, target = NULL, copy_header_refs = FALSE, copy_footer_refs = FALSE, ...) {
+#' @examples
+#'# write rdocx object to .docx file ----
+#' file <- tempfile(fileext = ".docx")
+#' x <- read_docx() # empty doc
+#' print(x, target = file)
+#'
+#' # preview mode: save to temp file and open locally ----
+#' \dontrun{
+#' print(x, preview = TRUE)
+#' }
+print.rdocx <- function(x, target = NULL, copy_header_refs = FALSE,
+                        copy_footer_refs = FALSE, preview = FALSE, ...) {
+  if (preview) {
+    file <- tempfile(fileext = ".docx")
+    print.rdocx(x,
+      target = file, copy_header_refs = copy_header_refs,
+      copy_footer_refs = copy_footer_refs, preview = FALSE, ...
+    )
+    open_file(file)
+    return(invisible(file))
+  }
   if (is.null(target)) {
     cat("rdocx document with", length(x), "element(s)\n")
     cat("\n* styles:\n")
@@ -192,7 +217,6 @@ print.rdocx <- function(x, target = NULL, copy_header_refs = FALSE, copy_footer_
   if (copy_footer_refs) {
     xml_str <- copy_footer_references_everywhere(x, xml_str = xml_str)
   }
-  x <- guess_and_set_even_and_odd_headers(x, xml_str)
 
   x <- replace_xml_body_from_chr(x = x, xml_str = xml_str)
 
@@ -509,6 +533,13 @@ doc_properties <- function(x) {
   out
 }
 
+is_string <- function(x) {
+  is.character(x) && length(x) == 1 && !is.na(x)
+}
+is_scalar_datetime <- function(x) {
+  inherits(x, "POSIXt") && length(x) == 1 && !is.na(x)
+}
+
 #' @export
 #' @title Set document properties
 #' @description set Word or PowerPoint document properties. These are not visible
@@ -527,6 +558,8 @@ doc_properties <- function(x) {
 #' @param created a date object
 #' @param ... named arguments (names are field names), each element is a single
 #' character value specifying value associated with the corresponding field name.
+#' These pairs of *key-value* are added as custom properties. If a value is
+#' `NULL` or `NA`, the corresponding field is set to '' in the document properties.
 #' @param values a named list (names are field names), each element is a single
 #' character value specifying value associated with the corresponding field name.
 #' If `values` is provided, argument `...` will be ignored.
@@ -540,20 +573,87 @@ doc_properties <- function(x) {
 #'   glop = "pas glop")
 #' x <- doc_properties(x)
 #' @family functions for Word document informations
-set_doc_properties <- function( x, title = NULL, subject = NULL,
-                                creator = NULL, description = NULL, created = NULL,
-                                ..., values = NULL){
-
-  if( inherits(x, "rdocx"))
+set_doc_properties <- function(
+    x,
+    title = NULL,
+    subject = NULL,
+    creator = NULL,
+    description = NULL,
+    created = NULL,
+    ...,
+    values = NULL) {
+  if (inherits(x, "rdocx")) {
     cp <- x$doc_properties
-  else if( inherits(x, "rpptx")) cp <- x$core_properties
-  else stop("x should be a rpptx or rdocx object.")
+  } else if (inherits(x, "rpptx")) {
+    cp <- x$core_properties
+  } else {
+    stop("x should be a rpptx or rdocx object.")
+  }
 
-  if( !is.null(title) ) cp['title','value'] <- title
-  if( !is.null(subject) ) cp['subject','value'] <- subject
-  if( !is.null(creator) ) cp['creator','value'] <- creator
-  if( !is.null(description) ) cp['description','value'] <- description
-  if( !is.null(created) ) cp['created','value'] <- format( created, "%Y-%m-%dT%H:%M:%SZ")
+  if (!is.null(title)) {
+    if (!is_string(title)) {
+      cli::cli_warn(
+        c(
+          "!" = "The value for property 'title' is not a string.",
+          "i" = "It will be set to '' in the document properties"
+        )
+      )
+      title <- ""
+    }
+    cp["title", "value"] <- title
+  }
+
+  if (!is.null(subject)) {
+    if (!is_string(subject)) {
+      cli::cli_warn(
+        c(
+          "!" = "The value for property 'subject' is not a string.",
+          "i" = "It will be set to '' in the document properties"
+        )
+      )
+      subject <- ""
+    }
+    cp["subject", "value"] <- subject
+  }
+
+  if (!is.null(creator)) {
+    if (!is_string(creator)) {
+      cli::cli_warn(
+        c(
+          "!" = "The value for property 'creator' is not a string.",
+          "i" = "It will be set to '' in the document properties"
+        )
+      )
+      creator <- ""
+    }
+    cp["creator", "value"] <- creator
+  }
+
+  if (!is.null(description)) {
+    if (!is_string(description)) {
+      cli::cli_warn(
+        c(
+          "!" = "The value for property 'description' is not a string.",
+          "i" = "It will be set to '' in the document properties"
+        )
+      )
+      description <- ""
+    }
+    cp["description", "value"] <- description
+  }
+
+  if (!is.null(created)) {
+    if (!is_scalar_datetime(created)) {
+      cli::cli_warn(
+        c(
+          "!" = "The value for property 'created' is not a date-time.",
+          "i" = "It will not be set in the document properties"
+        )
+      )
+    } else {
+      cp["created", "value"] <- format(created, "%Y-%m-%dT%H:%M:%SZ")
+    }
+  }
 
   if (is.null(values)) {
     values <- list(...)
@@ -561,23 +661,50 @@ set_doc_properties <- function( x, title = NULL, subject = NULL,
 
   if (length(values) > 0) {
     x$content_type$add_override(
-      setNames("application/vnd.openxmlformats-officedocument.custom-properties+xml",
-               "/docProps/custom.xml")
+      setNames(
+        "application/vnd.openxmlformats-officedocument.custom-properties+xml",
+        "/docProps/custom.xml"
+      )
     )
-    x$rel$add(id = paste0("rId", x$rel$get_next_id()),
-              type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties",
-              target = "docProps/custom.xml")
+    x$rel$add(
+      id = paste0("rId", x$rel$get_next_id()),
+      type = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties",
+      target = "docProps/custom.xml"
+    )
 
     custom_props <- x$doc_properties_custom
-    for(i in seq_along(values)) {
-      custom_props[names(values)[i], 'value'] <- enc2utf8(values[[i]])
+    for (i in seq_along(values)) {
+      .value. <- ""
+      if (!is.null(values[[i]]) &&
+        length(values[[i]]) == 1 &&
+        !is.na(values[[i]])) {
+        .value. <- format(values[[i]])
+        .value. <- enc2utf8(.value.)
+      } else if (!is.null(values[[i]]) &&
+        length(values[[i]]) == 1 &&
+        is.na(values[[i]])) {
+        .value. <- ""
+      } else if (is.null(values[[i]])) {
+        .value. <- ""
+      } else if (length(values[[i]]) != 1) {
+        .value. <- ""
+        cli::cli_warn(
+          c(
+            "!" = "The value for property '{names(values)[i]}' is not a single character value.",
+            "i" = "It will be set to '' in the document properties"
+          )
+        )
+      }
+      custom_props[names(values)[i], "value"] <- .value.
     }
     x$doc_properties_custom <- custom_props
   }
 
-  if( inherits(x, "rdocx"))
+  if (inherits(x, "rdocx")) {
     x$doc_properties <- cp
-  else x$core_properties <- cp
+  } else {
+    x$core_properties <- cp
+  }
 
   x
 }
