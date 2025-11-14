@@ -1,3 +1,26 @@
+# officer 0.7.1
+
+## Features
+
+- new function `floating_external_img()` to add a floating image in a 'Word' 
+document.
+
+## Changes
+
+- Refactoring of `docx_summary()`: the function now provide more run-level 
+information (text formatting, images, hyperlinks, bookmarks). 
+- Refactoring of `sanitize_images()`: the function now works as expected. It will
+be unexported soon since it is now automatically called before writing documents
+and is therefore no longer useful to end users.
+- Remove defunct `slip_in*` functions.
+
+## Issues
+
+- Fix RTF sections that were sometimes invisible
+- issue with image in google docs should now be fixed (#689)
+- add automatically namespaces when calling `write_elements_to_context()`
+- Fix lists styles with `body_import_docx()` thanks to Sean Anderson.
+
 # officer 0.7.0
 
 ## Features
