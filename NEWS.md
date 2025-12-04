@@ -1,3 +1,18 @@
+# officer 0.7.2
+
+## Issues
+
+- RTF support strike text setting.
+- fix an issue with bookmark selections in `docx_summary()`.
+- fix `fp_par_lite()` management of argument `tabs`.
+- there was a regression with svg in docx, it is solved now.
+
+## Features
+
+- new internal utilities `base64_to_image()`, `as_base64()`, `from_base64()` 
+and `plot_in_png()`.
+
+
 # officer 0.7.1
 
 ## Features
