@@ -2,15 +2,46 @@ props_to_ph_location <- function(props) {
   if (nrow(props) > 1) {
     cli::cli_alert_warning("More than one placeholder selected.")
   }
-  props <- props[, c("offx", "offy", "cx", "cy", "ph_label", "ph", "type", "fld_id", "fld_type", "rotation")]
-  names(props) <- c("left", "top", "width", "height", "ph_label", "ph", "type", "fld_id", "fld_type", "rotation")
+  props <- props[, c(
+    "offx",
+    "offy",
+    "cx",
+    "cy",
+    "ph_label",
+    "ph",
+    "type",
+    "fld_id",
+    "fld_type",
+    "rotation"
+  )]
+  names(props) <- c(
+    "left",
+    "top",
+    "width",
+    "height",
+    "ph_label",
+    "ph",
+    "type",
+    "fld_id",
+    "fld_type",
+    "rotation"
+  )
   as_ph_location(props)
 }
 
 
 # id is deprecated and replaced by type_idx. Will be removed soon
-get_ph_loc <- function(x, layout, master, type, type_idx = NULL, position_right, position_top,
-                       id = NULL, ph_id = NULL) {
+get_ph_loc <- function(
+  x,
+  layout,
+  master,
+  type,
+  type_idx = NULL,
+  position_right,
+  position_top,
+  id = NULL,
+  ph_id = NULL
+) {
   props <- layout_properties(x, layout = layout, master = master)
 
   if (!is.null(ph_id)) {
@@ -25,7 +56,9 @@ get_ph_loc <- function(x, layout, master, type, type_idx = NULL, position_right,
         c(
           "{.arg id} {.val {ph_id}} does not exist.",
           .all_ids_switch,
-          "i" = cli::col_grey("see column {.val id} in {.code layout_properties(..., '{layout}', '{master}')}")
+          "i" = cli::col_grey(
+            "see column {.val id} in {.code layout_properties(..., '{layout}', '{master}')}"
+          )
         ),
         call = NULL
       )
@@ -38,11 +71,16 @@ get_ph_loc <- function(x, layout, master, type, type_idx = NULL, position_right,
   props <- props[props$type %in% type, , drop = FALSE]
   nr <- nrow(props)
   if (nr < 1) {
-    cli::cli_abort(c(
-      "Found no placeholder of type {.val {type}} on layout {.val {layout}}.",
-      "x" = "Available types are {.val {types_on_layout}}",
-      "i" = cli::col_grey("see {.code layout_properties(x, '{layout}', '{master}')}")
-    ), call = NULL)
+    cli::cli_abort(
+      c(
+        "Found no placeholder of type {.val {type}} on layout {.val {layout}}.",
+        "x" = "Available types are {.val {types_on_layout}}",
+        "i" = cli::col_grey(
+          "see {.code layout_properties(x, '{layout}', '{master}')}"
+        )
+      ),
+      call = NULL
+    )
   }
 
   # id and type_idx are both used for now. 'id' is deprecated. The following code block can be removed in the future.
@@ -52,7 +90,9 @@ get_ph_loc <- function(x, layout, master, type, type_idx = NULL, position_right,
         c(
           "{.arg id} is out of range.",
           "x" = "Must be between {.val {1L}} and {.val {nr}} for ph type {.val {type}}.",
-          "i" = cli::col_grey("see {.code layout_properties(x, '{layout}', '{master}')} for all phs with type '{type}'")
+          "i" = cli::col_grey(
+            "see {.code layout_properties(x, '{layout}', '{master}')} for all phs with type '{type}'"
+          )
         ),
         call = NULL
       )
@@ -60,7 +100,13 @@ get_ph_loc <- function(x, layout, master, type, type_idx = NULL, position_right,
     # the ordering of 'type_idx' (top->bottom, left-righ) is different than for the 'id' arg (index
     # along the id colomn). Here, we restore the old ordering, to avoid a breaking change.
     props <- props[order(props$type, as.integer(props$id)), ] # set order for type idx. Removing the line would result in the default layout properties order, i.e., top->bottom left->right.
-    props$.id <- stats::ave(props$type, props$master_name, props$name, props$type, FUN = seq_along)
+    props$.id <- stats::ave(
+      props$type,
+      props$master_name,
+      props$name,
+      props$type,
+      FUN = seq_along
+    )
     props <- props[props$.id == id, , drop = FALSE]
     return(props_to_ph_location(props))
   }
@@ -71,7 +117,9 @@ get_ph_loc <- function(x, layout, master, type, type_idx = NULL, position_right,
         c(
           "{.arg type_idx} is out of range.",
           "x" = "Must be between {.val {1L}} and {.val {max(props$type_idx)}} for ph type {.val {type}}.",
-          "i" = cli::col_grey("see {.code layout_properties(..., layout = '{layout}', master = '{master}')} for indexes of type '{type}'")
+          "i" = cli::col_grey(
+            "see {.code layout_properties(..., layout = '{layout}', master = '{master}')} for indexes of type '{type}'"
+          )
         ),
         call = NULL
       )
@@ -97,16 +145,29 @@ get_ph_loc <- function(x, layout, master, type, type_idx = NULL, position_right,
 as_ph_location <- function(x, ...) {
   if (!is.data.frame(x)) {
     cli::cli_abort(
-      c("{.arg x} must be a data frame.",
+      c(
+        "{.arg x} must be a data frame.",
         "x" = "You provided {.cls {class(x)[1]}} instead."
       )
     )
   }
   ref_names <- c(
-    "width", "height", "left", "top", "ph_label", "ph", "type", "rotation", "fld_id", "fld_type"
+    "width",
+    "height",
+    "left",
+    "top",
+    "ph_label",
+    "ph",
+    "type",
+    "rotation",
+    "fld_id",
+    "fld_type"
   )
   if (!all(is.element(ref_names, names(x)))) {
-    stop("missing column values:", paste0(setdiff(ref_names, names(x)), collapse = ","))
+    stop(
+      "missing column values:",
+      paste0(setdiff(ref_names, names(x)), collapse = ",")
+    )
   }
   out <- x[ref_names]
   as.list(out)
@@ -128,13 +189,7 @@ is_ph_location <- function(x) {
 #' @param x a location for a placeholder.
 #' @param doc an rpptx object
 #' @param ... unused arguments
-#' @examples
-#' doc <- read_pptx()
-#' doc <- add_slide(doc,
-#'   layout = "Title and Content",
-#'   master = "Office Theme"
-#' )
-#' fortify_location(ph_location_fullsize(), doc)
+#' @example inst/examples/example_fortify_location.R
 #' @seealso [ph_location()], [ph_with()]
 #' @family functions for officer extensions
 #' @keywords internal
@@ -175,36 +230,37 @@ fortify_location <- function(x, doc, ...) {
 #' will be identified with that label in the *Selection Pane* of PowerPoint.
 #' This label can then be reused by other functions such as `ph_location_label()`.
 #' It can be set with argument `newlabel`.
-#' @examples
-#' doc <- read_pptx()
-#' doc <- add_slide(doc, "Title and Content")
-#' doc <- ph_with(doc, "Hello world",
-#'   location = ph_location(width = 4, height = 3, newlabel = "hello")
-#' )
-#' print(doc, target = tempfile(fileext = ".pptx"))
-#'
-#' # Set geometry and outline
-#' doc <- read_pptx()
-#' doc <- add_slide(doc, "Title and Content")
-#' loc <- ph_location(
-#'   left = 1, top = 1, width = 4, height = 3, bg = "steelblue",
-#'   ln = sp_line(color = "red", lwd = 2.5),
-#'   geom = "trapezoid"
-#' )
-#' doc <- ph_with(doc, "", loc = loc)
-#' print(doc, target = tempfile(fileext = ".pptx"))
-ph_location <- function(left = 1, top = 1, width = 4, height = 3,
-                        newlabel = "", bg = NULL, rotation = NULL,
-                        ln = NULL, geom = NULL, ...) {
+#' @example inst/examples/example_ph_location.R
+ph_location <- function(
+  left = 1,
+  top = 1,
+  width = 4,
+  height = 3,
+  newlabel = "",
+  bg = NULL,
+  rotation = NULL,
+  ln = NULL,
+  geom = NULL,
+  ...
+) {
   # remove name in case of named vector entry, e.g. ph_location(top = x["top])
   left <- unname(left)
   top <- unname(top)
   width <- unname(width)
   height <- unname(height)
   x <- list(
-    left = left, top = top, width = width, height = height,
-    ph_label = newlabel, ph = NA_character_, bg = bg, rotation = rotation, ln = ln,
-    geom = geom, fld_type = NA_character_, fld_id = NA_character_
+    left = left,
+    top = top,
+    width = width,
+    height = height,
+    ph_label = newlabel,
+    ph = NA_character_,
+    bg = bg,
+    rotation = rotation,
+    ln = ln,
+    geom = geom,
+    fld_type = NA_character_,
+    fld_id = NA_character_
   )
   class(x) <- c("location_manual", "location_str")
   x
@@ -233,24 +289,27 @@ fortify_location.location_manual <- function(x, doc, ...) {
 #' @param ... unused arguments
 #' @family functions for placeholder location
 #' @inherit ph_location details
-#' @examples
-#' doc <- read_pptx()
-#' doc <- add_slide(doc, "Title and Content")
-#' doc <- ph_with(doc, "Title",
-#'   location = ph_location_type(type = "title")
-#' )
-#' doc <- ph_with(doc, "Hello world",
-#'   location = ph_location_template(top = 4, type = "title")
-#' )
-#' print(doc, target = tempfile(fileext = ".pptx"))
+#' @example inst/examples/example_ph_location_template.R
 #' @export
-ph_location_template <- function(left = 1, top = 1, width = 4, height = 3,
-                                 newlabel = "", type = NULL, id = 1,
-                                 ...) {
+ph_location_template <- function(
+  left = 1,
+  top = 1,
+  width = 4,
+  height = 3,
+  newlabel = "",
+  type = NULL,
+  id = 1,
+  ...
+) {
   x <- list(
-    left = left, top = top, width = width, height = height,
-    ph_label = newlabel, ph = NA_character_,
-    type = type, id = id
+    left = left,
+    top = top,
+    width = width,
+    height = height,
+    ph_label = newlabel,
+    ph = NA_character_,
+    type = type,
+    id = id
   )
 
   class(x) <- c("location_template", "location_str")
@@ -265,7 +324,10 @@ fortify_location.location_template <- function(x, doc, ...) {
     ph <- sprintf('<p:ph type="%s"/>', "body")
   }
   x <- ph_location(
-    left = x$left, top = x$top, width = x$width, height = x$height,
+    left = x$left,
+    top = x$top,
+    width = x$width,
+    height = x$height,
     label = x$ph_label
   )
   x$ph <- ph
@@ -300,35 +362,16 @@ fortify_location.location_template <- function(x, doc, ...) {
 #' @param ... unused arguments
 #' @family functions for placeholder location
 #' @inherit ph_location details
-#' @examples
-#' # ph_location_type demo ----
-#'
-#' loc_title <- ph_location_type(type = "title")
-#' loc_footer <- ph_location_type(type = "ftr")
-#' loc_dt <- ph_location_type(type = "dt")
-#' loc_slidenum <- ph_location_type(type = "sldNum")
-#' loc_body <- ph_location_type(type = "body")
-#'
-#'
-#' doc <- read_pptx()
-#' doc <- add_slide(doc, "Title and Content")
-#' doc <- ph_with(x = doc, "Un titre", location = loc_title)
-#' doc <- ph_with(x = doc, "pied de page", location = loc_footer)
-#' doc <- ph_with(x = doc, format(Sys.Date()), location = loc_dt)
-#' doc <- ph_with(x = doc, "slide 1", location = loc_slidenum)
-#' doc <- ph_with(x = doc, letters[1:10], location = loc_body)
-#'
-#' loc_subtitle <- ph_location_type(type = "subTitle")
-#' loc_ctrtitle <- ph_location_type(type = "ctrTitle")
-#' doc <- add_slide(doc, layout = "Title Slide")
-#' doc <- ph_with(x = doc, "Un sous titre", location = loc_subtitle)
-#' doc <- ph_with(x = doc, "Un titre", location = loc_ctrtitle)
-#'
-#' fileout <- tempfile(fileext = ".pptx")
-#' print(doc, target = fileout)
-#'
-ph_location_type <- function(type = "body", type_idx = NULL, position_right = TRUE, position_top = TRUE,
-                             newlabel = NULL, id = NULL, ...) {
+#' @example inst/examples/example_ph_location_type.R
+ph_location_type <- function(
+  type = "body",
+  type_idx = NULL,
+  position_right = TRUE,
+  position_top = TRUE,
+  newlabel = NULL,
+  id = NULL,
+  ...
+) {
   # the following two warnings can be deleted after the deprecated id arg is removed.
   if (!is.null(id) && !is.null(type_idx)) {
     cli::cli_warn("{.arg id} is ignored if {.arg type_idx} is provided ")
@@ -338,26 +381,44 @@ ph_location_type <- function(type = "body", type_idx = NULL, position_right = TR
       c(
         "!" = "The {.arg id} argument in {.fn ph_location_type} is deprecated as of {.pkg officer} 0.6.7.",
         "i" = "Please use the {.arg type_idx} argument instead.",
-        "x" = cli::col_red("Caution: new index logic in {.arg type_idx} (see docs).")
+        "x" = cli::col_red(
+          "Caution: new index logic in {.arg type_idx} (see docs)."
+        )
       )
     )
   }
 
   ph_types <- c(
-    "ctrTitle", "subTitle", "dt", "ftr", "sldNum", "title", "body",
-    "pic", "chart", "tbl", "dgm", "media", "clipArt"
+    "ctrTitle",
+    "subTitle",
+    "dt",
+    "ftr",
+    "sldNum",
+    "title",
+    "body",
+    "pic",
+    "chart",
+    "tbl",
+    "dgm",
+    "media",
+    "clipArt"
   )
   if (!type %in% ph_types) {
     cli::cli_abort(
-      c("type {.val {type}} is unknown.",
+      c(
+        "type {.val {type}} is unknown.",
         "x" = "Must be one of {.or {.val {ph_types}}}"
       ),
       call = NULL
     )
   }
   x <- list(
-    type = type, type_idx = type_idx, position_right = position_right,
-    position_top = position_top, id = id, label = newlabel
+    type = type,
+    type_idx = type_idx,
+    position_right = position_right,
+    position_top = position_top,
+    id = id,
+    label = newlabel
   )
   class(x) <- c("location_type", "location_str")
   x
@@ -375,11 +436,16 @@ fortify_location.location_type <- function(x, doc, ...) {
 
   # to avoid a breaking change, the deprecated id is passed along.
   # As type_idx uses a different index order than id, this is necessary until the id arg is removed.
-  out <- get_ph_loc(doc,
-    layout = layout, master = master,
-    type = x$type, position_right = x$position_right,
-    position_top = x$position_top, type_idx = x$type_idx,
-    id = x$id, ph_id = NULL # id is deprecated and will be removed soon
+  out <- get_ph_loc(
+    doc,
+    layout = layout,
+    master = master,
+    type = x$type,
+    position_right = x$position_right,
+    position_top = x$position_top,
+    type_idx = x$type_idx,
+    id = x$id,
+    ph_id = NULL # id is deprecated and will be removed soon
   )
   if (!is.null(x$label)) {
     out$ph_label <- x$label
@@ -398,26 +464,7 @@ fortify_location.location_type <- function(x, doc, ...) {
 #' @param ... unused arguments
 #' @family functions for placeholder location
 #' @inherit ph_location details
-#' @examples
-#' # ph_location_label demo ----
-#'
-#' doc <- read_pptx()
-#' doc <- add_slide(doc, layout = "Title and Content")
-#'
-#' # all ph_label can be read here
-#' layout_properties(doc, layout = "Title and Content")
-#'
-#' doc <- ph_with(doc, head(iris),
-#'   location = ph_location_label(ph_label = "Content Placeholder 2")
-#' )
-#' doc <- ph_with(doc, format(Sys.Date()),
-#'   location = ph_location_label(ph_label = "Date Placeholder 3")
-#' )
-#' doc <- ph_with(doc, "This is a title",
-#'   location = ph_location_label(ph_label = "Title 1")
-#' )
-#'
-#' print(doc, target = tempfile(fileext = ".pptx"))
+#' @example inst/examples/example_ph_location_label.R
 ph_location_label <- function(ph_label, newlabel = NULL, ...) {
   x <- list(ph_label = unname(ph_label), label = unname(newlabel))
   class(x) <- c("location_label", "location_str")
@@ -436,32 +483,63 @@ fortify_location.location_label <- function(x, doc, ...) {
   props_all <- layout_properties(doc, layout = layout, master = master)
 
   if (nrow(props_all) == 0) {
-    cli::cli_abort(c(
-      "ph label {.val {x$ph_label}} does not exist",
-      "x" = "The layout has no placeholders!"
-    ), call = NULL)
+    cli::cli_abort(
+      c(
+        "ph label {.val {x$ph_label}} does not exist",
+        "x" = "The layout has no placeholders!"
+      ),
+      call = NULL
+    )
   }
 
   props <- props_all[props_all$ph_label %in% x$ph_label, , drop = FALSE]
 
   if (nrow(props) < 1) {
-    cli::cli_abort(c(
-      "ph label {.val {x$ph_label}} does not exist",
-      "x" = "layout {.val {layout}} has ph labels: {.val {props_all$ph_label}}",
-      "i" = "See {.fn plot_layout_properties} for details"
-    ), call = NULL)
+    cli::cli_abort(
+      c(
+        "ph label {.val {x$ph_label}} does not exist",
+        "x" = "layout {.val {layout}} has ph labels: {.val {props_all$ph_label}}",
+        "i" = "See {.fn plot_layout_properties} for details"
+      ),
+      call = NULL
+    )
   }
 
   if (nrow(props) > 1) {
-    cli::cli_abort(c(
-      "Placeholder {.val {x$ph_label}} label in layout {.val {layout}} is duplicated.",
-      "x" = "A layout's ph labels must be unique." ,
-      "i" = "{.fn layout_dedupe_ph_labels} helps handling duplicates."
-    ), call = NULL)
+    cli::cli_abort(
+      c(
+        "Placeholder {.val {x$ph_label}} label in layout {.val {layout}} is duplicated.",
+        "x" = "A layout's ph labels must be unique.",
+        "i" = "{.fn layout_dedupe_ph_labels} helps handling duplicates."
+      ),
+      call = NULL
+    )
   }
 
-  props <- props[, c("offx", "offy", "cx", "cy", "ph_label", "ph", "type", "rotation", "fld_id", "fld_type")]
-  names(props) <- c("left", "top", "width", "height", "ph_label", "ph", "type", "rotation", "fld_id", "fld_type")
+  props <- props[, c(
+    "offx",
+    "offy",
+    "cx",
+    "cy",
+    "ph_label",
+    "ph",
+    "type",
+    "rotation",
+    "fld_id",
+    "fld_type"
+  )]
+  names(props) <- c(
+    "left",
+    "top",
+    "width",
+    "height",
+    "ph_label",
+    "ph",
+    "type",
+    "rotation",
+    "fld_id",
+    "fld_type"
+  )
   row.names(props) <- NULL
   out <- as_ph_location(props)
   if (!is.null(x$label)) {
@@ -478,11 +556,7 @@ fortify_location.location_label <- function(x, doc, ...) {
 #' @param newlabel a label to associate with the placeholder.
 #' @param ... unused arguments
 #' @family functions for placeholder location
-#' @examples
-#' doc <- read_pptx()
-#' doc <- add_slide(doc, "Title and Content")
-#' doc <- ph_with(doc, "Hello world", location = ph_location_fullsize())
-#' print(doc, target = tempfile(fileext = ".pptx"))
+#' @example inst/examples/example_ph_location_fullsize.R
 ph_location_fullsize <- function(newlabel = "", ...) {
   x <- list(label = newlabel)
   class(x) <- c("location_fullsize", "location_str")
@@ -516,12 +590,7 @@ fortify_location.location_fullsize <- function(x, doc, ...) {
 #' @param newlabel a label to associate with the placeholder.
 #' @param ... unused arguments
 #' @family functions for placeholder location
-#' @examples
-#' doc <- read_pptx()
-#' doc <- add_slide(doc, "Title and Content")
-#' doc <- ph_with(doc, "Hello left", location = ph_location_left())
-#' doc <- ph_with(doc, "Hello right", location = ph_location_right())
-#' print(doc, target = tempfile(fileext = ".pptx"))
+#' @example inst/examples/example_ph_location_left.R
 ph_location_left <- function(newlabel = NULL, ...) {
   x <- list(label = newlabel)
   class(x) <- c("location_left", "location_str")
@@ -535,9 +604,12 @@ fortify_location.location_left <- function(x, doc, ...) {
 
   args <- list(...)
   master <- if (is.null(args$master)) unique(xfrm$master_name) else args$master
-  out <- get_ph_loc(doc,
-    layout = "Two Content", master = master,
-    type = "body", position_right = FALSE,
+  out <- get_ph_loc(
+    doc,
+    layout = "Two Content",
+    master = master,
+    type = "body",
+    position_right = FALSE,
     position_top = TRUE
   )
   if (!is.null(x$label)) {
@@ -557,12 +629,7 @@ fortify_location.location_left <- function(x, doc, ...) {
 #' @param newlabel a label to associate with the placeholder.
 #' @param ... unused arguments
 #' @family functions for placeholder location
-#' @examples
-#' doc <- read_pptx()
-#' doc <- add_slide(doc, "Title and Content")
-#' doc <- ph_with(doc, "Hello left", location = ph_location_left())
-#' doc <- ph_with(doc, "Hello right", location = ph_location_right())
-#' print(doc, target = tempfile(fileext = ".pptx"))
+#' @example inst/examples/example_ph_location_left.R
 ph_location_right <- function(newlabel = NULL, ...) {
   x <- list(label = newlabel)
   class(x) <- c("location_right", "location_str")
@@ -577,9 +644,12 @@ fortify_location.location_right <- function(x, doc, ...) {
 
   args <- list(...)
   master <- ifelse(is.null(args$master), unique(xfrm$master_name), args$master)
-  out <- get_ph_loc(doc,
-    layout = "Two Content", master = master,
-    type = "body", position_right = TRUE,
+  out <- get_ph_loc(
+    doc,
+    layout = "Two Content",
+    master = master,
+    type = "body",
+    position_right = TRUE,
     position_top = TRUE
   )
   if (!is.null(x$label)) {
@@ -602,27 +672,14 @@ fortify_location.location_right <- function(x, doc, ...) {
 #' @param ... not used.
 #' @family functions for placeholder location
 #' @inherit ph_location details
-#' @examples
-#' doc <- read_pptx()
-#' doc <- add_slide(doc, "Comparison")
-#' plot_layout_properties(doc, "Comparison")
-#'
-#' doc <- ph_with(doc, "The Title", location = ph_location_id(id = 2)) # title
-#' doc <- ph_with(doc, "Left Header", location = ph_location_id(id = 3)) # left header
-#' doc <- ph_with(doc, "Left Content", location = ph_location_id(id = 4)) # left content
-#' doc <- ph_with(doc, "The Footer", location = ph_location_id(id = 8)) # footer
-#'
-#' file <- tempfile(fileext = ".pptx")
-#' print(doc, file)
-#' \dontrun{
-#' file.show(file) # may not work on your system
-#' }
+#' @example inst/examples/example_ph_location_id.R
 ph_location_id <- function(id, newlabel = NULL, ...) {
   ph_id <- id # for disambiguation, store initial value
 
   if (length(ph_id) > 1) {
     cli::cli_abort(
-      c("{.arg id} must be {cli::style_underline('one')} number",
+      c(
+        "{.arg id} must be {cli::style_underline('one')} number",
         "x" = "Found more than one entry: {.val {ph_id}}"
       )
     )
@@ -634,7 +691,8 @@ ph_location_id <- function(id, newlabel = NULL, ...) {
     ph_id <- suppressWarnings(as.integer(ph_id))
     if (is.na(ph_id)) {
       cli::cli_abort(
-        c("Cannot convert {.val {id}} to integer",
+        c(
+          "Cannot convert {.val {id}} to integer",
           "x" = "{.arg id} must be a number, you provided class {.cls {class(id)[1]}}"
         )
       )
@@ -642,14 +700,21 @@ ph_location_id <- function(id, newlabel = NULL, ...) {
   }
   if (ph_id < 1) {
     cli::cli_abort(
-      c("{.arg id} must be a {cli::style_underline('positive')} number",
+      c(
+        "{.arg id} must be a {cli::style_underline('positive')} number",
         "x" = "Found {.val {ph_id}}"
       )
     )
   }
   x <- list(
-    type = NULL, type_idx = NULL, position_right = NULL, position_right = NULL,
-    position_top = NULL, id = NULL, ph_id = ph_id, label = newlabel
+    type = NULL,
+    type_idx = NULL,
+    position_right = NULL,
+    position_right = NULL,
+    position_top = NULL,
+    id = NULL,
+    ph_id = ph_id,
+    label = newlabel
   )
   class(x) <- c("location_id", "location_num")
   x
@@ -697,16 +762,7 @@ fortify_location.location_id <- function(x, doc, ...) {
 #' | `2`            | Length 1 integer                                            | `ph_location_id(2)`             |
 #' | `c(0,0,4,5)`   | Length 4 numeric, optionally named, `c(top=0, left=0, ...)` | `ph_location(0, 0, 4, 5)`       |
 #'
-#' @examples
-#' resolve_location("left")
-#' resolve_location("right")
-#' resolve_location("fullsize")
-#' resolve_location("body")
-#' resolve_location("body [1]")
-#' resolve_location("<some label>")
-#' resolve_location(2)
-#' resolve_location(c(0, 0, 4, 5))
-#'
+#' @example inst/examples/example_resolve_location.R
 resolve_location <- function(x) {
   if (is_ph_location(x)) {
     return(x)
@@ -732,7 +788,8 @@ resolve_location <- function(x) {
 raise_location_value_error <- function(x) {
   cli::cli_abort(
     call = NULL,
-    c("Incorrect value for {.arg location}",
+    c(
+      "Incorrect value for {.arg location}",
       "x" = "Must be a vector (character or numeric) or a ph_location object"
     )
   )
@@ -746,7 +803,8 @@ resolve_location_from_numeric <- function(x) {
   if (len == 1) {
     if (!is_integerish(x)) {
       cli::cli_abort(
-        c("{.arg location} is a length 1 {.cls {class(x)[1]}}: {.val {x}}",
+        c(
+          "{.arg location} is a length 1 {.cls {class(x)[1]}}: {.val {x}}",
           "x" = "If a length 1 numeric, {.arg location} requires {.cls integer}"
         ),
         call = NULL
@@ -757,7 +815,8 @@ resolve_location_from_numeric <- function(x) {
     location <- resolve_ph_location(x)
   } else {
     cli::cli_abort(
-      c("{.arg location} has incorrect length.",
+      c(
+        "{.arg location} has incorrect length.",
         "x" = "Numeric vector passed to {.arg location} must have length 1 or 4"
       ),
       call = NULL
@@ -770,7 +829,8 @@ resolve_location_from_numeric <- function(x) {
 resolve_ph_location_id <- function(x) {
   if (x < 0) {
     cli::cli_abort(
-      c("{.arg location} is negative.",
+      c(
+        "{.arg location} is negative.",
         "x" = "Integers passed to {.arg location} must be positive"
       ),
       call = NULL
@@ -786,7 +846,8 @@ resolve_ph_location_id <- function(x) {
 fortify_named_location_position <- function(x) {
   if (!is_named(x)) {
     cli::cli_abort(
-      c("Some vector elements have no names",
+      c(
+        "Some vector elements have no names",
         "x" = "{.arg x} must be a named vector"
       )
     )
@@ -800,7 +861,8 @@ fortify_named_location_position <- function(x) {
   i_na <- is.na(nms_new)
   if (any(i_na)) {
     cli::cli_abort(
-      c("Found {sum(i_na)} unknown name{?s} in {.arg location}: {.val {args[i_na]}}",
+      c(
+        "Found {sum(i_na)} unknown name{?s} in {.arg location}: {.val {args[i_na]}}",
         "x" = "{.arg location} understands {.val {expected}}",
         "i" = cli::col_silver("Partial name matching is supported")
       ),
@@ -811,7 +873,8 @@ fortify_named_location_position <- function(x) {
   ii_dupes <- duplicated(nms_new)
   if (any(ii_dupes)) {
     cli::cli_abort(
-      c("Duplicate entries in {.arg location}: {.val {unique(nms_new[ii_dupes])}}",
+      c(
+        "Duplicate entries in {.arg location}: {.val {unique(nms_new[ii_dupes])}}",
         "x" = "Each name in {.arg location} must be unique",
         "i" = cli::col_silver("Partial name matching is supported")
       ),
@@ -834,7 +897,8 @@ resolve_ph_location <- function(x) {
 resolve_location_from_character <- function(x) {
   if (is.character(x) && length(x) > 1) {
     cli::cli_abort(
-      c("{.arg location} has incorrect length.",
+      c(
+        "{.arg location} has incorrect length.",
         "x" = "Character vector passed to {.arg location} must have length 1"
       ),
       call = NULL

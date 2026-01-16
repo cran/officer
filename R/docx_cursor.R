@@ -8,50 +8,7 @@
 #' Set the cursor at the beginning of the document, on the first element
 #' of the document (usually a paragraph or a table).
 #' @param x a docx device
-#' @examples
-#' library(officer)
-#'
-#' # create a template ----
-#' doc <- read_docx()
-#' doc <- body_add_par(doc, "blah blah blah")
-#' doc <- body_add_par(doc, "blah blah blah")
-#' doc <- body_add_par(doc, "blah blah blah")
-#' doc <- body_add_par(doc, "Hello text to replace")
-#' doc <- body_add_par(doc, "blah blah blah")
-#' doc <- body_add_par(doc, "blah blah blah")
-#' doc <- body_add_par(doc, "blah blah blah")
-#' doc <- body_add_par(doc, "Hello text to replace")
-#' doc <- body_add_par(doc, "blah blah blah")
-#' template_file <- print(
-#'   x = doc,
-#'   target = tempfile(fileext = ".docx")
-#' )
-#'
-#' # replace all pars containing "to replace" ----
-#' doc <- read_docx(path = template_file)
-#' while (cursor_reach_test(doc, "to replace")) {
-#'   doc <- cursor_reach(doc, "to replace")
-#'
-#'   doc <- body_add_fpar(
-#'     x = doc,
-#'     pos = "on",
-#'     value = fpar(
-#'       "Here is a link: ",
-#'       hyperlink_ftext(
-#'         text = "yopyop",
-#'         href = "https://cran.r-project.org/"
-#'       )
-#'     )
-#'   )
-#' }
-#'
-#' doc <- cursor_end(doc)
-#' doc <- body_add_par(doc, "Yap yap yap yap...")
-#'
-#' result_file <- print(
-#'   x = doc,
-#'   target = tempfile(fileext = ".docx")
-#' )
+#' @example inst/examples/example_cursor.R
 cursor_begin <- function(x) {
   if (length(x$officer_cursor$nodes_names) > 0L) {
     x$officer_cursor$which <- 1L
@@ -66,19 +23,6 @@ cursor_begin <- function(x) {
 #' @section cursor_bookmark:
 #' Set the cursor at a bookmark that has previously been set.
 #' @export
-#' @examples
-#'
-#' # cursor_bookmark ----
-#'
-#' doc <- read_docx()
-#' doc <- body_add_par(doc, "centered text", style = "centered")
-#' doc <- body_bookmark(doc, "text_to_replace")
-#' doc <- body_add_par(doc, "A title", style = "heading 1")
-#' doc <- body_add_par(doc, "Hello world!", style = "Normal")
-#' doc <- cursor_bookmark(doc, "text_to_replace")
-#' doc <- body_add_table(doc, value = iris, style = "table_template")
-#'
-#' print(doc, target = tempfile(fileext = ".docx"))
 cursor_bookmark <- function(x, id) {
   xpath_ <- sprintf("//w:bookmarkStart[@w:name='%s']", id)
   bm_start <- xml_find_first(x$doc_obj$get(), xpath_)
@@ -99,7 +43,12 @@ cursor_bookmark <- function(x, id) {
     !inherits(match_node, "xml_missing")
   })
   if (!any(test_start)) {
-    stop("bookmark ", shQuote(id), " has not been found in the document", call. = FALSE)
+    stop(
+      "bookmark ",
+      shQuote(id),
+      " has not been found in the document",
+      call. = FALSE
+    )
   }
 
   test_end <- sapply(nodes_with_text, function(node) {
@@ -110,7 +59,12 @@ cursor_bookmark <- function(x, id) {
 
   on_same_par <- test_start == test_end
   if (!all(on_same_par)) {
-    stop("bookmark ", shQuote(id), " does not end in the same paragraph (or is on the whole paragraph)", call. = FALSE)
+    stop(
+      "bookmark ",
+      shQuote(id),
+      " does not end in the same paragraph (or is on the whole paragraph)",
+      call. = FALSE
+    )
   }
 
   x$officer_cursor$which <- which(test_start)[1]
@@ -125,6 +79,23 @@ cursor_bookmark <- function(x, id) {
 #' of the document.
 cursor_end <- function(x) {
   x$officer_cursor$which <- length(x$officer_cursor$nodes_names)
+  x
+}
+
+#' @export
+#' @rdname cursor
+#' @param index element index in the document
+#' @section cursor_reach_index:
+#' Set the cursor at a specific index position in the document.
+cursor_reach_index <- function(x, index) {
+  l_ <- length(x$officer_cursor$nodes_names)
+  if (l_ < 1) {
+    stop("document contains no element", call. = FALSE)
+  }
+  if (!between(index, 1, l_)) {
+    stop("invalid index ", index, " (", l_, " element(s))", call. = FALSE)
+  }
+  x$officer_cursor$which <- index
   x
 }
 
@@ -182,7 +153,10 @@ cursor_reach_test <- function(x, keyword) {
 #' @section cursor_forward:
 #' Move the cursor forward, it increments the cursor in the document.
 cursor_forward <- function(x) {
-  x$officer_cursor$which <- min(c(length(x$officer_cursor$nodes_names), x$officer_cursor$which + 1L))
+  x$officer_cursor$which <- min(c(
+    length(x$officer_cursor$nodes_names),
+    x$officer_cursor$which + 1L
+  ))
   x
 }
 

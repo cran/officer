@@ -17,36 +17,17 @@
 #' * "commented_text" - a list column of characters containing the
 #'    commented text. Elements can be vectors of length > 1 if a comment
 #'    spans multiple paragraphs or runs or of length 0 if the commented text is empty.
-#' @examples
-#' bl <- block_list(
-#'   fpar("Comment multiple words."),
-#'   fpar("Second line")
-#' )
-#'
-#' a_par <- fpar(
-#'   "This paragraph contains",
-#'   run_comment(
-#'     cmt = bl,
-#'     run = ftext("a comment."),
-#'     author = "Author Me",
-#'     date = "2023-06-01"
-#'   )
-#' )
-#'
-#' doc <- read_docx()
-#' doc <- body_add_fpar(doc, value = a_par, style = "Normal")
-#'
-#' docx_file <- print(doc, target = tempfile(fileext = ".docx"))
-#'
-#' docx_comments(read_docx(docx_file))
+#' @example inst/examples/example_docx_comments.R
 #' @export
 docx_comments <- function(x) {
   stopifnot(inherits(x, "rdocx"))
 
   comment_ids <- xml_attr(
     xml_find_all(
-      x$doc_obj$get(), "/w:document/w:body//*[self::w:commentRangeStart]"
-    ), "id"
+      x$doc_obj$get(),
+      "/w:document/w:body//*[self::w:commentRangeStart]"
+    ),
+    "id"
   )
 
   comment_text_runs <- lapply(comment_ids, function(id) {
@@ -54,9 +35,13 @@ docx_comments <- function(x) {
       x$doc_obj$get(),
       paste0(
         "/w:document/w:body//*[self::w:r[w:t and",
-        "preceding::w:commentRangeStart[@w:id=\'", id, "\']",
+        "preceding::w:commentRangeStart[@w:id=\'",
+        id,
+        "\']",
         " and ",
-        "following::w:commentRangeEnd[@w:id=\'", id, "\']]]"
+        "following::w:commentRangeEnd[@w:id=\'",
+        id,
+        "\']]]"
       )
     )
   })

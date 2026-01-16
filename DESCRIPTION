@@ -1,7 +1,7 @@
 Type: Package
 Package: officer
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.7.2
+Version: 0.7.3
 Authors@R: c(
     person("David", "Gohel", , "david.gohel@ardata.fr", role = c("aut", "cre")),
     person("Stefan", "Moog", , "moogs@gmx.de", role = "aut"),
@@ -27,6 +27,8 @@ Authors@R: c(
     person("Greg", "Leleu", , "gregoire.leleu@gmail.com", role = "ctb",
            comment = "fields functionality in ppt"),
     person("Majid", "Eismann", role = "ctb"),
+    person("Wahiduzzaman", "Khan", role = "ctb",
+           comment = "vectorization of remove_slide"),
     person("Hongyuan", "Jia", , "hongyuanjia@cqust.edu.cn", role = "ctb",
            comment = c(ORCID = "0000-0002-0075-8183")),
     person("Michael", "Stackhouse", , "mike.stackhouse@atorusresearch.com", role = "ctb")
@@ -66,7 +68,7 @@ Collate: 'core_properties.R' 'custom_properties.R' 'defunct.R'
         'relationship.R' 'rtf.R' 'shape_properties.R' 'shorcuts.R'
         'docx_append_context.R' 'utils-xml.R' 'deprecated.R' 'zzz.R'
 NeedsCompilation: no
-Packaged: 2025-12-03 17:04:25 UTC; davidgohel
+Packaged: 2026-01-16 16:20:49 UTC; davidgohel
 Author: David Gohel [aut, cre],
   Stefan Moog [aut],
   Mark Heckmann [aut] (ORCID: <https://orcid.org/0000-0002-0736-7417>),
@@ -82,8 +84,9 @@ Author: David Gohel [aut, cre],
   Nikolai Beck [ctb] (set speaker notes for .pptx documents),
   Greg Leleu [ctb] (fields functionality in ppt),
   Majid Eismann [ctb],
+  Wahiduzzaman Khan [ctb] (vectorization of remove_slide),
   Hongyuan Jia [ctb] (ORCID: <https://orcid.org/0000-0002-0075-8183>),
   Michael Stackhouse [ctb]
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2025-12-04 06:20:09 UTC
+Date/Publication: 2026-01-16 17:50:02 UTC

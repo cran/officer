@@ -13,9 +13,10 @@
 #' @seealso [print.rpptx()], [read_pptx()], [layout_summary()], [plot_layout_properties()], [ph_with()], [phs_with()], [layout_default()]
 #' @family slide_manipulation
 add_slide <- function(x, layout = NULL, master = NULL, ..., .dots = NULL) {
-
-  if (is.null(layout) && !has_layout_default(x)) {  # inform user. Passing no layout will be defunct in a future verion
-    .Deprecated("",
+  if (is.null(layout) && !has_layout_default(x)) {
+    # inform user. Passing no layout will be defunct in a future verion
+    .Deprecated(
+      "",
       package = "officer",
       msg = paste(
         "Calling `add_slide()` without specifying a `layout` is deprecated.\n",
@@ -37,7 +38,8 @@ add_slide <- function(x, layout = NULL, master = NULL, ..., .dots = NULL) {
   dots_list <- list(...)
   if (length(dots_list) > 0 && !is_named(dots_list)) {
     cli::cli_abort(
-      c("Missing key in {.arg ...}",
+      c(
+        "Missing key in {.arg ...}",
         "x" = "{.arg ...} requires a key-value syntax, with a ph short-form location as the key",
         "i" = "Example: {.code add_slide(x, ..., title = 'My title', 'body[1]' = 'My body')}"
       )
@@ -45,7 +47,8 @@ add_slide <- function(x, layout = NULL, master = NULL, ..., .dots = NULL) {
   }
   if (length(.dots) > 0 && !is_named(.dots)) {
     cli::cli_abort(
-      c("Missing names in {.arg .dots}",
+      c(
+        "Missing names in {.arg .dots}",
         "x" = "{.arg .dots} must be a named list, with ph short-form locations as names",
         "i" = "Example: {.code add_slide(x, ..., .dots = list(title = 'My title', 'body[1]' = 'My body'))}"
       )
@@ -79,33 +82,21 @@ add_slide <- function(x, layout = NULL, master = NULL, ..., .dots = NULL) {
 #' @description Change current slide index of an rpptx object.
 #' @param x an rpptx object
 #' @param index slide index
-#' @examples
-#' doc <- read_pptx()
-#' doc <- add_slide(doc, "Title and Content")
-#' doc <- add_slide(doc, "Title and Content")
-#' doc <- add_slide(doc, "Title and Content")
-#' doc <- on_slide(doc, index = 1)
-#' doc <- ph_with(
-#'   x = doc, "First title",
-#'   location = ph_location_type(type = "title")
-#' )
-#' doc <- on_slide(doc, index = 3)
-#' doc <- ph_with(
-#'   x = doc, "Third title",
-#'   location = ph_location_type(type = "title")
-#' )
-#'
-#' file <- tempfile(fileext = ".pptx")
-#' print(doc, target = file)
+#' @example inst/examples/example_on_slide.R
 #' @family slide_manipulation
 #' @seealso [read_pptx()], [ph_with()]
 on_slide <- function(x, index) {
   l_ <- length(x)
   if (l_ < 1) {
-    stop("presentation contains no slide", call. = FALSE)
+    cli::cli_abort("Presentation contains no slide.")
   }
   if (!between(index, 1, l_)) {
-    stop("unvalid index ", index, " (", l_, " slide(s))", call. = FALSE)
+    cli::cli_abort(
+      c(
+        "Slide index {.val {index}} is out of range.",
+        "x" = "Presentation has {cli::no(l_)} slide{?s}."
+      )
+    )
   }
 
   filename <- basename(x$presentation$slide_data()$target[index])
@@ -117,39 +108,81 @@ on_slide <- function(x, index) {
 
 
 #' @export
-#' @title Remove a slide
-#' @description Remove a slide from a pptx presentation.
+#' @title Remove slide(s)
+#' @description Remove one or more slides from a pptx presentation.
 #' @param x an rpptx object
-#' @param index slide index, default to current slide position.
+#' @param index slide index or a vector of slide indices to remove,
+#' default to current slide position.
 #' @param rm_images unused anymore.
 #' @note cursor is set on the last slide.
-#' @examples
-#' my_pres <- read_pptx()
-#' my_pres <- add_slide(my_pres, "Title and Content")
-#' my_pres <- remove_slide(my_pres)
+#' @example inst/examples/example_remove_slide.R
 #' @family slide_manipulation
 #' @seealso [read_pptx()], [ph_with()], [ph_remove()]
 remove_slide <- function(x, index = NULL, rm_images = FALSE) {
+  stop_if_not_rpptx(x)
+
   l_ <- length(x)
   if (l_ < 1) {
-    stop("presentation contains no slide to delete", call. = FALSE)
+    cli::cli_abort("Presentation contains no slide to delete.")
   }
 
   if (is.null(index)) {
     index <- x$cursor
   }
 
-  if (!between(index, 1, l_)) {
-    stop("unvalid index ", index, " (", l_, " slide(s))", call. = FALSE)
+  if (length(index) == 0) {
+    return(x)
   }
-  filename <- basename(x$presentation$slide_data()$target[index])
-  location <- which(x$slide$get_metadata()$name %in% filename)
 
-  del_file <- x$slide$remove_slide(location)
+  # Validate all indices
+  indices <- unique(as.integer(index))
+  invalid_indices <- indices[!between(indices, 1, l_)]
+  if (length(invalid_indices) > 0) {
+    n_invalid <- length(invalid_indices)
+    cli::cli_abort(
+      c(
+        "{cli::qty(n_invalid)}Slide index{?es} {.val {invalid_indices}} {cli::qty(n_invalid)}{?is/are} out of range.",
+        "x" = "Presentation has {cli::no(l_)} slide{?s}."
+      )
+    )
+  }
 
-  # update presentation elements
-  x$presentation$remove_slide(del_file)
-  x$content_type$remove_slide(partname = del_file)
+  # Get slide mapping information using existing slide_data method
+  slide_map <- x$presentation$slide_data()
+  slide_map$filename <- basename(slide_map$target)
+
+  indices_to_remove <- sort(unique(indices), decreasing = TRUE)
+  slides_to_remove_df <- slide_map[indices_to_remove, , drop = FALSE]
+
+  # Build file paths for deletion
+  files_to_delete <- file.path(
+    x$package_dir,
+    "ppt",
+    "slides",
+    slides_to_remove_df$filename
+  )
+  rels_to_delete <- file.path(
+    x$package_dir,
+    "ppt",
+    "slides",
+    "_rels",
+    paste0(slides_to_remove_df$filename, ".rels")
+  )
+
+  # Delete slide XML files if they exist
+  unlink(files_to_delete[file.exists(files_to_delete)], force = TRUE)
+  # Delete slide relationship files if they exist
+  unlink(rels_to_delete[file.exists(rels_to_delete)], force = TRUE)
+
+  # Remove slides from internal collections
+  for (filename in slides_to_remove_df$filename) {
+    slide_idx <- x$slide$slide_index(filename)
+    x$slide$remove_slide(slide_idx)
+    x$presentation$remove_slide(filename)
+    x$content_type$remove_slide(partname = filename)
+  }
+
+  # Set cursor to last slide
   x$cursor <- x$slide$length()
   x
 }
@@ -161,13 +194,7 @@ remove_slide <- function(x, index = NULL, rm_images = FALSE) {
 #' @inheritParams remove_slide
 #' @param to new slide index.
 #' @note cursor is set on the last slide.
-#' @examples
-#' x <- read_pptx()
-#' x <- add_slide(x, "Title and Content")
-#' x <- ph_with(x, "Hello world 1", location = ph_location_type())
-#' x <- add_slide(x, "Title and Content")
-#' x <- ph_with(x, "Hello world 2", location = ph_location_type())
-#' x <- move_slide(x, index = 1, to = 2)
+#' @example inst/examples/example_move_slide.R
 #' @family slide_manipulation
 #' @seealso [read_pptx()]
 move_slide <- function(x, index = NULL, to) {
@@ -180,13 +207,23 @@ move_slide <- function(x, index = NULL, to) {
   l_ <- length(x)
 
   if (l_ < 1) {
-    stop("presentation contains no slide", call. = FALSE)
+    cli::cli_abort("Presentation contains no slide.")
   }
   if (!between(index, 1, l_)) {
-    stop("unvalid index ", index, " (", l_, " slide(s))", call. = FALSE)
+    cli::cli_abort(
+      c(
+        "Slide index {.val {index}} is out of range.",
+        "x" = "Presentation has {cli::no(l_)} slide{?s}."
+      )
+    )
   }
   if (!between(to, 1, l_)) {
-    stop("unvalid 'to' ", to, " (", l_, " slide(s))", call. = FALSE)
+    cli::cli_abort(
+      c(
+        "Target position {.val {to}} is out of range.",
+        "x" = "Presentation has {cli::no(l_)} slide{?s}."
+      )
+    )
   }
 
   x$presentation$move_slide(from = index, to = to)
@@ -207,7 +244,13 @@ pptx_fortify_slides <- function(x) {
   for (cursor_index in seq_len(x$slide$length())) {
     slide <- x$slide$get_slide(cursor_index)
 
-    process_images(slide, slide$relationship(), x$package_dir, media_dir = "ppt/media", media_rel_dir = "../media")
+    process_images(
+      slide,
+      slide$relationship(),
+      x$package_dir,
+      media_dir = "ppt/media",
+      media_rel_dir = "../media"
+    )
 
     process_links(slide, type = "pml")
 
@@ -236,18 +279,33 @@ pptx_fortify_slides <- function(x) {
 #' @return a character value
 #' @family functions for officer extensions
 #' @keywords internal
-shape_properties_tags <- function(left = 0, top = 0, width = 3, height = 3,
-                                  bg = "transparent", rot = 0, label = "", ph = "<p:ph/>",
-                                  ln = sp_line(lwd = 0, linecmpd = "solid", lineend = "rnd"), geom = NULL) {
+shape_properties_tags <- function(
+  left = 0,
+  top = 0,
+  width = 3,
+  height = 3,
+  bg = "transparent",
+  rot = 0,
+  label = "",
+  ph = "<p:ph/>",
+  ln = sp_line(lwd = 0, linecmpd = "solid", lineend = "rnd"),
+  geom = NULL
+) {
   if (!is.null(bg) && !is.color(bg)) {
-    stop("bg must be a valid color.", call. = FALSE)
+    cli::cli_abort("{.arg bg} must be a valid color, not {.val {bg}}.")
   }
 
   bg_str <- solid_fill_pml(bg)
   ln_str <- ln_pml(ln)
   geom_str <- prst_geom_pml(geom)
 
-  xfrm_str <- a_xfrm_str(left = left, top = top, width = width, height = height, rot = rot)
+  xfrm_str <- a_xfrm_str(
+    left = left,
+    top = top,
+    width = width,
+    height = height,
+    rot = rot
+  )
   if (is.null(ph) || is.na(ph)) {
     ph <- "<p:ph/>"
   }
@@ -265,7 +323,8 @@ ensure_slide_index_exists <- function(x, slide_idx) {
   stop_if_not_rpptx(x)
   if (!is.numeric(slide_idx)) {
     cli::cli_abort(
-      c("{.arg slide_idx} must be {.cls numeric}",
+      c(
+        "{.arg slide_idx} must be {.cls numeric}",
         "x" = "You provided {.cls {class(slide_idx)[1]}} instead."
       ),
       call = NULL
@@ -275,7 +334,8 @@ ensure_slide_index_exists <- function(x, slide_idx) {
   check <- slide_idx %in% seq_len(n)
   if (!check) {
     cli::cli_abort(
-      c("Slide index {.val {slide_idx}} is out of range.",
+      c(
+        "Slide index {.val {slide_idx}} is out of range.",
         "x" = "Presentation has {cli::no(n)} slide{?s}."
       ),
       call = NULL
@@ -321,10 +381,14 @@ ensure_slide_index_exists <- function(x, slide_idx) {
   n_vals <- length(value)
   n_slides <- length(x)
   if (n_vals > n_slides) {
-    cli::cli_abort("More values ({.val {n_vals}}) than slides ({.val {n_slides}})")
+    cli::cli_abort(
+      "More values ({.val {n_vals}}) than slides ({.val {n_slides}})"
+    )
   }
   if (n_vals != 1 && n_vals != n_slides) {
-    cli::cli_warn("Value is not length 1 or same length as number of slides ({.val {n_slides}}). Recycling values.")
+    cli::cli_warn(
+      "Value is not length 1 or same length as number of slides ({.val {n_slides}}). Recycling values."
+    )
   }
   value <- rep(value, length.out = n_slides)
   for (i in seq_along(value)) {
@@ -357,7 +421,11 @@ slide_visible <- function(x, hide = NULL, show = NULL) {
     slide_visible(x)[show] <- TRUE
   }
   n_slides <- length(x)
-  res <- vapply(seq_len(n_slides), function(idx) .slide_visible(x, idx), logical(1))
+  res <- vapply(
+    seq_len(n_slides),
+    function(idx) .slide_visible(x, idx),
+    logical(1)
+  )
   if (is.null(hide) && is.null(show)) {
     res
   } else {

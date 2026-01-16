@@ -9,7 +9,8 @@ move_slide(x, index = NULL, to)
 \arguments{
 \item{x}{an rpptx object}
 
-\item{index}{slide index, default to current slide position.}
+\item{index}{slide index or a vector of slide indices to remove,
+default to current slide position.}
 
 \item{to}{new slide index.}
 }
@@ -20,6 +21,8 @@ Move a slide in a pptx presentation.
 cursor is set on the last slide.
 }
 \examples{
+library(officer)
+
 x <- read_pptx()
 x <- add_slide(x, "Title and Content")
 x <- ph_with(x, "Hello world 1", location = ph_location_type())
