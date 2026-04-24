@@ -770,7 +770,7 @@ to_wml.page_size <- function(x, add_ns = FALSE, ...) {
 #' @examples
 #' section_columns()
 #' @family functions for section definition
-section_columns <- function(widths = c(2.5, 2.5), space = .25, sep = FALSE) {
+section_columns <- function(widths = c(2.5, 2.5), space = 0.25, sep = FALSE) {
   if (length(widths) < 2) {
     stop("length of widths should be at least 2")
   }
@@ -1132,8 +1132,8 @@ to_wml.prop_section <- function(x, add_ns = FALSE, ...) {
 #' @family run functions for reporting
 external_img <- function(
   src,
-  width = .5,
-  height = .2,
+  width = 0.5,
+  height = 0.2,
   unit = "in",
   guess_size = FALSE,
   alt = ""
@@ -1214,7 +1214,7 @@ temp_blipfill <- function(value, ns = "p") {
     rsvg::rsvg_png(svg_src, file = img_src)
   } else {
     img_src <- tempfile(
-      fileext = gsub("(.*)(\\.[a-zA-Z0-0]+)$", "\\2", as.character(value))
+      fileext = gsub("(.*)(\\.[a-zA-Z0-9]+)$", "\\2", as.character(value))
     )
     file.copy(as.character(value), to = img_src)
   }
@@ -1422,8 +1422,8 @@ to_html.external_img <- function(x, ...) {
 #' @family run functions for reporting
 floating_external_img <- function(
   src,
-  width = .5,
-  height = .2,
+  width = 0.5,
+  height = 0.2,
   pos_x = 0,
   pos_y = 0,
   pos_h_from = "margin",

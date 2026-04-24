@@ -1,3 +1,50 @@
+# officer 0.7.4
+
+## Features
+
+### Excel
+
+- new functions `sheet_write_data()` and `sheet_add_drawing()` for writing
+data and inserting drawings (charts, vector graphics) into xlsx workbooks.
+`sheet_write_data()` is an S3 generic: beside `data.frame`, it also accepts
+a `character` vector (one cell per element, vertical by default; 
+`direction = "horizontal"` for a row), an [`fpar()`] (richtext inline cell honouring
+bold, italic, underline, strikethrough, size, colour, font, sub/superscript)
+and a [`block_list()`] (one cell per `fpar` item, stacked).
+`sheet_add_drawing()` has an `external_img` method and a `gg` method.
+- new function `sheet_remove()` to delete a sheet from an xlsx workbook.
+`add_sheet()` is purely additive and never drops any sheet; call
+`sheet_remove()` explicitly if the template's default sheet is not wanted.
+
+### Word
+
+- `write_docx_settings()` now preserves the existing `settings.xml`
+content instead of rebuilding it from scratch. This fixes the loss of
+embedded font settings, math properties, footnote/endnote settings and 
+other XML elements during docx roundtrips (#554).
+- new function `docx_embed_font()` to embed TrueType or OpenType font
+files into Word documents. Embedded fonts ensure correct rendering on
+systems where the font is not installed (#554).
+
+### Word & PowerPoint
+
+- new functions `list_item()`, `block_list_items()` and
+`body_add_list()` to create bullet or numbered lists with rich text
+(`fpar`) and multi-level nesting. Works in both Word and PowerPoint
+documents (#314).
+
+### Formatting properties
+
+- `fp_par()` and `fp_par_lite()` gain `first_line` and `hanging`
+arguments to control paragraph first-line and hanging indents (in
+points). Honored by the Word, PowerPoint, HTML and RTF renderers.
+`hanging` wins when both are provided (flextable #704).
+
+## Issues
+
+- `sheet_select()` now deselects other sheets, fixing the issue where
+multiple tabs appeared selected when opening the workbook.
+
 # officer 0.7.3
 
 ## Features

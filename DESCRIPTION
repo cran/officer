@@ -1,7 +1,7 @@
 Type: Package
 Package: officer
 Title: Manipulation of Microsoft Word and PowerPoint Documents
-Version: 0.7.3
+Version: 0.7.4
 Authors@R: c(
     person("David", "Gohel", , "david.gohel@ardata.fr", role = c("aut", "cre")),
     person("Stefan", "Moog", , "moogs@gmx.de", role = "aut"),
@@ -47,16 +47,16 @@ BugReports: https://github.com/davidgohel/officer/issues
 Imports: cli, dplyr, graphics, grDevices, openssl, R6, ragg, stats,
         tidyr, utils, uuid, xml2 (>= 1.1.0), zip (>= 2.1.0)
 Suggests: devEMF, doconv (>= 0.3.0), gdtools, ggplot2, knitr, magick,
-        rmarkdown, rsvg, testthat, withr
+        rmarkdown, rsvg, mschart, testthat, withr
 Encoding: UTF-8
 RoxygenNote: 7.3.3
 Collate: 'core_properties.R' 'custom_properties.R' 'defunct.R'
         'dev-utils.R' 'docx_add.R' 'docx_comments.R' 'docx_cursor.R'
-        'docx_part.R' 'docx_replace.R' 'docx_section.R'
-        'docx_settings.R' 'docx_styles.R' 'docx_utils_funs.R'
-        'empty_content.R' 'formatting_properties.R' 'fortify_docx.R'
-        'fortify_pptx.R' 'knitr_utils.R' 'officer.R' 'ooxml.R'
-        'ooxml_block_objects.R' 'ooxml_run_objects.R'
+        'docx_embed_font.R' 'docx_part.R' 'docx_replace.R'
+        'docx_section.R' 'docx_settings.R' 'docx_styles.R'
+        'docx_utils_funs.R' 'empty_content.R' 'formatting_properties.R'
+        'fortify_docx.R' 'fortify_pptx.R' 'knitr_utils.R' 'officer.R'
+        'ooxml.R' 'ooxml_block_objects.R' 'ooxml_run_objects.R'
         'openxml_content_type.R' 'openxml_document.R' 'pack_folder.R'
         'ph_location.R' 'post-proc.R' 'ppt_class_dir_collection.R'
         'ppt_classes.R' 'ppt_notes.R' 'ppt_ph_dedupe_layout.R'
@@ -68,7 +68,7 @@ Collate: 'core_properties.R' 'custom_properties.R' 'defunct.R'
         'relationship.R' 'rtf.R' 'shape_properties.R' 'shorcuts.R'
         'docx_append_context.R' 'utils-xml.R' 'deprecated.R' 'zzz.R'
 NeedsCompilation: no
-Packaged: 2026-01-16 16:20:49 UTC; davidgohel
+Packaged: 2026-04-24 07:44:01 UTC; davidgohel
 Author: David Gohel [aut, cre],
   Stefan Moog [aut],
   Mark Heckmann [aut] (ORCID: <https://orcid.org/0000-0002-0736-7417>),
@@ -89,4 +89,4 @@ Author: David Gohel [aut, cre],
   Michael Stackhouse [ctb]
 Maintainer: David Gohel <david.gohel@ardata.fr>
 Repository: CRAN
-Date/Publication: 2026-01-16 17:50:02 UTC
+Date/Publication: 2026-04-24 09:50:02 UTC

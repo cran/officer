@@ -80,7 +80,7 @@ p_xfrm_str <- function(left = 0, top = 0, width = 3, height = 3, rot = 0) {
 css_color <- function(color) {
   color <- as.vector(col2rgb(color, alpha = TRUE)) / c(1, 1, 1, 255)
 
-  if (!(color[4] > 0)) {
+  if (color[4] <= 0) {
     "transparent"
   } else {
     sprintf(
@@ -110,7 +110,7 @@ colalpha <- function(x) {
 }
 
 is_transparent <- function(color) {
-  !(colalpha(color) > 0)
+  colalpha(color) <= 0
 }
 
 solid_fill <- function(color) {
@@ -151,7 +151,7 @@ ln_pml <- function(x) {
   ln_str <- ""
   if (!is.null(x)) {
     color_ <- ""
-    if (is_transparent(x$color) || x$lwd < .001) {
+    if (is_transparent(x$color) || x$lwd < 0.001) {
       color_ <- "<a:noFill/>"
     } else {
       color_ <- solid_fill(x$color)
@@ -218,7 +218,7 @@ border_pml <- function(x, side) {
 
   width_ <- sprintf("w=\"%.0f\"", x$width * 12700)
 
-  if (is_transparent(x$color) || x$width < .001) {
+  if (is_transparent(x$color) || x$width < 0.001) {
     color_ <- "<a:noFill/>"
   } else {
     color_ <- solid_fill(x$color)
@@ -284,7 +284,7 @@ border_wml <- function(x, side) {
 }
 border_css <- function(x, side) {
   color_ <- css_color(x$color)
-  if (!(x$width > 0)) {
+  if (x$width <= 0) {
     color_ <- "transparent"
   }
 
@@ -329,10 +329,19 @@ ppr_pml <- function(x) {
 
   leftright_padding <- ""
   if (!is.na(x$padding.left) && !is.na(x$padding.right)) {
+    hang <- x$hanging %||% NA_real_
+    first <- x$first_line %||% NA_real_
+    indent_attr <- ""
+    if (!is.na(hang) && hang > 0) {
+      indent_attr <- sprintf(" indent=\"%.0f\"", -hang * 12700)
+    } else if (!is.na(first) && first > 0) {
+      indent_attr <- sprintf(" indent=\"%.0f\"", first * 12700)
+    }
     leftright_padding <- sprintf(
-      " marL=\"%.0f\" marR=\"%.0f\"",
+      " marL=\"%.0f\" marR=\"%.0f\"%s",
       x$padding.left * 12700,
-      x$padding.right * 12700
+      x$padding.right * 12700,
+      indent_attr
     )
   }
 
@@ -387,6 +396,14 @@ ppr_css <- function(x) {
     x$padding.left,
     x$padding.right
   )
+  hang <- x$hanging %||% NA_real_
+  first <- x$first_line %||% NA_real_
+  text_indent <- ""
+  if (!is.na(hang) && hang > 0) {
+    text_indent <- sprintf("text-indent:-%.0fpt;", hang)
+  } else if (!is.na(first) && first > 0) {
+    text_indent <- sprintf("text-indent:%.0fpt;", first)
+  }
   ls <- formatC(
     x$line_spacing,
     format = "f",
@@ -403,6 +420,7 @@ ppr_css <- function(x) {
     text.align,
     borders,
     paddings,
+    text_indent,
     line_spacing,
     shading.color
   )
@@ -454,10 +472,20 @@ ppr_wml <- function(x) {
 
   leftright_padding <- ""
   if (!is.na(x$padding.left) && !is.na(x$padding.right)) {
+    hang <- x$hanging %||% NA_real_
+    first <- x$first_line %||% NA_real_
+    if (!is.na(hang) && hang > 0) {
+      first_attr <- sprintf("w:hanging=\"%.0f\"", hang * 20)
+    } else if (!is.na(first) && first > 0) {
+      first_attr <- sprintf("w:firstLine=\"%.0f\"", first * 20)
+    } else {
+      first_attr <- "w:firstLine=\"0\" w:firstLineChars=\"0\""
+    }
     leftright_padding <- sprintf(
-      "<w:ind w:left=\"%.0f\" w:right=\"%.0f\" w:firstLine=\"0\" w:firstLineChars=\"0\"/>",
+      "<w:ind w:left=\"%.0f\" w:right=\"%.0f\" %s/>",
       x$padding.left * 20,
-      x$padding.right * 20
+      x$padding.right * 20,
+      first_attr
     )
   }
 

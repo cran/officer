@@ -37,7 +37,7 @@ layout_dedupe_ph_labels <- function(x, action = "detect", print_info = FALSE) {
     action = action
   )
   x <- reload_slidelayouts(x) # reinit slideLayouts to get processed ph labels [e.g. when calling x$slideLayouts$get_xfrm_data()]
-  if (print_info | action == "detect") {
+  if (print_info || action == "detect") {
     .print_dedupe_info(x = x, xfrm_list = xfrm_list, action = action)
   }
   invisible(x)
@@ -80,7 +80,7 @@ layout_dedupe_ph_labels <- function(x, action = "detect", print_info = FALSE) {
 
   # rename label or delete ph shape
   layout_xml <- layout$get()
-  for (i in 1L:nrow(xfrm)) {
+  for (i in seq_len(nrow(xfrm))) {
     shape <- xml2::xml_find_first(
       layout_xml,
       sprintf("p:cSld/p:spTree/*[p:nvSpPr/p:cNvPr[@id='%s']]", xfrm$id[i])
@@ -133,11 +133,12 @@ has_ph_dupes <- function(x) {
 
 # print info on what was done (if print_info = TRUE)
 .print_dedupe_info <- function(x, xfrm_list, action) {
-  .df_1 <- do.call(rbind, xfrm_list)
-  if (is.null(.df_1)) {
+  xfrm_list <- Filter(Negate(is.null), xfrm_list)
+  if (length(xfrm_list) == 0L) {
     cat("No duplicate placeholder labels detected.")
     return(invisible(NULL))
   }
+  .df_1 <- dplyr::bind_rows(xfrm_list)
   .df_2 <- x$slideLayouts$get_xfrm_data()
   .df_2 <- unique(.df_2[, c("master_file", "master_name"), drop = FALSE])
   df <- merge(.df_1, .df_2, sort = FALSE)

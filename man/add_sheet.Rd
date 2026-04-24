@@ -14,6 +14,13 @@ add_sheet(x, label)
 \description{
 Add a sheet into an xlsx worksheet.
 }
+\details{
+\code{read_xlsx()} returns a workbook that already contains one default
+sheet shipped with the template (named \code{"Sheet1"} or \code{"Feuil1"}
+depending on the locale). \code{add_sheet()} is purely additive: the
+default sheet is kept as-is. Remove it explicitly with
+\code{\link[=sheet_remove]{sheet_remove()}} if it is not wanted.
+}
 \examples{
 my_ws <- read_xlsx()
 my_pres <- add_sheet(my_ws, label = "new sheet")
