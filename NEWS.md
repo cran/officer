@@ -1,3 +1,53 @@
+# officer 0.7.5
+
+## Word
+
+- drop deprecated `seqfield` argument in `run_word_field()` and remove `run_seqfield()`
+(old duplicate of `run_word_field()`) .
+
+## RTF
+
+- RTF sections were debugged and now behave correctly: page orientation,
+columns, margins and per-section headers / footers all apply as expected,
+including multi-column layouts (#726, thanks to Nathan Kosiba).
+
+- New paragraph style API for RTF, aligned with `docx_set_paragraph_style()`
+on the Word side. `rtf_set_paragraph_style()` is now exported and takes
+`style_id`, `style_name`, `base_on`, `fp_p`, `fp_t` and `outline_level`;
+`rtf_styles_info()` returns the document's style table. `rtf_add()` accepts
+a `style` argument so paragraphs (character, factor, double, fpar,
+block_list) can reference a named style. `rtf_doc()` registers built-in
+`"heading 1"` / `"heading 2"` / `"heading 3"` styles with `\outlinelevel`
+values, so styled paragraphs feed Word's navigation pane and TOC field.
+Use `rtf_set_paragraph_style()` after `rtf_doc()` to override a built-in
+style; the row keyed by `style_id` is updated in place.
+
+- `rtf_add()` now accepts [block_toc()] objects and emits a TOC field
+in the RTF stream, in parity with `body_add_toc()` for Word. Word
+populates the table at open time using the outline levels carried by
+the built-in heading styles; LibreOffice does not render the TOC
+automatically.
+
+## Excel features
+
+- Images and ggplot drawings placed on Excel sheets with
+`sheet_add_drawing()` can now be anchored to cells. Pass
+`anchor = "B2:H20"` (a cell range) to make the drawing move and
+size with cells, Excel's default behaviour. Pass `anchor = "B2"`
+(a single cell) to make it move but keep its own size. Omit
+`anchor` for the previous fixed-position layout. The `edit_as`
+argument controls what happens when rows or columns are resized.
+The same options are available to charts inserted via 'mschart'.
+- Excel sheets can host the chartEx chart family (boxplot, funnel,
+histogram, pareto, sunburst, treemap, waterfall) in addition to the
+classic chart types. The new helper `ooxml_chart_uris()` returns the
+identifiers needed by `xlsx_drawing` to wire either family.
+- Two new building blocks for packages that emit OOXML directly
+(such as 'mschart'): `solid_fill(color)` returns a DrawingML
+solid-fill fragment with optional alpha; `to_pml()` now has an
+`sp_line` method exposing line-properties conversion that was
+previously internal.
+
 # officer 0.7.4
 
 ## Features
@@ -142,7 +192,7 @@ Word users could have.
 - Fix RTF generation so that `fp_par_lite()` works also for RTF output.
 - Fix `doc_summary(... detailed=TRUE)` when the runs has a shading (w:shd) with 
 a fill but no color attribute.
-- `plot_layout_properties()`: new `slide_idx` arg to specify which slide’s layout 
+- `plot_layout_properties()`: new `slide_idx` arg to specify which slide's layout 
   to plot. The plot title now also contains the master's name (#666)
 
 # officer 0.6.9
@@ -300,7 +350,7 @@ with flextable (for Word and RTF).
 ## Features 
 
 - `fp_border()` gains support for all line border styles listed in ECMA-376 
-  § 17.18.2 and allowed CSS border styles. Closes #165 and #443.
+  section 17.18.2 and allowed CSS border styles. Closes #165 and #443.
 
 ## Changes
 
