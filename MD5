@@ -1,8 +1,8 @@
-dae34243d142321ee201c5769e8cdada *DESCRIPTION
+7f02a653661a77e113ca55016d270553 *DESCRIPTION
 706ff72a57d21d9f964868222234d757 *LICENSE
 e75eab17130175927d808fb98fdb5104 *NAMESPACE
-128777c6084606f4ba2061a07b82761d *NEWS.md
-3bf35b3ba90ddcb73be4e7bec15d5b3a *R/core_properties.R
+9621a7105100c1297b39515eb7936f30 *NEWS.md
+cb8d94f07e41b4f819092f65290385af *R/core_properties.R
 f729360ce3c8b8a388835f4e624b64f9 *R/custom_properties.R
 cc1381c4e0a9e90ebd92406b65671256 *R/defunct.R
 d41d8cd98f00b204e9800998ecf8427e *R/deprecated.R
@@ -44,10 +44,10 @@ c2364ceaa1f2fcc7f6554983db1a8108 *R/pptx_informations.R
 20cb384824e365b4beb12f6f31ccfbda *R/pptx_layout_helper.R
 7d00184338e448ff666e9d9db0c626d2 *R/pptx_matrix.R
 854d8d32f38eebd55c42d561d87e216a *R/pptx_slide_manip.R
-72e55b9e02d767473376c3d22612714b *R/read_docx.R
+f609f6280605fe6f3cd97962d02904bc *R/read_docx.R
 811c8d1d7497a75dd94c6ccc5a79dc7a *R/read_docx_styles.R
 5a1539b8eb9551f58095a95ea57bcd94 *R/read_pptx.R
-cf9531482c4e8c801e1013985345ff58 *R/read_xlsx.R
+b2df1754ff7099aae340af2c34eb4501 *R/read_xlsx.R
 fba1a7cfc35b887c66ca83490e73595e *R/relationship.R
 a7507d28a894206b7444e825b60f01c7 *R/rtf.R
 9999f89aece2bebf1b71d66934195074 *R/shape_properties.R

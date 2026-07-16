@@ -1,3 +1,10 @@
+# officer 0.7.6
+
+## Issues
+
+- drop deprecated special names (`.Names`, `.Dim`, `.Dimnames`) in `structure()`
+calls, flagged as a NOTE by r-devel checks (#728).
+
 # officer 0.7.5
 
 ## Word
