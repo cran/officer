@@ -11,6 +11,7 @@ body_add_gg(
   height = 5,
   res = 300,
   style = "Normal",
+  alt_text = "",
   scale = 1,
   pos = "after",
   unit = "in",
@@ -28,6 +29,9 @@ Defaults to a width of 6 and a height of 5 "in"ches.}
 \item{res}{resolution of the png image in ppi}
 
 \item{style}{paragraph style}
+
+\item{alt_text}{Alt-text for screen-readers. Defaults to \code{""}. If \code{""} or \code{NULL}
+an alt text added with \code{ggplot2::labs(alt = ...)} will be used if any.}
 
 \item{scale}{Multiplicative scaling factor, same as in ggsave}
 

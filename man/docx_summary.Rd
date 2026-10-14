@@ -31,6 +31,9 @@ A data.frame with the following columns depending on the value of \code{detailed
 When \code{detailed = FALSE} (default), the data.frame contains:
 \itemize{
 \item \code{doc_index}: Document element index (integer).
+\item \code{para_id}: Unique paragraph id (character), can be used to make a join
+with the \code{para_id} column of \code{\link[=docx_comments]{docx_comments()}} results. \code{NA} when the
+paragraph has no id, e.g. in documents not produced by 'Word'.
 \item \code{content_type}: Type of content: "paragraph" or "table cell" (character).
 \item \code{style_name}: Name of the paragraph style (character).
 \item \code{text}: Collapsed text content of the paragraph or cell (character).

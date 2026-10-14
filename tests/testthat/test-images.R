@@ -32,6 +32,39 @@ test_that("add image in docx", {
   }
 })
 
+test_that("alt text is written to wp:docPr in docx", {
+  x <- read_docx()
+  x <- body_add_img(
+    x,
+    src = file.path(R.home("doc"), "html", "logo.jpg"),
+    width = 1.39, height = 1.06,
+    alt = "R logo"
+  )
+  x <- read_docx(path = print(x, target = tempfile(fileext = ".docx")))
+  node_docpr <- xml_find_first(docx_body_xml(x), "//wp:docPr")
+  expect_equal(xml_attr(node_docpr, "descr"), "R logo")
+})
+
+test_that("body_add_gg picks up ggplot2 alt text", {
+  skip_if_not_installed("ggplot2")
+  skip_if_not(capabilities(what = "png"))
+  gg <- ggplot2::ggplot(iris) +
+    ggplot2::geom_point(ggplot2::aes(Sepal.Length, Petal.Length)) +
+    ggplot2::labs(alt = "a scatter plot")
+  x <- read_docx()
+  x <- body_add_gg(x, value = gg)
+  x <- read_docx(path = print(x, target = tempfile(fileext = ".docx")))
+  node_docpr <- xml_find_first(docx_body_xml(x), "//wp:docPr")
+  expect_equal(xml_attr(node_docpr, "descr"), "a scatter plot")
+
+  # explicit alt_text wins over labs(alt = ...)
+  x <- read_docx()
+  x <- body_add_gg(x, value = gg, alt_text = "explicit alt")
+  x <- read_docx(path = print(x, target = tempfile(fileext = ".docx")))
+  node_docpr <- xml_find_first(docx_body_xml(x), "//wp:docPr")
+  expect_equal(xml_attr(node_docpr, "descr"), "explicit alt")
+})
+
 pic <- file.path(R.home("doc"), "html", "logo.jpg")
 base_dir <- tempfile()
 file1 <- file.path(base_dir, "dir1", "logo1.jpg")
@@ -895,4 +928,55 @@ test_that("image_to_base64 with multiple non-existent files", {
     image_to_base64(c(fake1, fake2)),
     "File\\(s\\) not found"
   )
+})
+
+test_that("VML v:imagedata media is preserved on save (#730)", {
+  # Build a minimal docx whose only reference to a media file is through a
+  # VML <v:imagedata r:id="..">, as produced for EMF previews of embedded
+  # OLE objects. Such media used to be dropped by sanitize_images().
+  src <- print(read_docx(), target = tempfile(fileext = ".docx"))
+  pkg_dir <- tempfile()
+  unpack_folder(src, pkg_dir)
+
+  img <- file.path(R.home("doc"), "html", "logo.jpg")
+  media_dir <- file.path(pkg_dir, "word", "media")
+  dir.create(media_dir, showWarnings = FALSE, recursive = TRUE)
+  file.copy(img, file.path(media_dir, "vmltest.jpg"))
+
+  rels_path <- file.path(pkg_dir, "word", "_rels", "document.xml.rels")
+  rels <- readLines(rels_path, warn = FALSE)
+  rels <- sub(
+    "</Relationships>",
+    paste0(
+      "<Relationship Id=\"rId999\" ",
+      "Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/image\" ",
+      "Target=\"media/vmltest.jpg\"/></Relationships>"
+    ),
+    rels
+  )
+  writeLines(rels, rels_path)
+
+  doc_path <- file.path(pkg_dir, "word", "document.xml")
+  doc <- readLines(doc_path, warn = FALSE)
+  pict <- paste0(
+    "<w:p><w:r><w:pict xmlns:v=\"urn:schemas-microsoft-com:vml\">",
+    "<v:shape style=\"width:10pt;height:10pt\">",
+    "<v:imagedata r:id=\"rId999\" o:title=\"\"/>",
+    "</v:shape></w:pict></w:r></w:p>"
+  )
+  doc <- sub("<w:sectPr", paste0(pict, "<w:sectPr"), doc)
+  writeLines(doc, doc_path)
+
+  fixture <- pack_folder(pkg_dir, tempfile(fileext = ".docx"))
+
+  out <- print(read_docx(fixture), target = tempfile(fileext = ".docx"))
+  out_dir <- tempfile()
+  unpack_folder(out, out_dir)
+
+  expect_true(file.exists(file.path(out_dir, "word", "media", "vmltest.jpg")))
+  out_rels <- paste(
+    readLines(file.path(out_dir, "word", "_rels", "document.xml.rels"), warn = FALSE),
+    collapse = ""
+  )
+  expect_match(out_rels, "media/vmltest.jpg")
 })

@@ -20,6 +20,7 @@
 #'
 #' print(doc_1, target = tempfile(fileext = ".docx"))
 #' @family functions for Word sections
+#' @inheritSection body_end_block_section Section breaks occupy a line
 body_end_section_continuous <- function(x) {
   bs <- block_section(prop_section(type = "continuous"))
   str <- to_wml(bs, add_ns = TRUE)
@@ -42,6 +43,7 @@ body_end_section_continuous <- function(x) {
 #'
 #' print(doc_1, target = tempfile(fileext = ".docx"))
 #' @family functions for Word sections
+#' @inheritSection body_end_block_section Section breaks occupy a line
 body_end_section_landscape <- function(x, w = 16838 / 1440, h = 11906 / 1440) {
   bs <- block_section(prop_section(
     page_size = page_size(width = w, height = h, orient = "landscape"),
@@ -67,6 +69,7 @@ body_end_section_landscape <- function(x, w = 16838 / 1440, h = 11906 / 1440) {
 #' doc_1 <- body_add_par(doc_1, value = str1, style = "Normal")
 #' print(doc_1, target = tempfile(fileext = ".docx"))
 #' @family functions for Word sections
+#' @inheritSection body_end_block_section Section breaks occupy a line
 body_end_section_portrait <- function(x, w = 16838 / 1440, h = 11906 / 1440) {
   bs <- block_section(prop_section(
     page_size = page_size(width = w, height = h, orient = "portrait"),
@@ -97,6 +100,7 @@ body_end_section_portrait <- function(x, w = 16838 / 1440, h = 11906 / 1440) {
 #' doc_1 <- body_add_par(doc_1, value = str1, style = "Normal")
 #' print(doc_1, target = tempfile(fileext = ".docx"))
 #' @family functions for Word sections
+#' @inheritSection body_end_block_section Section breaks occupy a line
 body_end_section_columns <- function(
   x,
   widths = c(2.5, 2.5),
@@ -134,6 +138,7 @@ body_end_section_columns <- function(
 #' doc_1 <- body_add_par(doc_1, value = str1, style = "Normal")
 #' print(doc_1, target = tempfile(fileext = ".docx"))
 #' @family functions for Word sections
+#' @inheritSection body_end_block_section Section breaks occupy a line
 body_end_section_columns_landscape <- function(
   x,
   widths = c(2.5, 2.5),
@@ -185,6 +190,21 @@ body_end_section_columns_landscape <- function(
 #'
 #' The RTF output uses the opposite model: `rtf_add(block_section(...))`
 #' applies to the content that *follows* the call. See [rtf_add()].
+#'
+#' @section Section breaks occupy a line:
+#' Ending a section is materialized in the document by an empty
+#' paragraph mark holding the section properties; this is how the
+#' OOXML format represents a section break, there is no other way, and
+#' Word does the same when a section break is inserted manually. As
+#' any paragraph mark, it occupies one line whose height depends on
+#' the default paragraph style. The same applies to
+#' [run_columnbreak()] when it has to be placed after a table: a table
+#' cannot host the break, so it must live in a paragraph that also
+#' takes one line. If that residual line matters for your layout,
+#' define a dedicated paragraph style with a very small font size
+#' (e.g. 1pt) and no spacing in your Word template, and use it for the
+#' paragraph hosting the break:
+#' `fpar(run_columnbreak(), fp_p = fp_par(word_style = "MyTinyStyle"))`.
 #'
 #' @param x an rdocx object
 #' @param value a [block_section] object
@@ -274,11 +294,15 @@ process_sections_content <- function(x, xml_str) {
     )
   }
 
-  xml_str[hof_summary$reference_position] <- sprintf(
-    xml_str[hof_summary$reference_position],
-    hof_summary[["rid"]]
+  xml_str[hof_summary$reference_position] <- gsub(
+    " w:officer=\"true\"",
+    "",
+    sprintf(
+      xml_str[hof_summary$reference_position],
+      hof_summary[["rid"]]
+    ),
+    fixed = TRUE
   )
-  # xml_str <- gsub(" w:officer=\"true\"",  "", xml_str)
 
   # drop added sections contents from document xml
   lines_index_to_drop <- mapply(
@@ -448,42 +472,38 @@ extract_hof <- function(x, xml_str) {
 }
 
 
-copy_header_references_everywhere <- function(x, xml_str) {
+copy_hf_references_everywhere <- function(x, header = TRUE, footer = TRUE) {
   xml_body <- docx_body_xml(x)
-
-  all_ref <- xml_find_all(
-    xml_body,
-    "/w:document/w:body/w:sectPr/w:headerReference"
+  default_sect <- xml_find_first(xml_body, "/w:document/w:body/w:sectPr")
+  if (inherits(default_sect, "xml_missing")) {
+    return(x)
+  }
+  ref_names <- c(
+    if (header) "headerReference",
+    if (footer) "footerReference"
   )
-  all_ref <- as.character(all_ref)
-  all_ref <- paste0(all_ref, collapse = "")
-  m <- regexpr("(?=</w:sectPr)", xml_str, perl = TRUE)
+  all_sects <- xml_find_all(xml_body, "/w:document/w:body/w:p/w:pPr/w:sectPr")
 
-  default_sect_pos <- tail(which(m > -1), n = 1)
-  attr(m, "match.length")[default_sect_pos] <- -1
-  m[default_sect_pos] <- -1
+  for (sect in all_sects) {
+    for (ref_name in ref_names) {
+      existing_types <- xml_attr(
+        xml_find_all(sect, paste0("w:", ref_name)),
+        "type"
+      )
+      default_refs <- xml_find_all(default_sect, paste0("w:", ref_name))
+      for (ref in default_refs) {
+        if (!xml_attr(ref, "type") %in% existing_types) {
+          xml_add_child(sect, ref)
+        }
+      }
+    }
 
-  regmatches(xml_str, m) <- all_ref
-
-  xml_str
-}
-
-copy_footer_references_everywhere <- function(x, xml_str) {
-  xml_body <- docx_body_xml(x)
-
-  all_ref <- xml_find_all(
-    xml_body,
-    "/w:document/w:body/w:sectPr/w:footerReference"
-  )
-  all_ref <- as.character(all_ref)
-  all_ref <- paste0(all_ref, collapse = "")
-  m <- regexpr("(?=</w:sectPr)", xml_str, perl = TRUE)
-
-  default_sect_pos <- tail(which(m > -1), n = 1)
-  attr(m, "match.length")[default_sect_pos] <- -1
-  m[default_sect_pos] <- -1
-
-  regmatches(xml_str, m) <- all_ref
-
-  xml_str
+    refs <- xml_find_all(sect, "w:headerReference|w:footerReference")
+    refs <- refs[order(xml_name(refs) != "headerReference")]
+    for (i in seq_along(refs)) {
+      xml_add_child(sect, refs[[i]], .where = i - 1)
+    }
+    xml_remove(refs)
+  }
+  x
 }

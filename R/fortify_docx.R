@@ -439,6 +439,7 @@ docx_p_information <- function(p_nodes) {
 
   data.frame(
     doc_index = as.integer(doc_index),
+    para_id = xml_attr(p_nodes, "paraId"),
     par_style_name = xml_attr(pstyle_nodes, "val"),
     keep_with_next = xml_name(kn_nodes) %in% "keepNext",
     align = xml_attr(jc_nodes, "val"),
@@ -634,6 +635,7 @@ docx_tablerows_information <- function(tr_nodes) {
 summarise_as_paragraph <- function(data, preserve = FALSE) {
   finest_grp_by <- c(
     "doc_index",
+    "para_id",
     "content_type",
     "table_index",
     "row_id",
@@ -668,6 +670,7 @@ summarise_as_paragraph <- function(data, preserve = FALSE) {
     table_data <- summarise(
       .data = table_data,
       doc_index = first(.data$doc_index),
+      para_id = first(.data$para_id),
       text = paste0(.data$text, collapse = "\n"),
       .by = all_of(finest_grp_by)
     )
@@ -678,7 +681,7 @@ summarise_as_paragraph <- function(data, preserve = FALSE) {
   par_data <- summarise(
     .data = par_data,
     .by = all_of(
-      c("doc_index", "content_type", "paragraph_stylename")
+      c("doc_index", "para_id", "content_type", "paragraph_stylename")
     ),
     text = paste0(.data$text, collapse = "")
   )
@@ -718,6 +721,9 @@ summarise_as_paragraph <- function(data, preserve = FALSE) {
 #' When `detailed = FALSE` (default), the data.frame contains:
 #'
 #' - `doc_index`: Document element index (integer).
+#' - `para_id`: Unique paragraph id (character), can be used to make a join
+#'   with the `para_id` column of [docx_comments()] results. `NA` when the
+#'   paragraph has no id, e.g. in documents not produced by 'Word'.
 #' - `content_type`: Type of content: "paragraph" or "table cell" (character).
 #' - `style_name`: Name of the paragraph style (character).
 #' - `text`: Collapsed text content of the paragraph or cell (character).
@@ -923,6 +929,7 @@ docx_summary <- function(
 
   column_names <- c(
     "doc_index",
+    "para_id",
     "content_type",
     "run_index",
     "run_content_index",

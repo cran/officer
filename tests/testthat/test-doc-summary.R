@@ -223,3 +223,22 @@ test_that("empty slide summary", {
   run <- try(pptx_summary(doc), silent = TRUE)
   expect_false(inherits(run, "try-error"))
 })
+
+test_that("docx summary exposes para_id for joining with comments", {
+  doc <- read_docx(path = "docs_dir/test-docx_comments.docx")
+  doc_data <- docx_summary(doc)
+  expect_true("para_id" %in% colnames(doc_data))
+
+  doc_data_detailed <- docx_summary(doc, detailed = TRUE)
+  expect_true("para_id" %in% colnames(doc_data_detailed))
+
+  comments <- docx_comments(doc)
+  single_par_ids <- vapply(
+    comments$para_id,
+    function(x) if (length(x) > 0) x[[1]] else NA_character_,
+    NA_character_
+  )
+  # comments with an empty commented text have no parent paragraph
+  single_par_ids <- single_par_ids[!is.na(single_par_ids)]
+  expect_true(all(single_par_ids %in% doc_data$para_id))
+})

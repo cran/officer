@@ -24,6 +24,7 @@ body_add_break <- function(x, pos = "after") {
 #' Defaults to "in"ches.
 #' @param unit One of the following units in which the width and height
 #' arguments are expressed: "in", "cm" or "mm".
+#' @param alt alternative text for the image
 #' @example inst/examples/example_body_add_img.R
 #' @family functions for adding content
 body_add_img <- function(
@@ -33,7 +34,8 @@ body_add_img <- function(
   width,
   height,
   pos = "after",
-  unit = "in"
+  unit = "in",
+  alt = ""
 ) {
   if (is.null(style)) {
     style <- x$default_styles$paragraph
@@ -59,7 +61,13 @@ body_add_img <- function(
 
   style_id <- get_style_id(data = x$styles, style = style, type = "paragraph")
 
-  ext_img <- external_img(new_src, width = width, height = height, unit = unit)
+  ext_img <- external_img(
+    new_src,
+    width = width,
+    height = height,
+    unit = unit,
+    alt = alt
+  )
   xml_elt <- runs_to_p_wml(ext_img, add_ns = TRUE, style_id = style_id)
 
   body_add_xml(x = x, str = xml_elt, pos = pos)
@@ -238,6 +246,8 @@ body_import_docx <- function(
 #' @param unit One of the following units in which the width and height
 #' arguments are expressed: "in", "cm" or "mm".
 #' @param res resolution of the png image in ppi
+#' @param alt_text Alt-text for screen-readers. Defaults to `""`. If `""` or `NULL`
+#'    an alt text added with `ggplot2::labs(alt = ...)` will be used if any.
 #' @param scale Multiplicative scaling factor, same as in ggsave
 #' @param pos where to add the new element relative to the cursor,
 #' one of "after", "before", "on".
@@ -268,6 +278,7 @@ body_add_gg <- function(
   height = 5,
   res = 300,
   style = "Normal",
+  alt_text = "",
   scale = 1,
   pos = "after",
   unit = "in",
@@ -302,6 +313,12 @@ body_add_gg <- function(
   print(value)
   dev.off()
   on.exit(unlink(file))
+
+  if (is.null(alt_text) || alt_text == "") {
+    alt_text <- ggplot2::get_alt_text(value)
+    if (is.null(alt_text)) alt_text <- ""
+  }
+
   body_add_img(
     x,
     src = file,
@@ -309,7 +326,8 @@ body_add_gg <- function(
     width = width,
     height = height,
     pos = pos,
-    unit = unit
+    unit = unit,
+    alt = alt_text
   )
 }
 

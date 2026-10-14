@@ -14,6 +14,23 @@ body_end_section_portrait(x, w = 16838/1440, h = 11906/1440)
 \description{
 A section with portrait orientation is added to the document.
 }
+\section{Section breaks occupy a line}{
+
+Ending a section is materialized in the document by an empty
+paragraph mark holding the section properties; this is how the
+OOXML format represents a section break, there is no other way, and
+Word does the same when a section break is inserted manually. As
+any paragraph mark, it occupies one line whose height depends on
+the default paragraph style. The same applies to
+\code{\link[=run_columnbreak]{run_columnbreak()}} when it has to be placed after a table: a table
+cannot host the break, so it must live in a paragraph that also
+takes one line. If that residual line matters for your layout,
+define a dedicated paragraph style with a very small font size
+(e.g. 1pt) and no spacing in your Word template, and use it for the
+paragraph hosting the break:
+\code{fpar(run_columnbreak(), fp_p = fp_par(word_style = "MyTinyStyle"))}.
+}
+
 \examples{
 str1 <- "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
 str1 <- rep(str1, 5)

@@ -1,3 +1,34 @@
+# officer 0.7.7
+
+## Features
+
+- `body_add_gg()` gains an `alt_text` argument (as `ph_with()` for ggplot
+objects); if empty, the alt text defined with `ggplot2::labs(alt = ...)` is
+used. `body_add_img()` gains an `alt` argument, passed to `external_img()`
+(discussion #733).
+- `docx_summary()` gains a `para_id` column containing the unique paragraph
+id, allowing to join its results with those of `docx_comments()`
+(discussion #732).
+
+## Issues
+
+- headers and footers no longer disappear from even pages when a document is
+opened with `read_docx()` and saved again. The "different odd and even pages"
+option of the document was always switched on, even when it was off.
+- a Word document created with officer and containing headers or footers can
+now be opened again with `read_docx()` and saved without error.
+- with `print(copy_header_refs = TRUE, copy_footer_refs = TRUE)`, headers and
+footers of the default section are now added to the other sections without
+replacing the ones a section already defines, and Word opens the result
+without complaint.
+- adding a list with `block_list_items()` no longer removes the numbering of
+the numbered headings of a template.
+- lists added with `block_list_items()` in a footnote, a comment, a header or
+a footer are now displayed correctly by Word.
+- images such as previews of embedded objects (e.g. EMF) are no longer lost
+when saving a document (#730).
+
+
 # officer 0.7.6
 
 ## Issues
