@@ -11,13 +11,31 @@
 #' unordered list of formatted paragraphs,
 #' pretty tables with package flextable, editable graphics with
 #' package rvg, 'Microsoft' charts with package mschart.
-#' @param location a placeholder location object or a location short form. It will be used
+#' @param location a location object or a location short form. It will be used
 #' to specify the location of the new shape. This location can be defined with a call to one
 #' of the `ph_location_*` functions (see section `"see also"`). In `ph_with()`, several location
 #' short forms can be used, as listed in section `"Short forms"`.
 #' @param ... further arguments passed to or from other methods. When
 #' adding a `ggplot` object or `plot_instr`, these arguments will be used
 #' by the png function.
+#'
+#' @section How it works:
+#' Despite its name, `ph_with()` does not fill an existing placeholder. A new
+#' slide contains no shapes: [add_slide()] only sets its layout. Each call to
+#' `ph_with()` creates a new shape on the slide. The location decides where it
+#' goes: most `ph_location_*()` functions make it inherit the position and
+#' appearance of a placeholder of the layout, while [ph_location()] places it
+#' anywhere. Calling `ph_with()` twice with the same location therefore gives two
+#' overlapping shapes. Use [ph_remove()] first to replace a shape.
+#'
+#' @section Location and appearance:
+#' `ph_location_type()`, `ph_location_label()`, `ph_location_left()`,
+#' `ph_location_right()`, `ph_location_id()` and `ph_location_template()` link the
+#' new shape to a placeholder of the slide layout: its appearance, such as fonts,
+#' colors or bullets, comes from the template. To change it, modify the template.
+#'
+#' `ph_location()` creates a free shape, not linked to the slide layout: its
+#' appearance can be defined with arguments `bg`, `rotation`, `ln` and `geom`.
 #'
 #' @section Short forms:
 #' The `location` argument of `ph_with()` either expects a location object as returned by the
@@ -34,10 +52,10 @@
 #' | `ph_location(0, 0, 4, 5)`                   | `c(0,0,4,5)`               | Length 4 numeric, optionally named, `c(top=0, left=0, ...)` |
 #'
 #' @example inst/examples/example_ph_with.R
-#' @seealso Specify placeholder locations with [ph_location_type], [ph_location],
+#' @seealso Specify locations with [ph_location_type], [ph_location],
 #' [ph_location_label], [ph_location_left], [ph_location_right],
 #' [ph_location_fullsize], [ph_location_template]. [phs_with] is a sibling of
-#' `ph_with` that fills multiple placeholders at once. Use [add_slide] to add new slides.
+#' `ph_with` that adds several shapes at once. Use [add_slide] to add new slides.
 #' @section Illustrations:
 #'
 #' \if{html}{\figure{ph_with_doc_1.png}{options: style="width:80\%;"}}
@@ -56,6 +74,7 @@ ph_with <- function(x, value, location, ...) {
 #' @describeIn ph_with add a character vector to a new shape on the
 #' current slide, values will be added as paragraphs.
 ph_with.character <- function(x, value, location, ...) {
+  chkDots(...)
   slide <- x$slide$get_slide(x$cursor)
 
   location <- fortify_location(location, doc = x)
@@ -139,6 +158,7 @@ ph_with.numeric <- function(x, value, location, format_fun = format, ...) {
 #' current slide, values will be be converted as character and then
 #' added as paragraphs.
 ph_with.factor <- function(x, value, location, ...) {
+  chkDots(...)
   slide <- x$slide$get_slide(x$cursor)
   value <- as.character(value)
   location <- fortify_location(location, doc = x)
@@ -176,7 +196,15 @@ ph_with.factor <- function(x, value, location, ...) {
 }
 #' @export
 #' @rdname ph_with
-ph_with.logical <- ph_with.numeric
+ph_with.logical <- function(
+  x,
+  value,
+  location,
+  format_fun = as.character,
+  ...
+) {
+  ph_with.numeric(x, value, location, format_fun = format_fun, ...)
+}
 
 
 #' @export
@@ -210,6 +238,7 @@ ph_with.block_list <- function(
   level_list = integer(0),
   ...
 ) {
+  chkDots(...)
   slide <- x$slide$get_slide(x$cursor)
 
   location <- fortify_location(location, doc = x)
@@ -271,6 +300,7 @@ ph_with.block_list <- function(
 #' @describeIn ph_with add a [unordered_list()] made
 #' of [fpar()] to a new shape on the current slide.
 ph_with.unordered_list <- function(x, value, location, ...) {
+  chkDots(...)
   slide <- x$slide$get_slide(x$cursor)
   location <- fortify_location(location, doc = x)
 
@@ -305,6 +335,7 @@ ph_with.unordered_list <- function(x, value, location, ...) {
 #' @describeIn ph_with add a [block_list_items()] (bullet or numbered list)
 #' to a new shape on the current slide.
 ph_with.block_list_items <- function(x, value, location, ...) {
+  chkDots(...)
   slide <- x$slide$get_slide(x$cursor)
   location <- fortify_location(location, doc = x)
 
@@ -352,6 +383,7 @@ ph_with.data.frame <- function(
   alignment = NULL,
   ...
 ) {
+  chkDots(...)
   location <- fortify_location(location, doc = x)
 
   slide <- x$slide$get_slide(x$cursor)
@@ -504,6 +536,7 @@ ph_with.plot_instr <- function(x, value, location, res = 300, ...) {
 #' ignored, their values will be those of the location,
 #' unless use_loc_size is set to FALSE.
 ph_with.external_img <- function(x, value, location, use_loc_size = TRUE, ...) {
+  chkDots(...)
   location <- fortify_location(location, doc = x)
 
   slide <- x$slide$get_slide(x$cursor)
@@ -538,6 +571,7 @@ ph_with.external_img <- function(x, value, location, use_loc_size = TRUE, ...) {
 #' @describeIn ph_with add an [fpar()] to a new shape
 #' on the current slide as a single paragraph in a [block_list()].
 ph_with.fpar <- function(x, value, location, ...) {
+  chkDots(...)
   ph_with.block_list(x, value = block_list(value), location = location)
 
   x
@@ -547,6 +581,7 @@ ph_with.fpar <- function(x, value, location, ...) {
 #' @describeIn ph_with add an [empty_content()] to a new shape
 #' on the current slide.
 ph_with.empty_content <- function(x, value, location, ...) {
+  chkDots(...)
   slide <- x$slide$get_slide(x$cursor)
 
   location <- fortify_location(location, doc = x)
@@ -657,6 +692,7 @@ xml_to_slide <- function(slide, location, value, package_dir) {
 #' @describeIn ph_with add an xml_document object to a new shape on the
 #' current slide. This function is to be used to add custom openxml code.
 ph_with.xml_document <- function(x, value, location, ...) {
+  chkDots(...)
   slide <- x$slide$get_slide(x$cursor)
 
   location <- fortify_location(location, doc = x)
@@ -670,12 +706,12 @@ ph_with.xml_document <- function(x, value, location, ...) {
 
 # PHS_WITH -------
 
-#' @title Fill multiple placeholders using key value syntax
-#' @description A sibling of [officer::ph_with] that fills mutiple placeholders at once. Placeholder locations are
-#'   specfied using the short form syntax. The location and corresponding object are passed as key value pairs
+#' @title Add several shapes using key value syntax
+#' @description A sibling of [officer::ph_with] that adds several shapes at once. Locations are
+#'   specified using the short form syntax. The location and corresponding object are passed as key value pairs
 #'   (`phs_with("short form location" = object)`). Under the hood, [officer::ph_with] is called for each pair. Note
-#'   that `phs_with` does not cover all options from the `ph_location_*` family and is also less customization. It is a
-#'   covenience wrapper for the most common use cases. The implemented short forms are listed in section
+#'   that `phs_with` does not cover all options from the `ph_location_*` family and offers less customization. It is a
+#'   convenience wrapper for the most common use cases. The implemented short forms are listed in section
 #'   `"Short forms"`.
 #' @param x A `rpptx` object.
 #' @param ... Key-value pairs of the form `"short form location" = object`. If the short form is an integer or a string

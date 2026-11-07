@@ -203,9 +203,11 @@ fortify_location <- function(x, doc, ...) {
 # main ----
 
 #' @export
-#' @title Location for a placeholder from scratch
+#' @title Location of a free shape
 #' @description The function will return a list that complies with
 #' expected format for argument `location` of function [ph_with()].
+#' The shape is not linked to a placeholder of the slide layout, so it does not
+#' inherit its appearance, see section *Location and appearance* of [ph_with()].
 #' @param left,top,width,height place holder coordinates
 #' in inches.
 #' @param newlabel a label for the placeholder. See section details.
@@ -245,6 +247,7 @@ ph_location <- function(
   geom = NULL,
   ...
 ) {
+  chkDots(...)
   # remove name in case of named vector entry, e.g. ph_location(top = x["top])
   left <- unname(left)
   top <- unname(top)
@@ -303,6 +306,7 @@ ph_location_template <- function(
   id = 1,
   ...
 ) {
+  chkDots(...)
   x <- list(
     left = left,
     top = top,
@@ -330,7 +334,7 @@ fortify_location.location_template <- function(x, doc, ...) {
     top = x$top,
     width = x$width,
     height = x$height,
-    label = x$ph_label
+    newlabel = x$ph_label
   )
   x$ph <- ph
   fortify_location.location_manual(x)
@@ -374,6 +378,7 @@ ph_location_type <- function(
   id = NULL,
   ...
 ) {
+  chkDots(...)
   # the following two warnings can be deleted after the deprecated id arg is removed.
   if (!is.null(id) && !is.null(type_idx)) {
     cli::cli_warn("{.arg id} is ignored if {.arg type_idx} is provided ")
@@ -468,6 +473,7 @@ fortify_location.location_type <- function(x, doc, ...) {
 #' @inherit ph_location details
 #' @example inst/examples/example_ph_location_label.R
 ph_location_label <- function(ph_label, newlabel = NULL, ...) {
+  chkDots(...)
   x <- list(ph_label = unname(ph_label), label = unname(newlabel))
   class(x) <- c("location_label", "location_str")
   x
@@ -560,6 +566,7 @@ fortify_location.location_label <- function(x, doc, ...) {
 #' @family functions for placeholder location
 #' @example inst/examples/example_ph_location_fullsize.R
 ph_location_fullsize <- function(newlabel = "", ...) {
+  chkDots(...)
   x <- list(label = newlabel)
   class(x) <- c("location_fullsize", "location_str")
   x
@@ -594,6 +601,7 @@ fortify_location.location_fullsize <- function(x, doc, ...) {
 #' @family functions for placeholder location
 #' @example inst/examples/example_ph_location_left.R
 ph_location_left <- function(newlabel = NULL, ...) {
+  chkDots(...)
   x <- list(label = newlabel)
   class(x) <- c("location_left", "location_str")
   x
@@ -633,6 +641,7 @@ fortify_location.location_left <- function(x, doc, ...) {
 #' @family functions for placeholder location
 #' @example inst/examples/example_ph_location_left.R
 ph_location_right <- function(newlabel = NULL, ...) {
+  chkDots(...)
   x <- list(label = newlabel)
   class(x) <- c("location_right", "location_str")
   x
@@ -676,6 +685,7 @@ fortify_location.location_right <- function(x, doc, ...) {
 #' @inherit ph_location details
 #' @example inst/examples/example_ph_location_id.R
 ph_location_id <- function(id, newlabel = NULL, ...) {
+  chkDots(...)
   ph_id <- id # for disambiguation, store initial value
 
   if (length(ph_id) > 1) {
@@ -919,7 +929,10 @@ resolve_location_from_character <- function(x) {
   } else if (x == "fullsize") {
     location <- ph_location_fullsize()
   } else if (has_ph_type_format(x)) {
-    location <- do.call(ph_location_type, get_ph_type_info(x))
+    location <- do.call(
+      ph_location_type,
+      get_ph_type_info(x)[c("type", "type_idx")]
+    )
   } else {
     location <- ph_location_label(x)
   }

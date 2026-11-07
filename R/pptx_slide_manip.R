@@ -113,13 +113,22 @@ on_slide <- function(x, index) {
 #' @param x an rpptx object
 #' @param index slide index or a vector of slide indices to remove,
 #' default to current slide position.
-#' @param rm_images unused anymore.
+#' @param rm_images deprecated and ignored. Images no longer used are removed
+#' when the file is saved.
 #' @note cursor is set on the last slide.
 #' @example inst/examples/example_remove_slide.R
 #' @family slide_manipulation
 #' @seealso [read_pptx()], [ph_with()], [ph_remove()]
 remove_slide <- function(x, index = NULL, rm_images = FALSE) {
   stop_if_not_rpptx(x)
+  if (!missing(rm_images)) {
+    cli::cli_warn(
+      c(
+        "!" = "Argument {.arg rm_images} of {.fn remove_slide} is deprecated and ignored.",
+        "i" = "Images no longer used are removed when the file is saved."
+      )
+    )
+  }
 
   l_ <- length(x)
   if (l_ < 1) {
@@ -177,6 +186,7 @@ remove_slide <- function(x, index = NULL, rm_images = FALSE) {
   # Remove slides from internal collections
   for (filename in slides_to_remove_df$filename) {
     slide_idx <- x$slide$slide_index(filename)
+    remove_slide_notes(x, filename)
     x$slide$remove_slide(slide_idx)
     x$presentation$remove_slide(filename)
     x$content_type$remove_slide(partname = filename)
@@ -185,6 +195,21 @@ remove_slide <- function(x, index = NULL, rm_images = FALSE) {
   # Set cursor to last slide
   x$cursor <- x$slide$length()
   x
+}
+
+
+# Notes belong to their slide, and refer to it: they are removed with it.
+remove_slide_notes <- function(x, filename) {
+  rels <- x$slide$collection_get(filename)$rel_df()
+  notes_files <- basename(rels$target[grepl("notesSlide$", rels$type)])
+  for (notes_file in notes_files) {
+    notes_idx <- x$notesSlide$slide_index(notes_file)
+    if (length(notes_idx) > 0) {
+      x$notesSlide$remove_slide(notes_idx)
+      x$content_type$remove_slide(partname = notes_file)
+    }
+  }
+  invisible(x)
 }
 
 

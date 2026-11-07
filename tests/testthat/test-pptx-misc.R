@@ -218,13 +218,41 @@ test_that("annotate base template", {
   expect_s3_class(try(annotate_base(), silent = TRUE), "rpptx")
 })
 
+test_that("saving a presentation does not add blanks to the text of shapes", {
+  x <- read_pptx()
+  x <- add_slide(x, "Title and Content")
+  x <- ph_with(
+    x,
+    fpar(ftext("a"), ftext(" "), ftext("b")),
+    location = ph_location_type("title")
+  )
+  expect_equal(slide_summary(x, 1)$text, "a b")
+
+  print(x, target = tempfile(fileext = ".pptx"))
+  expect_equal(slide_summary(x, 1)$text, "a b")
+})
+
+test_that("annotate_base() prints the arguments of ph_location functions", {
+  x <- annotate_base(output_file = NULL)
+  i <- which(layout_summary(x)$layout == "Two Content")
+  text <- slide_summary(x, i)$text
+
+  expect_true(
+    'type = "body", type_idx = 1, ph_label = "Content Placeholder 2", id = 3' %in%
+      text
+  )
+  expect_true(
+    'type = "body", type_idx = 2, ph_label = "Content Placeholder 3", id = 4' %in%
+      text
+  )
+})
+
 test_that("no master do not generate an error", {
   x <- read_pptx("docs_dir/no_master.pptx")
   x <- add_slide(x, layout = "Page One", master = "Office Theme")
   x <- try(
     ph_with(
       x,
-      i,
       value = "graphic title",
       location = ph_location_type(type = "body")
     ),
@@ -317,3 +345,14 @@ test_that("slide_visible", {
   x <- read_pptx(path)
   expect_equal(slide_visible(x), c(TRUE, FALSE, TRUE))
 })
+
+test_that("rm_images of remove_slide() is deprecated", {
+  x <- read_pptx()
+  x <- add_slide(x, "Title and Content", "Office Theme")
+  x <- add_slide(x, "Title and Content", "Office Theme")
+  expect_warning(x <- remove_slide(x, 1, rm_images = TRUE), "deprecated")
+  expect_length(x, 1L)
+  expect_no_warning(x <- remove_slide(x, 1))
+  expect_length(x, 0L)
+})
+

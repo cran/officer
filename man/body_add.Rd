@@ -90,8 +90,9 @@ unordered list of formatted paragraphs,
 pretty tables with package flextable, 'Microsoft' charts with package mschart.}
 
 \item{...}{further arguments passed to or from other methods. When
-adding a \code{ggplot} object or \link{plot_instr}, these arguments will be used
-by png function. See method signatures to see what arguments can be used.}
+adding a \link{plot_instr}, these arguments are passed to the png function.
+Other methods warn about arguments they do not use. See method signatures
+to see what arguments can be used.}
 
 \item{style}{paragraph style name. These names are available with function \link{styles_info}
 and are the names of the Word styles defined in the base document (see
@@ -118,11 +119,8 @@ arguments are expressed: "in", "cm" or "mm".}
 }
 \description{
 This function adds objects into a Word document. Values are added
-as new paragraphs or tables.
-
-This function is experimental and will replace the \verb{body_add_*} functions
-later. For now it is only to be used for successive additions and cannot
-be used in conjunction with the \verb{body_add_*} functions.
+as new paragraphs or tables, at the end of the document, whatever the position
+of the cursor. To add content at the cursor, use the \verb{body_add_*} functions.
 }
 \section{Methods (by class)}{
 \itemize{

@@ -39,7 +39,9 @@ to_rtf.fpar <- function(x, ...) {
     # render the formatting, and prevent Word from recording spurious
     # "overrides" against the named style.
     style_props <- attr(x, "rtf_style_props")
-    if (is.null(style_props)) style_props <- ""
+    if (is.null(style_props)) {
+      style_props <- ""
+    }
     return(paste0(
       sprintf("{\\pard\\plain\\s%.0f", style_index),
       style_props,
@@ -104,7 +106,7 @@ to_rtf.external_img <- function(x, ...) {
   if (!grepl("\\.png$", x)) {
     imgpath <- tempfile(fileext = ".png")
     img <- magick::image_read(x)
-    magick::image_write(img, path = imgpath)
+    magick::image_write(img, path = imgpath, format = "png")
   } else {
     imgpath <- x
   }
@@ -145,7 +147,7 @@ to_rtf.floating_external_img <- function(x, ...) {
   if (!grepl("\\.png$", x)) {
     imgpath <- tempfile(fileext = ".png")
     img <- magick::image_read(x)
-    magick::image_write(img, path = imgpath)
+    magick::image_write(img, path = imgpath, format = "png")
   } else {
     imgpath <- x
   }
@@ -961,19 +963,25 @@ rtf_doc <- function(
   # convention. outline_level wires the style into Word's navigation pane
   # and TOC field.
   x <- rtf_set_paragraph_style(
-    x, style_id = "heading 1", style_name = "Heading 1",
+    x,
+    style_id = "heading 1",
+    style_name = "Heading 1",
     fp_p = fp_par(padding.top = 12, padding.bottom = 6),
     fp_t = fp_text_lite(bold = TRUE, font.size = 18, color = "#1F4E79"),
     outline_level = 1L
   )
   x <- rtf_set_paragraph_style(
-    x, style_id = "heading 2", style_name = "Heading 2",
+    x,
+    style_id = "heading 2",
+    style_name = "Heading 2",
     fp_p = fp_par(padding.top = 8, padding.bottom = 4),
     fp_t = fp_text_lite(bold = TRUE, font.size = 14, color = "#2E75B6"),
     outline_level = 2L
   )
   x <- rtf_set_paragraph_style(
-    x, style_id = "heading 3", style_name = "Heading 3",
+    x,
+    style_id = "heading 3",
+    style_name = "Heading 3",
     fp_p = fp_par(padding.top = 6, padding.bottom = 3),
     fp_t = fp_text_lite(bold = TRUE, font.size = 12, color = "#5B9BD5"),
     outline_level = 3L
@@ -1030,6 +1038,7 @@ rtf_add <- function(x, value, ...) {
 #' @export
 #' @describeIn rtf_add add a new section definition
 rtf_add.block_section <- function(x, value, ...) {
+  chkDots(...)
   x$content[[length(x$content) + 1]] <- value
   x
 }
@@ -1062,7 +1071,8 @@ resolve_rtf_style <- function(x, style) {
   idx <- match(style, x$styles$style_id)
   if (is.na(idx)) {
     stop(
-      "style ", shQuote(style),
+      "style ",
+      shQuote(style),
       " is not registered. Use rtf_styles_info() to list available styles ",
       "or rtf_set_paragraph_style() to add one."
     )
@@ -1093,6 +1103,7 @@ apply_rtf_style <- function(value, style) {
 #' on the document. Defaults to `NULL` (use the document's normal style). See
 #' [rtf_set_paragraph_style()] and [rtf_styles_info()].
 rtf_add.character <- function(x, value, style = NULL, ...) {
+  chkDots(...)
   styled <- resolve_rtf_style(x, style)
   chunk_prop <- if (is.null(styled)) x$normal_chunk else NULL
   par_prop <- if (is.null(styled)) x$normal_par else fp_par()
@@ -1113,6 +1124,7 @@ rtf_add.character <- function(x, value, style = NULL, ...) {
 #' @export
 #' @describeIn rtf_add add a factor vector as new paragraphs
 rtf_add.factor <- function(x, value, style = NULL, ...) {
+  chkDots(...)
   styled <- resolve_rtf_style(x, style)
   chunk_prop <- if (is.null(styled)) x$normal_chunk else NULL
   par_prop <- if (is.null(styled)) x$normal_par else fp_par()
@@ -1134,6 +1146,7 @@ rtf_add.factor <- function(x, value, style = NULL, ...) {
 #' @describeIn rtf_add add a double vector as new paragraphs
 #' @param formatter function used to format the numerical values
 rtf_add.double <- function(x, value, formatter = formatC, style = NULL, ...) {
+  chkDots(...)
   styled <- resolve_rtf_style(x, style)
   chunk_prop <- if (is.null(styled)) x$normal_chunk else NULL
   par_prop <- if (is.null(styled)) x$normal_par else fp_par()
@@ -1154,6 +1167,7 @@ rtf_add.double <- function(x, value, formatter = formatC, style = NULL, ...) {
 #' @export
 #' @describeIn rtf_add add an [fpar()]
 rtf_add.fpar <- function(x, value, style = NULL, ...) {
+  chkDots(...)
   styled <- resolve_rtf_style(x, style)
   x$content[[length(x$content) + 1]] <- apply_rtf_style(value, styled)
   x
@@ -1162,6 +1176,7 @@ rtf_add.fpar <- function(x, value, style = NULL, ...) {
 #' @export
 #' @describeIn rtf_add add an [block_list()]
 rtf_add.block_list <- function(x, value, style = NULL, ...) {
+  chkDots(...)
   styled <- resolve_rtf_style(x, style)
   items <- lapply(as.list(value), apply_rtf_style, style = styled)
   x$content <- append(x$content, items)
@@ -1174,6 +1189,7 @@ rtf_add.block_list <- function(x, value, style = NULL, ...) {
 #' built-in heading styles (which carry an outline level). LibreOffice
 #' will not render the TOC automatically.
 rtf_add.block_toc <- function(x, value, ...) {
+  chkDots(...)
   x$content[[length(x$content) + 1]] <- value
   x
 }
@@ -1621,7 +1637,8 @@ rtf_set_paragraph_style <- function(
   if (!is.null(base_on)) {
     if (!base_on %in% x$styles$style_id) {
       stop(
-        "base_on = ", shQuote(base_on),
+        "base_on = ",
+        shQuote(base_on),
         " does not match any existing style_id. Existing: ",
         paste0(shQuote(x$styles$style_id), collapse = ", ")
       )
@@ -1630,8 +1647,10 @@ rtf_set_paragraph_style <- function(
   outline_str <- ""
   if (!is.null(outline_level)) {
     stopifnot(
-      is.numeric(outline_level), length(outline_level) == 1L,
-      outline_level >= 1L, outline_level <= 9L
+      is.numeric(outline_level),
+      length(outline_level) == 1L,
+      outline_level >= 1L,
+      outline_level <= 9L
     )
     # RTF / OOXML outline levels are 0-indexed; Heading 1 → \outlinelevel0.
     outline_str <- sprintf("\\outlinelevel%.0f", as.integer(outline_level) - 1L)
@@ -1660,7 +1679,11 @@ rtf_set_paragraph_style <- function(
     x$styles <- rbind(x$styles, new_row)
   } else {
     x$styles[idx, "style_name"] <- style_name
-    x$styles[idx, "based_on"] <- if (is.null(base_on)) NA_character_ else base_on
+    x$styles[idx, "based_on"] <- if (is.null(base_on)) {
+      NA_character_
+    } else {
+      base_on
+    }
     x$styles[idx, "rtf"] <- rtf_fragment
   }
   x

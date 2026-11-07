@@ -1194,7 +1194,8 @@ read_xlsx <- function(path = NULL) {
     cli::cli_abort("Could not find file {.file {path}}.")
   }
 
-  if (is.null(path)) {
+  from_template <- is.null(path)
+  if (from_template) {
     path <- system.file(package = "officer", "template/template.xlsx")
   }
 
@@ -1215,6 +1216,13 @@ read_xlsx <- function(path = NULL) {
   obj$sheets <- dir_sheet$new(obj)
   obj$styles <- xlsx_styles$new(package_dir)
   obj$core_properties <- read_core_properties(obj$package_dir)
+  if (from_template) {
+    obj$core_properties <- reset_template_properties(obj$core_properties)
+  }
+  obj$doc_properties_custom <- read_custom_properties(package_dir)
+
+  obj$rel <- relationship$new()
+  obj$rel$feed_from_xml(file.path(package_dir, "_rels", ".rels"))
 
   obj
 }
@@ -1433,6 +1441,7 @@ sheet_write_data <- function(
 
 #' @export
 sheet_write_data.default <- function(x, value, sheet, ...) {
+  chkDots(...)
   cli::cli_abort(c(
     "No {.fun sheet_write_data} method for an object of class
      {.cls {class(value)[1]}}.",
@@ -1450,6 +1459,7 @@ sheet_write_data.data.frame <- function(
   start_col = 1L,
   ...
 ) {
+  chkDots(...)
   stopifnot(inherits(x, "rxlsx"))
   check_sheet_exists(x, sheet)
   start_row <- as.integer(start_row)
@@ -1723,6 +1733,7 @@ sheet_write_data.character <- function(
   direction = c("vertical", "horizontal"),
   ...
 ) {
+  chkDots(...)
   stopifnot(inherits(x, "rxlsx"))
   check_sheet_exists(x, sheet)
   direction <- match.arg(direction)
@@ -1765,6 +1776,7 @@ sheet_write_data.fpar <- function(
   start_col = 1L,
   ...
 ) {
+  chkDots(...)
   stopifnot(inherits(x, "rxlsx"))
   check_sheet_exists(x, sheet)
   start_row <- as.integer(start_row)
@@ -1787,6 +1799,7 @@ sheet_write_data.block_list <- function(
   direction = c("vertical", "horizontal"),
   ...
 ) {
+  chkDots(...)
   stopifnot(inherits(x, "rxlsx"))
   check_sheet_exists(x, sheet)
   direction <- match.arg(direction)
@@ -1915,6 +1928,7 @@ sheet_add_drawing.external_img <- function(
   edit_as = c("twoCell", "oneCell", "absolute"),
   ...
 ) {
+  chkDots(...)
   edit_as <- match.arg(edit_as)
   ft <- parse_anchor(anchor)
   stopifnot(inherits(x, "rxlsx"))
@@ -2066,12 +2080,14 @@ print.rxlsx <- function(x, target = NULL, ...) {
   x$content_type$save()
   x$styles$save()
 
-  x$core_properties['modified', 'value'] <- format(
-    Sys.time(),
-    "%Y-%m-%dT%H:%M:%SZ"
-  )
-  x$core_properties['lastModifiedBy', 'value'] <- Sys.getenv("USER")
+  x$core_properties <- update_core_properties(x$core_properties)
   write_core_properties(x$core_properties, x$package_dir)
+  if (nrow(x$doc_properties_custom$data) > 0) {
+    write_custom_properties(x$doc_properties_custom, x$package_dir)
+  }
+  x$rel$write(file.path(x$package_dir, "_rels", ".rels"))
 
-  invisible(pack_folder(folder = x$package_dir, target = target))
+  target <- pack_folder(folder = x$package_dir, target = target)
+  fix_zip_dates(target)
+  invisible(target)
 }

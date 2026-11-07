@@ -123,32 +123,54 @@ test_that("layout properties - all phs for multiple masters (#597)", {
 })
 
 
-test_that("plot layout properties (part 1)", {
-  local_edition(3L)
-  announce_snapshot_file(name = "plot-titleslide-layout-default.png")
-  announce_snapshot_file(name = "plot-titleslide-layout-labels-only.png")
-  announce_snapshot_file(name = "plot-titleslide-layout-default-with-legend.png")
-  announce_snapshot_file(name = "plot-content-order-default.png")
-  announce_snapshot_file(name = "plot-content-order-labels-only.png")
-  skip_if_not_installed("doconv")
-  skip_if_not(doconv::msoffice_available())
-  skip_if_not_installed("gdtools")
-  require(doconv)
-  x <- read_pptx()
-
-  png1 <- tempfile(fileext = ".png")
-  dev_png(png1, width = 7, height = 6, res = 150, units = "in")
-  plot_layout_properties(
-    x = x,
-    layout = "Title Slide",
-    master = "Office Theme"
+# what plot_layout_properties() draws: the arguments of its calls to text(),
+# title() and legend()
+layout_plot_calls <- function(...) {
+  calls <- list(text = list(), title = list(), legend = list())
+  record <- function(fun) {
+    function(...) {
+      calls[[fun]][[length(calls[[fun]]) + 1L]] <<- list(...)
+      invisible()
+    }
+  }
+  local_mocked_bindings(
+    text = record("text"),
+    title = record("title"),
+    legend = record("legend")
   )
-  dev.off()
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off())
+  plot_layout_properties(...)
 
-  png2 <- tempfile(fileext = ".png")
-  dev_png(png2, width = 7, height = 6, res = 150, units = "in")
-  plot_layout_properties(
-    x = x,
+  by_color <- function(col) {
+    Filter(function(x) identical(x$col, col), calls$text)
+  }
+  list(
+    title = vapply(calls$title, function(x) x$main, character(1)),
+    labels = by_color("red"),
+    types = by_color("blue"),
+    ids = by_color("darkgreen"),
+    legend = calls$legend
+  )
+}
+
+test_that("plot layout properties (part 1)", {
+  x <- read_pptx()
+  props <- layout_properties(x, "Title Slide", "Office Theme")
+
+  drawn <- layout_plot_calls(x, layout = "Title Slide", master = "Office Theme")
+  expect_equal(drawn$title, "Title Slide [Office Theme]")
+  expect_equal(drawn$labels[[1]]$labels, props$ph_label)
+  expect_equal(
+    drawn$types[[1]]$labels,
+    c("ctrTitle [1]", "subTitle [1]", "dt [1]", "ftr [1]", "sldNum [1]")
+  )
+  expect_equal(drawn$ids[[1]]$labels, props$id)
+  expect_length(drawn$legend, 0L)
+
+  # labels only
+  drawn <- layout_plot_calls(
+    x,
     layout = "Title Slide",
     master = "Office Theme",
     labels = TRUE,
@@ -156,70 +178,49 @@ test_that("plot layout properties (part 1)", {
     id = FALSE,
     title = FALSE
   )
-  dev.off()
+  expect_length(drawn$title, 0L)
+  expect_equal(drawn$labels[[1]]$labels, props$ph_label)
+  expect_length(drawn$types, 0L)
+  expect_length(drawn$ids, 0L)
 
-  png3 <- tempfile(fileext = ".png")
-  dev_png(png3, width = 7, height = 6, res = 150, units = "in")
-  plot_layout_properties(
-    x = x,
+  # no label
+  drawn <- layout_plot_calls(
+    x,
+    layout = "Title Slide",
+    master = "Office Theme",
+    labels = FALSE
+  )
+  expect_length(drawn$labels, 0L)
+  expect_length(drawn$types, 1L)
+  expect_length(drawn$ids, 1L)
+
+  # legend
+  drawn <- layout_plot_calls(
+    x,
     layout = "Title Slide",
     master = "Office Theme",
     legend = TRUE
   )
-  dev.off()
-
-  expect_snapshot_doc(
-    name = "plot-titleslide-layout-default",
-    x = png1,
-    engine = "testthat"
-  )
-  expect_snapshot_doc(
-    name = "plot-titleslide-layout-labels-only",
-    x = png2,
-    engine = "testthat"
-  )
-  expect_snapshot_doc(
-    name = "plot-titleslide-layout-default-with-legend",
-    x = png3,
-    engine = "testthat"
+  expect_length(drawn$legend, 1L)
+  expect_equal(
+    drawn$legend[[1]]$legend,
+    c("type [type_idx]", "ph_label", "id")
   )
 
-  # issue #604
-  p <- test_path("docs_dir/test-content-order.pptx")
-  x <- read_pptx(p)
-
-  png4 <- tempfile(fileext = ".png")
-  dev_png(png4, width = 7, height = 6, res = 150, units = "in")
-  plot_layout_properties(
-    x = x,
-    layout = "Many Contents",
-    master = "Office Theme"
+  # issue #604: each text is drawn on its own placeholder
+  x <- read_pptx(test_path("docs_dir/test-content-order.pptx"))
+  props <- layout_properties(x, "Many Contents", "Office Theme")
+  drawn <- layout_plot_calls(x, layout = "Many Contents", master = "Office Theme")
+  expect_equal(drawn$labels[[1]]$labels, props$ph_label)
+  expect_equal(drawn$labels[[1]]$x, props$offx + props$cx / 2)
+  expect_equal(drawn$labels[[1]]$y, -(props$offy + props$cy / 2))
+  expect_equal(
+    drawn$types[[1]]$labels,
+    paste0(props$type, " [", props$type_idx, "]")
   )
-  dev.off()
-
-  png5 <- tempfile(fileext = ".png")
-  dev_png(png5, width = 7, height = 6, res = 150, units = "in")
-  plot_layout_properties(
-    x = x,
-    layout = "Many Contents",
-    master = "Office Theme",
-    labels = TRUE,
-    type = FALSE,
-    id = FALSE,
-    title = FALSE
-  )
-  dev.off()
-
-  expect_snapshot_doc(
-    name = "plot-content-order-default",
-    x = png4,
-    engine = "testthat"
-  )
-  expect_snapshot_doc(
-    name = "plot-content-order-labels-only",
-    x = png5,
-    engine = "testthat"
-  )
+  expect_equal(drawn$types[[1]]$x, props$offx)
+  expect_equal(drawn$ids[[1]]$labels, props$id)
+  expect_equal(drawn$ids[[1]]$x, props$offx + props$cx)
 })
 
 
@@ -329,4 +330,51 @@ test_that("color scheme", {
   expect_is(cs$type, "character")
   expect_is(cs$value, "character")
   expect_is(cs$theme, "character")
+})
+
+remove_master_shapes <- function(file, master = "slideMaster1.xml") {
+  dir <- tempfile()
+  unpack_folder(file, dir)
+  master_file <- file.path(dir, "ppt/slideMasters", master)
+  doc <- read_xml(master_file)
+  shapes <- xml_find_all(
+    doc,
+    "p:cSld/p:spTree/*[not(self::p:nvGrpSpPr or self::p:grpSpPr)]"
+  )
+  xml_remove(shapes)
+  write_xml(doc, master_file)
+  pack_folder(dir, tempfile(fileext = ".pptx"))
+}
+
+test_that("layout_properties() returns the name of a master without shapes", {
+  x <- read_pptx(remove_master_shapes(
+    system.file("template", "template.pptx", package = "officer")
+  ))
+  expect_gt(nrow(layout_properties(x)), 0)
+  expect_equal(unique(layout_properties(x)$master_name), "Office Theme")
+})
+
+test_that("layout_properties() keeps each master apart when one has no shapes", {
+  file <- "docs_dir/test-three-identical-masters.pptx"
+  x <- read_pptx(remove_master_shapes(file))
+  props <- layout_properties(x)
+  expect_false(anyNA(props$master_name))
+  expect_setequal(props$master_name, paste0("Master_", 1:3))
+
+  # the other masters are not affected
+  ref <- layout_properties(read_pptx(file))
+  for (master in c("Master_2", "Master_3")) {
+    new_rows <- props[props$master_name == master, ]
+    ref_rows <- ref[ref$master_name == master, ]
+    rownames(new_rows) <- NULL
+    rownames(ref_rows) <- NULL
+    expect_equal(new_rows, ref_rows)
+  }
+})
+
+test_that("read_pptx() explains that a file has no layout", {
+  expect_error(
+    read_pptx("docs_dir/test-no-layouts.pptx"),
+    "No slide layout found"
+  )
 })
